@@ -1,0 +1,45 @@
+name: Build Micronaut Native Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: git-commit-code-check-linux
+            output_path: target/git-commit-code-check
+          - os: windows-latest
+            artifact_name: git-commit-code-check-windows.exe
+            output_path: target/git-commit-code-check.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v2
+        with:
+          version: '22.3.0' # Adjust to your GraalVM version
+          java-version: '17'
+
+      - name: Install native-image tool
+        run: gu install native-image
+
+      - name: Build native image
+        run: mvn clean package -Dpackaging=native-image
+
+      - name: Archive artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.output_path }}
