@@ -6,15 +6,23 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import de.zorro909.codecheck.ValidationError;
 import de.zorro909.codecheck.java.JavaChecker;
+import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * This class is responsible for checking the correctness of Java code by enforcing JavaDoc
+ * comments for public classes and methods that are not getter or setter methods or overridden methods.
+ * It extends the {@link JavaChecker} abstract class.
+ */
+@Singleton
 public class JavaDocCheck extends JavaChecker {
+
     @Override
     public boolean isJavaResponsible(Path path) {
-        return path.toString().contains("/src/main/java/");
+        return path.toString().contains("src/main/java/");
     }
 
     @Override
@@ -28,9 +36,9 @@ public class JavaDocCheck extends JavaChecker {
                 .filter(decl -> decl.getImplementedTypes().isEmpty())
                 .forEach(decl -> {
                     int line = decl.getBegin().map(pos -> pos.line).orElse(-1);
-                    errors.add(new ValidationError(javaUnit.getStorage().get().getPath().toString(),
+                    errors.add(new ValidationError(javaUnit.getStorage().get().getPath(),
                                                    "Public class doesn't implement an interface and doesn't have a javadoc comment",
-                                                   line, ValidationError.Severity.HIGH));
+                                                   line, ValidationError.Severity.MEDIUM));
                 });
 
 
@@ -38,17 +46,17 @@ public class JavaDocCheck extends JavaChecker {
                          method -> method.getAccessSpecifier() == AccessSpecifier.PUBLIC)
                 .stream()
                 .filter(method -> !method.hasJavaDocComment())
-                .filter(method -> !method.getAnnotationByName("Override").isPresent())
+                .filter(method -> method.getAnnotationByName("Override").isEmpty())
                 .filter(method -> !isSimpleGetterOrSetter(method))
                 .forEach(method -> {
                     int line = method.getBegin().map(pos -> pos.line).orElse(-1);
-                    errors.add(new ValidationError(javaUnit.getStorage().get().getPath().toString(),
+                    errors.add(new ValidationError(javaUnit.getStorage().get().getPath(),
                                                    "Public method doesn't have a @Override annotation, is not a simple getter or setter, and doesn't have a javadoc comment",
-                                                   line, ValidationError.Severity.HIGH));
+                                                   line, ValidationError.Severity.MEDIUM));
                 });
 
 
-        return List.of();
+        return errors;
     }
 
     boolean isSimpleGetterOrSetter(MethodDeclaration method) {
@@ -62,8 +70,4 @@ public class JavaDocCheck extends JavaChecker {
         return method.getParameters().size() == 1 && isNamedSet && hasVoidReturnType;
     }
 
-    @Override
-    public void resetCache(Path file) {
-
-    }
 }

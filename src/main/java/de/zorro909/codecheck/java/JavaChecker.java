@@ -1,19 +1,36 @@
 package de.zorro909.codecheck.java;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.Problem;
 import com.github.javaparser.ast.CompilationUnit;
 import de.zorro909.codecheck.CodeCheck;
 import de.zorro909.codecheck.ValidationError;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class JavaChecker implements CodeCheck {
 
-    private static final Map<Path, CompilationUnit> classCache = new HashMap<>();
+    private static final Map<Path, ParseResult<CompilationUnit>> classCache = new HashMap<>();
     private static final JavaParser javaParser = new JavaParser();
 
+    static {
+        javaParser.getParserConfiguration()
+                  .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+    }
+
+    /**
+     * Checks if a given file path is responsible for Java code validation.
+     *
+     * @param path The file path to check.
+     * @return True if the file path is responsible for Java code validation, false otherwise.
+     */
     public abstract boolean isJavaResponsible(Path path);
 
     @Override
@@ -24,22 +41,54 @@ public abstract class JavaChecker implements CodeCheck {
         return false;
     }
 
+    /**
+     * Abstract method for performing code validation on a CompilationUnit.
+     *
+     * @param javaUnit The CompilationUnit to be validated.
+     * @return A List of ValidationErrors representing the errors found during validation.
+     */
     public abstract List<ValidationError> check(CompilationUnit javaUnit);
 
     @Override
     public List<ValidationError> check(Path path) {
-        Optional<CompilationUnit> javaUnitOptional = load(path);
-        if (javaUnitOptional.isEmpty()) {
-            return List.of(new ValidationError(path.toString(), "Failure parsing java file", 0, ValidationError.Severity.HIGH));
+        ParseResult<CompilationUnit> parseResult = load(path);
+        if (!parseResult.isSuccessful()) {
+            String errorMessage = "Failure parsing java file: " + parseResult.getProblems()
+                                                                             .stream()
+                                                                             .map(Problem::toString)
+                                                                             .collect(
+                                                                                     Collectors.joining(
+                                                                                             ", "));
+            return List.of(
+                    new ValidationError(path, errorMessage, 0, ValidationError.Severity.HIGH));
         }
-        return check(javaUnitOptional.get());
+        return check(parseResult.getResult().get());
     }
 
-    public Optional<CompilationUnit> load(Path path) {
+    /**
+     * Loads a Java source file from the specified path and returns a ParseResult of CompilationUnit.
+     *
+     * @param path The path of the Java source file to load.
+     * @return The ParseResult of CompilationUnit representing the loaded Java source file.
+     */
+    public ParseResult<CompilationUnit> load(Path path) {
         try {
-            return javaParser.parse(path).getResult();
+            if (classCache.containsKey(path)) {
+                return classCache.get(path);
+            }
+            synchronized (javaParser) {
+                ParseResult<CompilationUnit> parseResult = javaParser.parse(path);
+                classCache.put(path, parseResult);
+                return parseResult;
+            }
         } catch (IOException e) {
-            return Optional.empty();
+            return new ParseResult<>(null, null, null);
         }
     }
+
+    @Override
+    public void resetCache(Path path) {
+        classCache.remove(path);
+    }
+
 }
