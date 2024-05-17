@@ -116,7 +116,7 @@ public class GitCommitCodeCheckCommand implements Runnable {
 
     private Stream<ValidationError> checkFile(Path file) {
         codeChecker.forEach(cc -> cc.resetCache(file));
-        System.out.println("Checking file: " + path);
+        System.out.println("Checking file: " + file);
         return codeChecker.stream()
                           .filter(checker -> checker.isResponsible(file))
                           .peek(checker -> System.out.println("Using checker '" + checker.class.getName() + "'"))
