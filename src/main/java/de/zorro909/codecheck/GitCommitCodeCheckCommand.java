@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
+//TODO: Check Klassen mit *Test Namen, dass sie von einer Klasse erben und eine @Tests Annotation besitzen.
 @Command(name = "git-commit-code-check", description = "...", mixinStandardHelpOptions = true)
 public class GitCommitCodeCheckCommand implements Runnable {
 
@@ -24,15 +26,14 @@ public class GitCommitCodeCheckCommand implements Runnable {
     @Inject
     public List<CodeCheck> codeChecker;
 
-    @Option(names = {"-v", "--verbose"}, description = "...")
+    @Option(names = { "-v", "--verbose" }, description = "...")
     boolean verbose;
 
-    @Option(names = {"--fix"}, description = "Prompt to fix problems")
+    @Option(names = { "--fix" }, description = "Prompt to fix problems")
     boolean fix;
 
     /**
      * Starts the main Program
-     *
      * @param args
      * @throws Exception
      */
@@ -65,34 +66,34 @@ public class GitCommitCodeCheckCommand implements Runnable {
             System.out.println("Here are the details:");
             if (!fix) {
                 errorsMap.values().forEach(errorList -> errorList.forEach(System.out::println));
+                System.exit(1);
             } else {
                 for (Map.Entry<Path, List<ValidationError>> entry : new HashSet<>(
-                        errorsMap.entrySet())) {
+                    errorsMap.entrySet())) {
                     Path filePath = entry.getKey();
                     Optional<ValidationError> errorOptional = Optional.ofNullable(
-                            entry.getValue().get(0));
+                        entry.getValue().get(0));
                     while (errorOptional.isPresent()) {
                         ValidationError error = errorOptional.get();
                         System.out.println(error);
                         int lineNumber = error.lineNumber();
 
                         // Construct command for IDEA
-                        String[] ideaCommand = {"idea", "--line", String.valueOf(
-                                lineNumber), "--wait", filePath.toString()};
+                        String[] ideaCommand = { "idea64.exe", "--line", String.valueOf(
+                            lineNumber), "--wait", filePath.toString() };
 
                         //  Execute IDEA with file path
                         try {
                             new ProcessBuilder(ideaCommand).start().waitFor();
                         } catch (Exception e) {
                             System.out.println(
-                                    "Error while trying to start IntelliJ IDEA: " + e.getMessage());
+                                "Error while trying to start IntelliJ IDEA: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
 
                         errorOptional = checkFile(filePath).findFirst();
                     }
                 }
-
 
                 try (Git git = Git.open(new File(""))) {
                     AddCommand add = git.add();
@@ -109,17 +110,17 @@ public class GitCommitCodeCheckCommand implements Runnable {
     }
 
     private Map<Path, List<ValidationError>> checkForErrors(Set<Path> changedFiles) {
-        return changedFiles.parallelStream()
-                           .flatMap(this::checkFile)
-                           .collect(Collectors.groupingBy(ValidationError::filePath));
+        return changedFiles.stream()
+            .flatMap(this::checkFile)
+            .collect(Collectors.groupingBy(ValidationError::filePath));
     }
 
     private Stream<ValidationError> checkFile(Path file) {
         codeChecker.forEach(cc -> cc.resetCache(file));
-        System.out.println("Checking file: " + file);
+        //System.out.println("Checking file: " + file);
         return codeChecker.stream()
-                          .filter(checker -> checker.isResponsible(file))
-                          .peek(checker -> System.out.println("Using checker '" + checker.class.getName() + "'"))
-                          .flatMap(checker -> checker.check(file).stream());
+            .filter(checker -> checker.isResponsible(file))
+            //.peek(checker -> System.out.println("Using checker '" + checker.getClass().getName() + "'"))
+            .flatMap(checker -> checker.check(file).stream());
     }
 }
