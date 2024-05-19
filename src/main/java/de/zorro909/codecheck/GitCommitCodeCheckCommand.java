@@ -3,8 +3,6 @@ package de.zorro909.codecheck;
 import io.micronaut.configuration.picocli.PicocliRunner;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
-import org.eclipse.jgit.api.AddCommand;
-import org.eclipse.jgit.api.Git;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -31,6 +29,9 @@ public class GitCommitCodeCheckCommand implements Runnable {
 
     @Option(names = { "--fix" }, description = "Prompt to fix problems")
     boolean fix;
+
+    @Option(names = "--no-exit-code")
+    boolean noExitCode;
 
     /**
      * Starts the main Program
@@ -66,7 +67,7 @@ public class GitCommitCodeCheckCommand implements Runnable {
             System.out.println("Here are the details:");
             if (!fix) {
                 errorsMap.values().forEach(errorList -> errorList.forEach(System.out::println));
-                System.exit(1);
+                if(!noExitCode) System.exit(1);
             } else {
                 for (Map.Entry<Path, List<ValidationError>> entry : new HashSet<>(
                     errorsMap.entrySet())) {
@@ -95,15 +96,15 @@ public class GitCommitCodeCheckCommand implements Runnable {
                     }
                 }
 
-                try (Git git = Git.open(new File(""))) {
-                    AddCommand add = git.add();
-                    for (Path changedFile : changedFiles) {
-                        add.addFilepattern(changedFile.toString());
-                    }
-                    add.call();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+//                try (Git git = Git.open(new File(""))) {
+//                    AddCommand add = git.add();
+//                    for (Path changedFile : changedFiles) {
+//                        add.addFilepattern(changedFile.toString());
+//                    }
+//                    add.call();
+//                } catch (Exception ex) {
+//                    ex.printStackTrace();
+//                }
             }
         }
 

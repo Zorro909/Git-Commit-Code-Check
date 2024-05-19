@@ -1,17 +1,15 @@
 package de.zorro909.codecheck;
 
-import jakarta.inject.Singleton;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.diff.DiffEntry;
 
+import jakarta.inject.Singleton;
+
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * This class is responsible for loading the list of changed files in a Git repository.
@@ -26,21 +24,30 @@ public class GitDiffLoader {
      * @throws IOException If an I/O error occurs during the retrieval process.
      */
     public Set<Path> getChangedFiles(Path repositoryDirectory) throws IOException {
-        try (Git git = Git.open(repositoryDirectory.toFile())) {
+        Set<Path> changedFiles = new HashSet<>();
 
-            List<DiffEntry> diffs = git.diff().setCached(true).setShowNameAndStatusOnly(true).call();
-
-            return diffs.stream()
-                .map(DiffEntry::getNewPath)
-                .distinct()
-                .map(Paths::get)
-                .filter(Files::exists)
-                .collect(Collectors.toSet());
-        } catch (Exception e) {
-            e.printStackTrace();
+        try {
+            ProcessBuilder builder = new ProcessBuilder("git", "diff", "--cached", "--name-status");
+            builder.directory(repositoryDirectory.toAbsolutePath().toFile());
+            Process process = builder.start();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Assuming the output format is "A\tfile1\nM\tfile2\n..."
+                    String[] splitLine = line.split("\t");
+                    if (splitLine.length > 1 && (splitLine[0].equals("A") || splitLine[0].equals(
+                            "M"))) {
+                        changedFiles.add(Paths.get(splitLine[1]));
+                    }
+                }
+            }
+            process.waitFor();
+        } catch (InterruptedException | IOException e) {
+            throw new IOException("Failed to execute git command", e);
         }
 
-        return new HashSet<>();
+        return changedFiles;
     }
 
 }

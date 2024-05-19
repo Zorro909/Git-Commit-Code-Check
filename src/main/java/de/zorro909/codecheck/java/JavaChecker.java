@@ -8,7 +8,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import de.zorro909.codecheck.CodeCheck;
 import de.zorro909.codecheck.ValidationError;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -76,13 +75,12 @@ public abstract class JavaChecker implements CodeCheck {
             if (classCache.containsKey(path)) {
                 return classCache.get(path);
             }
-            synchronized (javaParser) {
-                ParseResult<CompilationUnit> parseResult = javaParser.parse(path);
-                classCache.put(path, parseResult);
-                return parseResult;
-            }
-        } catch (IOException e) {
-            return new ParseResult<>(null, null, null);
+            ParseResult<CompilationUnit> parseResult = javaParser.parse(path);
+            classCache.put(path, parseResult);
+            return parseResult;
+        } catch (Exception e) {
+            return new ParseResult<>(null, List.of(new Problem("Big Problem Exception", null, e)),
+                                     null);
         }
     }
 

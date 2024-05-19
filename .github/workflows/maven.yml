@@ -17,10 +17,10 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: git-commit-code-check-linux
-            output_path: target/git-commit-code-check
+            output_path: git-commit-code-check-*
           - os: windows-latest
             artifact_name: git-commit-code-check-windows.exe
-            output_path: target/git-commit-code-check.exe
+            output_path: git-commit-code-check-*.exe
 
     steps:
       - name: Checkout code
@@ -34,8 +34,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
 
+      - name: Build jar archive
+        run: mvn clean package
+
       - name: Build native image
-        run: mvn clean package -Dpackaging=native-image
+        run: native-image -H:ConfigurationFileDirectories=src/main/resources/native-image -march=x86-64-v3 -jar target/git-commit-code-check-*.jar
 
       - name: Archive artifact
         uses: actions/upload-artifact@v4
