@@ -1,4 +1,4 @@
-package de.zorro909.codecheck;
+package de.zorro909.codecheck.checks;
 
 import java.nio.file.Path;
 

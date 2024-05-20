@@ -1,12 +1,12 @@
-package de.zorro909.codecheck.java;
+package de.zorro909.codecheck.checks.java;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.Problem;
 import com.github.javaparser.ast.CompilationUnit;
-import de.zorro909.codecheck.CodeCheck;
-import de.zorro909.codecheck.ValidationError;
+import de.zorro909.codecheck.checks.CodeCheck;
+import de.zorro909.codecheck.checks.ValidationError;
 
 import java.nio.file.Path;
 import java.util.HashMap;

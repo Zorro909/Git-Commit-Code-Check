@@ -1,9 +1,9 @@
-package de.zorro909.codecheck.java.test;
+package de.zorro909.codecheck.checks.java.test;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import de.zorro909.codecheck.ValidationError;
-import de.zorro909.codecheck.java.JavaChecker;
+import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.checks.java.JavaChecker;
 import jakarta.inject.Singleton;
 
 import java.io.File;

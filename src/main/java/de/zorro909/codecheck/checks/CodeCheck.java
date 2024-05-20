@@ -1,6 +1,5 @@
-package de.zorro909.codecheck;
+package de.zorro909.codecheck.checks;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -13,7 +12,6 @@ public interface CodeCheck {
 
     List<ValidationError> check(Path file);
 
-    // Test
     void resetCache(Path file);
 
 }
