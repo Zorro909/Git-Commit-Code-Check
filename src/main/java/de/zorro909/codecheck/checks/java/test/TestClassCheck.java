@@ -19,10 +19,16 @@ import java.util.List;
 public class TestClassCheck extends JavaChecker {
 
     private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
+    public static final String JAVA_TEST_FILE_ENDING = "Test.java";
+    public static final String TEST_CLASS_SUFFIX = "Test";
+    public static final String TESTS_ANNOTATION_NAME = "Tests";
+    public static final String ERROR_TEST_CLASS_SHOULD_EXTEND = "TestClass should extend a class.";
+    public static final String ERROR_TEST_CLASS_TESTS_ANNOTATION = "Test Class should contain a @Tests annotation.";
 
     @Override
     public boolean isJavaResponsible(Path path) {
-        return path.toString().contains(TEST_FOLDER) && path.toString().endsWith("Test.java");
+        return path.toString().contains(TEST_FOLDER) && path.toString()
+                                                            .endsWith(JAVA_TEST_FILE_ENDING);
     }
 
     @Override
@@ -31,23 +37,25 @@ public class TestClassCheck extends JavaChecker {
 
 
         javaUnit.findAll(ClassOrInterfaceDeclaration.class,
-                         decl -> decl.getNameAsString().endsWith("Test")).forEach(type -> {
-            if (type.getExtendedTypes().isEmpty()) {
-                errors.add(new ValidationError(javaUnit.getStorage().get().getPath(),
-                                               "TestClass should extend a class.",
-                                               type.getBegin().get().line,
-                                               ValidationError.Severity.HIGH));
-            }
+                         decl -> decl.getNameAsString().endsWith(TEST_CLASS_SUFFIX))
+                .forEach(type -> {
+                    if (type.getExtendedTypes().isEmpty()) {
+                        errors.add(new ValidationError(getPath(javaUnit),
+                                                       ERROR_TEST_CLASS_SHOULD_EXTEND,
+                                                       type.getBegin(),
+                                                       ValidationError.Severity.HIGH));
+                    }
 
-            boolean containsTestsAnnotation = type.getAnnotationByName("Tests").isPresent();
+                    boolean containsTestsAnnotation = type.getAnnotationByName(
+                            TESTS_ANNOTATION_NAME).isPresent();
 
-            if (!containsTestsAnnotation) {
-                errors.add(new ValidationError(javaUnit.getStorage().get().getPath(),
-                                               "Test Class should contain a @Tests annotation.",
-                                               type.getBegin().get().line,
-                                               ValidationError.Severity.HIGH));
-            }
-        });
+                    if (!containsTestsAnnotation) {
+                        errors.add(new ValidationError(getPath(javaUnit),
+                                                       ERROR_TEST_CLASS_TESTS_ANNOTATION,
+                                                       type.getBegin(),
+                                                       ValidationError.Severity.HIGH));
+                    }
+                });
 
         return errors;
     }

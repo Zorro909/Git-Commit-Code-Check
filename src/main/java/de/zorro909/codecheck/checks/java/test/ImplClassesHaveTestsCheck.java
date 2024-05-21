@@ -1,5 +1,6 @@
 package de.zorro909.codecheck.checks.java.test;
 
+import com.github.javaparser.Position;
 import de.zorro909.codecheck.RequiresCliOption;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
@@ -34,7 +35,7 @@ public class ImplClassesHaveTestsCheck implements CodeCheck {
             ValidationError noTestClassError = new ValidationError(file,
                                                                    "The Implementation " + "Class '" + file.getFileName()
                                                                                                            .toString() + "' has no Tests!",
-                                                                   1,
+                                                                   new Position(1, 1),
                                                                    ValidationError.Severity.MEDIUM);
             return List.of(noTestClassError);
         }

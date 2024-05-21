@@ -1,10 +1,8 @@
 package de.zorro909.codecheck.checks.java;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.ParserConfiguration;
-import com.github.javaparser.Problem;
+import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
 
@@ -12,12 +10,18 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class JavaChecker implements CodeCheck {
 
     private static final Map<Path, ParseResult<CompilationUnit>> classCache = new HashMap<>();
     private static final JavaParser javaParser = new JavaParser();
+    public static final String JAVA_FILE_SUFFIX = ".java";
+    public static final String PARSE_EXCEPTION = "Big Problem Exception";
+    public static final String COMP_UNIT_NO_STORAGE = "Invalid compilation unit: storage not found";
+    public static final String GENERATED_ANNOTATION = "Generated";
 
     static {
         javaParser.getParserConfiguration()
@@ -34,7 +38,7 @@ public abstract class JavaChecker implements CodeCheck {
 
     @Override
     public boolean isResponsible(Path path) {
-        if (path.getFileName().toString().endsWith(".java")) {
+        if (path.getFileName().toString().endsWith(JAVA_FILE_SUFFIX)) {
             return isJavaResponsible(path);
         }
         return false;
@@ -51,15 +55,16 @@ public abstract class JavaChecker implements CodeCheck {
     @Override
     public List<ValidationError> check(Path path) {
         ParseResult<CompilationUnit> parseResult = load(path);
-        if (!parseResult.isSuccessful()) {
+        if (!parseResult.isSuccessful() || parseResult.getResult().isEmpty()) {
             String errorMessage = "Failure parsing java file: " + parseResult.getProblems()
                                                                              .stream()
                                                                              .map(Problem::toString)
                                                                              .collect(
                                                                                      Collectors.joining(
                                                                                              ", "));
-            return List.of(
-                    new ValidationError(path, errorMessage, 0, ValidationError.Severity.HIGH));
+            return List.of(new ValidationError(path, errorMessage, new Position(Position.FIRST_LINE,
+                                                                                Position.FIRST_COLUMN),
+                                               ValidationError.Severity.HIGH));
         }
         return check(parseResult.getResult().get());
     }
@@ -79,14 +84,24 @@ public abstract class JavaChecker implements CodeCheck {
             classCache.put(path, parseResult);
             return parseResult;
         } catch (Exception e) {
-            return new ParseResult<>(null, List.of(new Problem("Big Problem Exception", null, e)),
-                                     null);
+            return new ParseResult<>(null, List.of(new Problem(PARSE_EXCEPTION, null, e)), null);
         }
     }
 
     @Override
     public void resetCache(Path path) {
         classCache.remove(path);
+    }
+
+    protected Path getPath(CompilationUnit javaUnit) {
+        Optional<Path> pathOpt = javaUnit.getStorage().map(CompilationUnit.Storage::getPath);
+        return pathOpt.orElseThrow(() -> new IllegalArgumentException(COMP_UNIT_NO_STORAGE));
+    }
+
+    protected Stream<ClassOrInterfaceDeclaration> filterGeneratedClasses(CompilationUnit javaUnit) {
+        return javaUnit.findAll(ClassOrInterfaceDeclaration.class,
+                                clazz -> clazz.getAnnotationByName(GENERATED_ANNOTATION).isEmpty())
+                       .stream();
     }
 
 }

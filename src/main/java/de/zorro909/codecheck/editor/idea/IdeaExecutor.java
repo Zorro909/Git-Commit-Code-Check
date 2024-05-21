@@ -1,28 +1,32 @@
 package de.zorro909.codecheck.editor.idea;
 
 
+import com.github.javaparser.Position;
 import de.zorro909.codecheck.editor.EditorExecutor;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
+public class IdeaExecutor implements EditorExecutor {
 
-public abstract class IdeaExecutor implements EditorExecutor {
+    private final String ideaExecutable;
 
-    protected abstract String getIdeaExecutable();
+    public IdeaExecutor(String ideaExecutable) {
+        this.ideaExecutable = ideaExecutable;
+    }
 
     @Override
-    public boolean open(Path path, Integer line) {
-        String[] params = new String[]{getIdeaExecutable(), "--line", String.valueOf(
-                line), path.toString()};
+    public boolean open(Path path, Position pos) {
+        String[] params = new String[]{ideaExecutable, "--line", String.valueOf(
+                pos.line), "--column", String.valueOf(pos.column), path.toString()};
 
         return exec(params);
     }
 
     @Override
-    public boolean openAndWait(Path path, Integer line) {
-        String[] params = new String[]{getIdeaExecutable(), "--wait", "--line", String.valueOf(
-                line), path.toString()};
+    public boolean openAndWait(Path path, Position pos) {
+        String[] params = new String[]{ideaExecutable, "--wait", "--line", String.valueOf(
+                pos.line), "--column", String.valueOf(pos.column), path.toString()};
 
         return exec(params);
     }
