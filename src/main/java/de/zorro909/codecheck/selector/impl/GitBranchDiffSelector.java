@@ -1,8 +1,7 @@
 package de.zorro909.codecheck.selector.impl;
 
-
+import de.zorro909.codecheck.RequiresCliOption;
 import de.zorro909.codecheck.selector.FileSelector;
-import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Singleton;
 
 import java.io.BufferedReader;
@@ -13,17 +12,17 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 @Singleton
-@Secondary
-public class GitDiffSelector implements FileSelector {
+@RequiresCliOption("--check-branch")
+public class GitBranchDiffSelector implements FileSelector {
 
     private static final String GIT_COMMAND = "git";
-    private static final String[] GIT_PARAMS = {GIT_COMMAND, "diff", "--cached", "--name-status", "--relative"};
+    private static final String[] GIT_PARAMS = {GIT_COMMAND, "diff", "--cached", "--name-status", "--relative", "develop"};
     private static final String FILE_ADDED = "A";
     private static final String FILE_MODIFIED = "M";
 
     private final Path repositoryDirectory;
 
-    public GitDiffSelector(Path repositoryDirectory) {
+    public GitBranchDiffSelector(Path repositoryDirectory) {
         this.repositoryDirectory = repositoryDirectory;
     }
 

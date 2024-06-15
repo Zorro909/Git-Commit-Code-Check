@@ -62,6 +62,10 @@ public class GitCommitCodeCheckCommand implements Runnable {
     boolean checkAll;
 
     @Getter
+    @Option(names = "--check-branch", defaultValue = "false")
+    boolean checkBranch;
+
+    @Getter
     @Option(names = "--git", defaultValue = "true")
     boolean git;
 
