@@ -21,6 +21,7 @@ import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
+import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
 import jakarta.inject.Singleton;
@@ -58,6 +59,10 @@ public final class JavaDocCheck extends JavaChecker {
     public static final String EXCLUSION_OVERRIDE_ANNOTAION = "Override";
 
     public static final String EXCLUSION_GETTER_PREFIX = "get";
+
+    public JavaDocCheck(FileLoader fileLoader) {
+        super(fileLoader);
+    }
 
     @Override
     public boolean isJavaResponsible(Path path) {

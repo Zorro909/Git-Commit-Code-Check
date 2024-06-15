@@ -2,6 +2,7 @@ package de.zorro909.codecheck.checks.java.test;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
 import jakarta.inject.Singleton;
@@ -24,6 +25,10 @@ public class TestClassCheck extends JavaChecker {
     public static final String TESTS_ANNOTATION_NAME = "Tests";
     public static final String ERROR_TEST_CLASS_SHOULD_EXTEND = "TestClass should extend a class.";
     public static final String ERROR_TEST_CLASS_TESTS_ANNOTATION = "Test Class should contain a @Tests annotation.";
+
+    public TestClassCheck(FileLoader fileLoader) {
+        super(fileLoader);
+    }
 
     @Override
     public boolean isJavaResponsible(Path path) {

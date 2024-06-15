@@ -1,13 +1,13 @@
 package de.zorro909.codecheck.checks.java.test;
 
 import com.github.javaparser.Position;
+import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.RequiresCliOption;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
 import jakarta.inject.Singleton;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -18,6 +18,12 @@ public class ImplClassesHaveTestsCheck implements CodeCheck {
 
     private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
     private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
+
+    private final FileLoader fileLoader;
+
+    public ImplClassesHaveTestsCheck(FileLoader fileLoader) {
+        this.fileLoader = fileLoader;
+    }
 
     @Override
     public boolean isResponsible(Path path) {
@@ -31,7 +37,7 @@ public class ImplClassesHaveTestsCheck implements CodeCheck {
                                       .replace("Impl.java", "ImplTest.java");
 
         Path testFile = Paths.get(testFilePath);
-        if (!Files.exists(testFile)) {
+        if (!fileLoader.fileExists(testFile)) {
             ValidationError noTestClassError = new ValidationError(file,
                                                                    "The Implementation " + "Class '" + file.getFileName()
                                                                                                            .toString() + "' has no Tests!",

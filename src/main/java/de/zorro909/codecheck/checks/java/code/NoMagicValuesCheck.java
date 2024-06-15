@@ -5,6 +5,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithArguments;
 import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
+import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
 import jakarta.inject.Singleton;
@@ -24,6 +25,10 @@ import java.util.List;
 public class NoMagicValuesCheck extends JavaChecker {
 
     private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
+
+    public NoMagicValuesCheck(FileLoader fileLoader) {
+        super(fileLoader);
+    }
 
     @Override
     public boolean isJavaResponsible(Path path) {

@@ -11,6 +11,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
 
@@ -43,6 +44,8 @@ public abstract class JavaChecker implements CodeCheck {
     private static final String TEST_FOLDER =
         "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
+    protected final FileLoader fileLoader;
+
     static {
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
         combinedTypeSolver.add(new ReflectionTypeSolver());
@@ -52,6 +55,10 @@ public abstract class JavaChecker implements CodeCheck {
         javaParser.getParserConfiguration()
             .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
             .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
+    }
+
+    public JavaChecker(FileLoader fileLoader) {
+        this.fileLoader = fileLoader;
     }
 
     /**
@@ -103,6 +110,7 @@ public abstract class JavaChecker implements CodeCheck {
             if (classCache.containsKey(path)) {
                 return classCache.get(path);
             }
+            fileLoader.markFile(path);
             ParseResult<CompilationUnit> parseResult = javaParser.parse(path);
             classCache.put(path, parseResult);
             return parseResult;
