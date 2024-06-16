@@ -1,11 +1,12 @@
 package de.zorro909.codecheck.checks.java.test;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
+import de.zorro909.codecheck.utils.CompilationUnitExtensions;
 import jakarta.inject.Singleton;
+import lombok.experimental.ExtensionMethod;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -16,6 +17,7 @@ import java.util.List;
  * The TestClassCheck class is responsible for checking Java test classes
  * for specific conditions and validating them.
  */
+@ExtensionMethod(CompilationUnitExtensions.class)
 @Singleton
 public class TestClassCheck extends JavaChecker {
 
@@ -36,31 +38,30 @@ public class TestClassCheck extends JavaChecker {
                                                             .endsWith(JAVA_TEST_FILE_ENDING);
     }
 
+    /**
+     * Checks the specified CompilationUnit for specific conditions and returns a list of validation errors.
+     *
+     * @param javaUnit The CompilationUnit to be checked.
+     * @return A list of ValidationErrors representing the errors found during validation.
+     */
     @Override
     public List<ValidationError> check(CompilationUnit javaUnit) {
         List<ValidationError> errors = new ArrayList<>();
 
+        // Creates a HIGH severity Validation Erroor for Test Classes that do not extend another
+        // Class
+        javaUnit.findAllClassesWithEnds(TEST_CLASS_SUFFIX)
+                .filter(type -> type.getExtendedTypes().isEmpty())
+                .map(type -> javaUnit.validationError(type, ValidationError.Severity.HIGH,
+                                                      ERROR_TEST_CLASS_SHOULD_EXTEND))
+                .forEach(errors::add);
 
-        javaUnit.findAll(ClassOrInterfaceDeclaration.class,
-                         decl -> decl.getNameAsString().endsWith(TEST_CLASS_SUFFIX))
-                .forEach(type -> {
-                    if (type.getExtendedTypes().isEmpty()) {
-                        errors.add(new ValidationError(getPath(javaUnit),
-                                                       ERROR_TEST_CLASS_SHOULD_EXTEND,
-                                                       type.getBegin(),
-                                                       ValidationError.Severity.HIGH));
-                    }
-
-                    boolean containsTestsAnnotation = type.getAnnotationByName(
-                            TESTS_ANNOTATION_NAME).isPresent();
-
-                    if (!containsTestsAnnotation) {
-                        errors.add(new ValidationError(getPath(javaUnit),
-                                                       ERROR_TEST_CLASS_TESTS_ANNOTATION,
-                                                       type.getBegin(),
-                                                       ValidationError.Severity.HIGH));
-                    }
-                });
+        // Creates a HIGH severity Validation Error for Test Classes without the @Tests annotation
+        javaUnit.findAllClassesWithEnds(TEST_CLASS_SUFFIX)
+                .filter(type -> type.getAnnotationByName(TESTS_ANNOTATION_NAME).isEmpty())
+                .map(type -> javaUnit.validationError(type, ValidationError.Severity.HIGH,
+                                                      ERROR_TEST_CLASS_TESTS_ANNOTATION))
+                .forEach(errors::add);
 
         return errors;
     }

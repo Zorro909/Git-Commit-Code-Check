@@ -1,6 +1,9 @@
-package de.zorro909.codecheck;
+package de.zorro909.codecheck.daemon;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import de.zorro909.codecheck.RequiresCliOption;
+import de.zorro909.codecheck.ValidationCheckPipeline;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.selector.FileSelector;
 import jakarta.inject.Provider;
@@ -18,6 +21,9 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Represents a daemon server that runs a file selection process, starts an HTTP server, and runs indefinitely.
+ */
 @RequiresCliOption("--daemon")
 @Singleton
 public class DaemonServer {
@@ -34,24 +40,44 @@ public class DaemonServer {
         this.validationCheckPipeline = validationCheckPipeline;
     }
 
+    /**
+     * Runs the application by selecting files, updating files, starting an HTTP server, and running the server indefinitely.
+     *
+     * @throws IOException            if an I/O error occurs during the file selection process.
+     * @throws InterruptedException   if the current thread is interrupted while sleeping.
+     */
     public void run() throws IOException, InterruptedException {
         fileSelector.selectFiles().forEach(this::updateFile);
+        HttpServer server = getHttpServer();
+        server.start();
+        runServerIndefinitely();
+    }
+
+    private HttpServer getHttpServer() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(23464), 4);
         server.setExecutor(Executors.newCachedThreadPool());
-        server.createContext("/check", (httpExchange) -> {
-            ValidationCheckPipeline vcp = validationCheckPipeline.get();
-            String output = fileSelector.selectFiles()
-                                        .map(vcp::checkFile)
-                                        .reduce(Stream::concat)
-                                        .orElse(Stream.empty())
-                                        .map(ValidationError::toString)
-                                        .collect(Collectors.joining("\n"));
-            byte[] response = output.getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(200, response.length);
-            httpExchange.getResponseBody().write(response);
-        });
-        server.start();
+        server.createContext("/check", this::handleHttpExchange);
+        return server;
+    }
 
+    private void handleHttpExchange(HttpExchange httpExchange) throws IOException {
+        ValidationCheckPipeline vcp = validationCheckPipeline.get();
+        String validationOutput = getValidationOutput(vcp);
+        byte[] response = validationOutput.getBytes(StandardCharsets.UTF_8);
+        httpExchange.sendResponseHeaders(200, response.length);
+        httpExchange.getResponseBody().write(response);
+    }
+
+    private String getValidationOutput(ValidationCheckPipeline vcp) throws IOException {
+        return fileSelector.selectFiles()
+                           .map(vcp::checkFile)
+                           .reduce(Stream::concat)
+                           .orElse(Stream.empty())
+                           .map(ValidationError::toString)
+                           .collect(Collectors.joining("\n"));
+    }
+
+    private void runServerIndefinitely() {
         while (true) {
             try {
                 Thread.sleep(Long.MAX_VALUE);
@@ -61,6 +87,11 @@ public class DaemonServer {
         }
     }
 
+    /**
+     * Marks the specified file as a dependency for the currently computed File.
+     *
+     * @param path The path of the file to mark.
+     */
     public void markFile(Path path) {
         if (currentFile.equals(path)) {
             return;
@@ -71,6 +102,11 @@ public class DaemonServer {
         }
     }
 
+    /**
+     * Updates the specified file and its dependencies.
+     *
+     * @param path The path of the file to update.
+     */
     public synchronized void updateFile(Path path) {
         if (fileDependencies.containsKey(path)) {
             fileDependencies.get(path).forEach(this::updateFile);

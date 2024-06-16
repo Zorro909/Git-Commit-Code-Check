@@ -14,9 +14,9 @@
     </parent>
     <properties>
         <packaging>jar</packaging>
-        <jdk.version>17</jdk.version>
-        <release.version>17</release.version>
-        <micronaut.version>4.4.2</micronaut.version>
+        <jdk.version>22</jdk.version>
+        <release.version>22</release.version>
+        <micronaut.version>4.4.3</micronaut.version>
         <exec.mainClass>de.zorro909.codecheck.GitCommitCodeCheckCommand</exec.mainClass>
     </properties>
 
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-symbol-solver-core</artifactId>
-            <version>3.25.10</version>
+            <version>3.26.0</version>
         </dependency>
     </dependencies>
     <build>

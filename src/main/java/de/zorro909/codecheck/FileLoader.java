@@ -1,5 +1,6 @@
 package de.zorro909.codecheck;
 
+import de.zorro909.codecheck.daemon.DaemonServer;
 import jakarta.inject.Singleton;
 
 import java.io.File;
