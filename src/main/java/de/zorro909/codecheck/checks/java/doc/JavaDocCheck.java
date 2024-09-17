@@ -1,5 +1,14 @@
 package de.zorro909.codecheck.checks.java.doc;
 
+import jakarta.inject.Singleton;
+import lombok.experimental.ExtensionMethod;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
 import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -9,28 +18,20 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithJavadoc;
-import com.github.javaparser.ast.stmt.ReturnStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
+
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
-import jakarta.inject.Singleton;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import de.zorro909.codecheck.utils.MethodDeclarationExtensions;
 
 /**
  * This class is responsible for checking the correctness of Java code by enforcing JavaDoc comments for
@@ -38,6 +39,7 @@ import java.util.Optional;
  * {@link JavaChecker} abstract class.
  */
 @Singleton
+@ExtensionMethod(MethodDeclarationExtensions.class)
 public final class JavaDocCheck extends JavaChecker {
 
     private static final String MAIN_FOLDER =
@@ -57,8 +59,6 @@ public final class JavaDocCheck extends JavaChecker {
     public static final String EXCLUSIION_MAPPER_CLASS_SUFFIX = "Mapper";
 
     public static final String EXCLUSION_OVERRIDE_ANNOTAION = "Override";
-
-    public static final String EXCLUSION_GETTER_PREFIX = "get";
 
     public JavaDocCheck(FileLoader fileLoader) {
         super(fileLoader);
@@ -93,7 +93,7 @@ public final class JavaDocCheck extends JavaChecker {
             .filter(this::hasNoJavaDoc)
             .filter(method -> method.getAnnotationByName(EXCLUSION_OVERRIDE_ANNOTAION)
                 .isEmpty())
-            .filter(method -> !isSimpleGetterOrSetter(method))
+            .filter(MethodDeclarationExtensions::isSimpleGetterOrSetter)
             .map(Node::getBegin)
             .map(pos -> new ValidationError(getPath(javaUnit), ERROR_MESSAGE_METHOD, pos,
                 ValidationError.Severity.MEDIUM))
@@ -105,7 +105,7 @@ public final class JavaDocCheck extends JavaChecker {
             .filter(this::hasNoJavaDoc)
             .filter(method -> method.getAnnotationByName(EXCLUSION_OVERRIDE_ANNOTAION)
                 .isEmpty())
-            .filter(method -> !isSimpleGetterOrSetter(method))
+            .filter(method -> !method.isSimpleGetterOrSetter())
             .map(Node::getBegin)
             .map(pos -> new ValidationError(getPath(javaUnit), ERROR_MESSAGE_METHOD, pos,
                 ValidationError.Severity.MEDIUM))
@@ -159,34 +159,7 @@ public final class JavaDocCheck extends JavaChecker {
         });
     }
 
-    boolean isSimpleGetterOrSetter(MethodDeclaration method) {
-        if (method.getParameters().isEmpty()) {
-            boolean isNamedGet = method.getNameAsString().startsWith(EXCLUSION_GETTER_PREFIX);
-            if (isNamedGet) {
-                return true;
-            }
-            Optional<ReturnStmt> returnStmt = method.getBody()
-                .flatMap(block -> block.getStatements()
-                    .getFirst())
-                .filter(Statement::isReturnStmt)
-                .map(Statement::asReturnStmt);
-            if (returnStmt.isPresent()) {
-                Optional<Expression> firstExpression = returnStmt.get().getExpression();
-                if (firstExpression.isPresent()) {
-                    String expression = firstExpression.get().toString().trim();
-                    if (expression.equalsIgnoreCase(
-                        "this." + method.getNameAsString()) || expression.equalsIgnoreCase(
-                        method.getNameAsString())) {
-                        return true;
-                    }
-                }
-            }
-        }
 
-        boolean isNamedSet = method.getNameAsString().startsWith("set");
-        boolean hasVoidReturnType = method.getType().asString().equals("void");
-        return method.getParameters().size() == 1 && isNamedSet && hasVoidReturnType;
-    }
 
     boolean hasNoJavaDoc(NodeWithJavadoc<?> node) {
         return hasNoJavaDoc(node, false);

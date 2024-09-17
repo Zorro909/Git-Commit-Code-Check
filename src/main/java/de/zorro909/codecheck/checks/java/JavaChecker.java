@@ -1,5 +1,16 @@
 package de.zorro909.codecheck.checks.java;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
@@ -11,24 +22,16 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class JavaChecker implements CodeCheck {
 
     private static final Map<Path, ParseResult<CompilationUnit>> classCache = new HashMap<>();
 
-    private static final JavaParser javaParser = new JavaParser();
+    private static final Map<String, JavaParser> javaParser = new HashMap<>();
 
     public static final String JAVA_FILE_SUFFIX = ".java";
 
@@ -46,18 +49,7 @@ public abstract class JavaChecker implements CodeCheck {
 
     protected final FileLoader fileLoader;
 
-    static {
-        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-        combinedTypeSolver.add(new ReflectionTypeSolver());
-        combinedTypeSolver.add(new JavaParserTypeSolver(MAIN_FOLDER));
-        combinedTypeSolver.add(new JavaParserTypeSolver(TEST_FOLDER));
-
-        javaParser.getParserConfiguration()
-            .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
-            .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
-    }
-
-    public JavaChecker(FileLoader fileLoader) {
+    protected JavaChecker(FileLoader fileLoader) {
         this.fileLoader = fileLoader;
     }
 
@@ -111,7 +103,7 @@ public abstract class JavaChecker implements CodeCheck {
                 return classCache.get(path);
             }
             fileLoader.markFile(path);
-            ParseResult<CompilationUnit> parseResult = javaParser.parse(path);
+            ParseResult<CompilationUnit> parseResult = getJavaParser(path).parse(path);
             classCache.put(path, parseResult);
             return parseResult;
         } catch (Exception e) {
@@ -136,4 +128,37 @@ public abstract class JavaChecker implements CodeCheck {
             .stream();
     }
 
+    private JavaParser getJavaParser(Path filePath) {
+        String path = filePath.toAbsolutePath().toString();
+
+        if(path.contains(MAIN_FOLDER)){
+            path = path.substring(0, path.indexOf(MAIN_FOLDER));
+        }else if(path.contains(TEST_FOLDER)){
+            path = path.substring(0, path.indexOf(TEST_FOLDER));
+        }
+        path = path.toLowerCase();
+
+        if(javaParser.containsKey(path)){
+            return javaParser.get(path);
+        }
+
+        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver.add(new ReflectionTypeSolver());
+        Path mainFolder = Paths.get(path + MAIN_FOLDER);
+        if(Files.exists(mainFolder)) {
+            combinedTypeSolver.add(new JavaParserTypeSolver(mainFolder));
+        }
+        Path testFolder = Paths.get(path + TEST_FOLDER);
+        if(Files.exists(testFolder)) {
+            combinedTypeSolver.add(new JavaParserTypeSolver(testFolder));
+        }
+
+        JavaParser parser = new JavaParser();
+        parser.getParserConfiguration()
+            .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
+            .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
+
+        javaParser.put(path, parser);
+        return parser;
+    }
 }
