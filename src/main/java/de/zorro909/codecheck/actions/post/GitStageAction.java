@@ -1,6 +1,7 @@
 package de.zorro909.codecheck.actions.post;
 
 import de.zorro909.codecheck.actions.PostAction;
+import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.selector.impl.GitDiffSelector;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.Order;
@@ -9,6 +10,7 @@ import jakarta.inject.Singleton;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Order(99)
@@ -23,7 +25,9 @@ public class GitStageAction implements PostAction {
     }
 
     @Override
-    public boolean perform(Set<Path> files) {
+    public boolean perform(Map<Path, List<ValidationError>> validationErrors) {
+        Set<Path> files = validationErrors.keySet();
+
         int startIndex = 0;
         int filesPerBatch = 10; // number of files to process at a time
 

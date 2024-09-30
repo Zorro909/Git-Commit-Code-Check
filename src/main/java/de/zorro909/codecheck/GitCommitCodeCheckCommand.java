@@ -130,7 +130,7 @@ public class GitCommitCodeCheckCommand implements Runnable {
                 System.exit(1);
             }
 
-            validationCheckPipeline.executePostActions(errorsMap.keySet());
+            validationCheckPipeline.executePostActions(errorsMap);
 
         }
     }

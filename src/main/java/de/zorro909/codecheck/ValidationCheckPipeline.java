@@ -10,7 +10,10 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,27 +39,16 @@ public class ValidationCheckPipeline {
     List<PostAction> postActions;
 
     /**
-     * Execute all PostActions on a Set of Paths
-     * @param paths set of paths
+     * Executes post actions for a given set of validation errors.
+     *
+     * @param validationErrors A map containing the validation errors, where the key is a file path and the value is the corresponding error.
      */
-    public void executePostActions(Set<Path> paths) {
+    public void executePostActions(Map<Path, List<ValidationError>> validationErrors) {
         if (postActions == null) {
             return;
         }
 
-        postActions.forEach(action -> action.perform(paths));
-    }
-
-    /**
-     * Execute all PostActions on a single Path
-     * @param path Path to execute on
-     */
-    public void executePostActions(Path path) {
-        if (postActions == null) {
-            return;
-        }
-
-        postActions.forEach(action -> action.perform(Set.of(path)));
+        postActions.forEach(action -> action.perform(validationErrors));
     }
 
     public boolean executeFixActions(Map<Path, List<ValidationError>> errorsMap) {
