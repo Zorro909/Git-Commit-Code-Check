@@ -1,11 +1,10 @@
 package de.zorro909.codecheck.checks.java.test;
 
 import jakarta.inject.Singleton;
-import lombok.experimental.ExtensionMethod;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -15,7 +14,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.google.common.collect.Lists;
 
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
@@ -26,7 +24,6 @@ import de.zorro909.codecheck.utils.MethodDeclarationExtensions;
 /**
  * Checks that all Public Methods inside Impl Classes have Tests
  */
-@ExtensionMethod(CompilationUnitExtensions.class)
 @Singleton
 public class PublicMethodsAreTestedCheck extends JavaChecker {
 
@@ -48,15 +45,15 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
 
         Path filePath = getPath(javaUnit);
         filePath =
-            Paths.get(filePath.toString().replace("main", "test").replace("Impl.java", "ImplTest.java"));
+            Path.of(filePath.toString().replace("main", "test").replace("Impl.java", "ImplTest.java"));
 
         if (!Files.exists(filePath)) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
 
         ParseResult<CompilationUnit> testUnitResult = load(filePath);
         if (!testUnitResult.isSuccessful()) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
 
         CompilationUnit testUnit = testUnitResult.getResult().get();
@@ -77,7 +74,7 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
         });
 
         return publicMethods.stream().map(method ->
-            javaUnit.validationError(method, ValidationError.Severity.MEDIUM,
+            CompilationUnitExtensions.validationError(javaUnit, method, ValidationError.Severity.MEDIUM,
                 "Method '" + method.getNameAsString()
                     + "' is not used in any Tests! Probably missing coverage.")
         ).toList();

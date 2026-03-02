@@ -9,7 +9,6 @@ import jakarta.inject.Singleton;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Singleton
@@ -36,7 +35,7 @@ public class ImplClassesHaveTestsCheck implements CodeCheck {
         String testFilePath = filePath.replace(MAIN_FOLDER, TEST_FOLDER)
                                       .replace("Impl.java", "ImplTest.java");
 
-        Path testFile = Paths.get(testFilePath);
+        Path testFile = Path.of(testFilePath);
         if (!fileLoader.fileExists(testFile)) {
             ValidationError noTestClassError = new ValidationError(file,
                                                                    "The Implementation " + "Class '" + file.getFileName()

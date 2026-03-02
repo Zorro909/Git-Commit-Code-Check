@@ -4,7 +4,7 @@ import io.micronaut.context.condition.Condition;
 import io.micronaut.context.condition.ConditionContext;
 import jakarta.inject.Singleton;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Singleton
@@ -34,7 +34,7 @@ public class CliOptionCondition implements Condition {
         }
 
         String finalOptionName = optionName;
-        return Arrays.stream(args)
-                     .anyMatch(str -> str.equalsIgnoreCase(finalOptionName)) == expected;
+        return List.of(args).stream()
+                   .anyMatch(str -> str.equalsIgnoreCase(finalOptionName)) == expected;
     }
 }

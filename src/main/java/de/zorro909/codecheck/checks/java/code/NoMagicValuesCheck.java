@@ -40,12 +40,13 @@ public class NoMagicValuesCheck extends JavaChecker {
         List<ValidationError> errors = new ArrayList<>();
 
         filterGeneratedClasses(javaUnit).flatMap(Node::stream)
-                                        .filter(node -> (node instanceof MethodCallExpr) || (node instanceof ExplicitConstructorInvocationStmt) || (node instanceof ObjectCreationExpr))
+                                        .filter(node -> node instanceof MethodCallExpr || node instanceof ExplicitConstructorInvocationStmt || node instanceof ObjectCreationExpr)
                                         .map(obj -> (NodeWithArguments<?>) obj)
                                         .filter(this::filterOutExceptions)
                                         .flatMap(call -> call.getArguments().stream())
-                                        .filter(expr -> expr instanceof LiteralExpr)
-                                        .filter(expr -> !(expr instanceof NullLiteralExpr) && !(expr instanceof BooleanLiteralExpr))
+                                        .filter(expr -> expr instanceof LiteralExpr
+                                                && !(expr instanceof NullLiteralExpr)
+                                                && !(expr instanceof BooleanLiteralExpr))
                                         .map(expr -> new ValidationError(getPath(javaUnit),
                                                                          "Magic Values like '" + expr + "' are not allowed! Extract to Constant!",
                                                                          expr.getBegin(),
@@ -74,7 +75,7 @@ public class NoMagicValuesCheck extends JavaChecker {
         private final String scope;
         private final String method;
 
-        private MethodExclusion(String scope, String method) {
+        MethodExclusion(String scope, String method) {
             this.scope = scope;
             this.method = method;
         }

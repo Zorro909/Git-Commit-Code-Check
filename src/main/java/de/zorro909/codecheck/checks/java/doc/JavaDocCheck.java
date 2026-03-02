@@ -1,7 +1,6 @@
 package de.zorro909.codecheck.checks.java.doc;
 
 import jakarta.inject.Singleton;
-import lombok.experimental.ExtensionMethod;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -39,7 +38,6 @@ import de.zorro909.codecheck.utils.MethodDeclarationExtensions;
  * {@link JavaChecker} abstract class.
  */
 @Singleton
-@ExtensionMethod(MethodDeclarationExtensions.class)
 public final class JavaDocCheck extends JavaChecker {
 
     private static final String MAIN_FOLDER =
@@ -105,7 +103,7 @@ public final class JavaDocCheck extends JavaChecker {
             .filter(this::hasNoJavaDoc)
             .filter(method -> method.getAnnotationByName(EXCLUSION_OVERRIDE_ANNOTAION)
                 .isEmpty())
-            .filter(method -> !method.isSimpleGetterOrSetter())
+            .filter(method -> !MethodDeclarationExtensions.isSimpleGetterOrSetter(method))
             .map(Node::getBegin)
             .map(pos -> new ValidationError(getPath(javaUnit), ERROR_MESSAGE_METHOD, pos,
                 ValidationError.Severity.MEDIUM))
@@ -125,11 +123,9 @@ public final class JavaDocCheck extends JavaChecker {
 
     private boolean hasNoImplements(CompilationUnit unit,
         TypeDeclaration typeDeclaration) {
-        if (!(typeDeclaration instanceof ClassOrInterfaceDeclaration)) {
+        if (!(typeDeclaration instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration)) {
             return true;
         }
-        ClassOrInterfaceDeclaration classOrInterfaceDeclaration =
-            (ClassOrInterfaceDeclaration) typeDeclaration;
 
         NodeList<ClassOrInterfaceType> implementedTypes =
             classOrInterfaceDeclaration.getImplementedTypes();
