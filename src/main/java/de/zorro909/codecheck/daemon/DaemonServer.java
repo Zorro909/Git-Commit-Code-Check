@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,7 +31,7 @@ public class DaemonServer {
     private final FileSelector fileSelector;
     private final Provider<ValidationCheckPipeline> validationCheckPipeline;
 
-    private final Map<Path, List<Path>> fileDependencies = new HashMap<>();
+    private final Map<Path, Set<Path>> fileDependencies = new HashMap<>();
     private Path currentFile;
 
     public DaemonServer(FileSelector fileSelector,
@@ -96,7 +96,7 @@ public class DaemonServer {
         if (currentFile.equals(path)) {
             return;
         }
-        fileDependencies.computeIfAbsent(currentFile, _ -> new ArrayList<>())
+        fileDependencies.computeIfAbsent(currentFile, _ -> new HashSet<>())
                         .add(path);
     }
 
