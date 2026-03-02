@@ -6,7 +6,6 @@ import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
 import de.zorro909.codecheck.utils.CompilationUnitExtensions;
 import jakarta.inject.Singleton;
-import lombok.experimental.ExtensionMethod;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -17,7 +16,6 @@ import java.util.List;
  * The TestClassCheck class is responsible for checking Java test classes
  * for specific conditions and validating them.
  */
-@ExtensionMethod(CompilationUnitExtensions.class)
 @Singleton
 public class TestClassCheck extends JavaChecker {
 
@@ -50,17 +48,17 @@ public class TestClassCheck extends JavaChecker {
 
         // Creates a HIGH severity Validation Erroor for Test Classes that do not extend another
         // Class
-        javaUnit.findAllClassesWithEnds(TEST_CLASS_SUFFIX)
+        CompilationUnitExtensions.findAllClassesWithEnds(javaUnit, TEST_CLASS_SUFFIX)
                 .filter(type -> type.getExtendedTypes().isEmpty())
-                .map(type -> javaUnit.validationError(type, ValidationError.Severity.HIGH,
-                                                      ERROR_TEST_CLASS_SHOULD_EXTEND))
+                .map(type -> CompilationUnitExtensions.validationError(javaUnit, type,
+                        ValidationError.Severity.HIGH, ERROR_TEST_CLASS_SHOULD_EXTEND))
                 .forEach(errors::add);
 
         // Creates a HIGH severity Validation Error for Test Classes without the @Tests annotation
-        javaUnit.findAllClassesWithEnds(TEST_CLASS_SUFFIX)
+        CompilationUnitExtensions.findAllClassesWithEnds(javaUnit, TEST_CLASS_SUFFIX)
                 .filter(type -> type.getAnnotationByName(TESTS_ANNOTATION_NAME).isEmpty())
-                .map(type -> javaUnit.validationError(type, ValidationError.Severity.HIGH,
-                                                      ERROR_TEST_CLASS_TESTS_ANNOTATION))
+                .map(type -> CompilationUnitExtensions.validationError(javaUnit, type,
+                        ValidationError.Severity.HIGH, ERROR_TEST_CLASS_TESTS_ANNOTATION))
                 .forEach(errors::add);
 
         return errors;

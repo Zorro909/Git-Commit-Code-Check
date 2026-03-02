@@ -55,7 +55,7 @@ public class DaemonServer {
 
     private HttpServer getHttpServer() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(23464), 4);
-        server.setExecutor(Executors.newCachedThreadPool());
+        server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
         server.createContext("/check", this::handleHttpExchange);
         return server;
     }
@@ -96,10 +96,8 @@ public class DaemonServer {
         if (currentFile.equals(path)) {
             return;
         }
-        List<Path> paths = fileDependencies.getOrDefault(currentFile, new ArrayList<>());
-        if (!paths.contains(path)) {
-            paths.add(path);
-        }
+        fileDependencies.computeIfAbsent(currentFile, _ -> new ArrayList<>())
+                        .add(path);
     }
 
     /**

@@ -98,7 +98,7 @@ public class ValidationCheckPipeline {
         codeChecker.forEach(cc -> cc.resetCache(file));
         return codeChecker.stream()
                           .filter(checker -> checker.isResponsible(file))
-                          .flatMap(checker -> checker.check(file).stream()); //Test23
+                          .flatMap(checker -> checker.check(file).stream());
     }
 
 }

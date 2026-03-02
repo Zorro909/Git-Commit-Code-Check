@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 @Singleton
@@ -46,7 +45,7 @@ public class GitBranchDiffSelector implements FileSelector {
     private Stream<Path> processGitDiffOutput(Stream<String> output) {
         return output.map(line -> line.split("\t"))
                      .filter(this::isFileAddedOrModified)
-                     .map(splitLine -> Paths.get(splitLine[1]));
+                     .map(splitLine -> Path.of(splitLine[1]));
     }
 
     private boolean isFileAddedOrModified(String[] splitLine) {

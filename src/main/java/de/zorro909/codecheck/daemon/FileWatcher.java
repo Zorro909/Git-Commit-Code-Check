@@ -44,7 +44,7 @@ public class FileWatcher implements Runnable {
     private Future<?> watchUpdateTask;
     private WatchService watchService;
 
-    private final Executor taskExecutor = Executors.newSingleThreadExecutor();
+    private final Executor taskExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     public FileWatcher(DaemonServer daemonServer, RepositoryPathProvider repositoryPathProvider) {
         this.daemonServer = daemonServer;
@@ -75,18 +75,16 @@ public class FileWatcher implements Runnable {
              .filter(dir -> !dir.toString().contains(TARGET_DIRECTORY))
              .forEach(this::registerDirectory);
 
-        watchThread = new Thread(this);
-        watchThread.start();
+        watchThread = Thread.ofVirtual().name("file-watcher").start(this);
     }
 
     private void registerDirectory(Path directory) {
-        WatchKey key = null;
         try {
-            key = directory.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            WatchKey key = directory.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            watchKeys.put(key, directory);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        watchKeys.put(key, directory);
         System.out.println("Registered directory: " + directory);
     }
 
@@ -118,6 +116,7 @@ public class FileWatcher implements Runnable {
         key.pollEvents().forEach(event -> processEvent(key, event));
     }
 
+    @SuppressWarnings("unchecked")
     private void processEvent(WatchKey key, WatchEvent<?> event) {
         WatchEvent.Kind<?> kind = event.kind();
         WatchEvent<Path> ev = (WatchEvent<Path>) event;
@@ -163,7 +162,7 @@ public class FileWatcher implements Runnable {
                 e.printStackTrace();
             }
 
-            List<Path> paths = (List<Path>) filesToUpdate.clone();
+            List<Path> paths = new ArrayList<>(filesToUpdate);
             filesToUpdate.clear();
             paths.stream().distinct().forEach(daemonServer::updateFile);
         }, taskExecutor);

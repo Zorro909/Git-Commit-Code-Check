@@ -3,7 +3,6 @@ package de.zorro909.codecheck.checks.java;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,18 +143,18 @@ public abstract class JavaChecker implements CodeCheck {
 
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
         combinedTypeSolver.add(new ReflectionTypeSolver());
-        Path mainFolder = Paths.get(path + MAIN_FOLDER);
+        Path mainFolder = Path.of(path + MAIN_FOLDER);
         if(Files.exists(mainFolder)) {
             combinedTypeSolver.add(new JavaParserTypeSolver(mainFolder));
         }
-        Path testFolder = Paths.get(path + TEST_FOLDER);
+        Path testFolder = Path.of(path + TEST_FOLDER);
         if(Files.exists(testFolder)) {
             combinedTypeSolver.add(new JavaParserTypeSolver(testFolder));
         }
 
         JavaParser parser = new JavaParser();
         parser.getParserConfiguration()
-            .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17)
+            .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_25)
             .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
 
         javaParser.put(path, parser);
