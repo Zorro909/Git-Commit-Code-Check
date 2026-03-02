@@ -11,10 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -38,7 +35,7 @@ public class FileWatcher implements Runnable {
     private final DaemonServer daemonServer;
     private final RepositoryPathProvider repositoryPathProvider;
     private final Map<WatchKey, Path> watchKeys = new HashMap<>();
-    private final ArrayList<Path> filesToUpdate = new ArrayList<>();
+    private final CopyOnWriteArrayList<Path> filesToUpdate = new CopyOnWriteArrayList<>();
 
     private Thread watchThread;
     private Future<?> watchUpdateTask;
@@ -162,7 +159,7 @@ public class FileWatcher implements Runnable {
                 e.printStackTrace();
             }
 
-            List<Path> paths = new ArrayList<>(filesToUpdate);
+            List<Path> paths = List.copyOf(filesToUpdate);
             filesToUpdate.clear();
             paths.stream().distinct().forEach(daemonServer::updateFile);
         }, taskExecutor);

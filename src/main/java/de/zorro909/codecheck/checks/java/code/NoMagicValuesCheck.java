@@ -61,7 +61,7 @@ public class NoMagicValuesCheck extends JavaChecker {
         if (nodeWithArguments instanceof MethodCallExpr methodCallExpr) {
             for (MethodExclusion exclusion : MethodExclusion.values()) {
                 if (exclusion.isMethodCall(methodCallExpr)) {
-                    return true;
+                    return false;
                 }
             }
         }
