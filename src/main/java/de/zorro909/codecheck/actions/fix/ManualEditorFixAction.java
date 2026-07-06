@@ -5,6 +5,8 @@ import de.zorro909.codecheck.RequiresCliOption;
 import de.zorro909.codecheck.actions.FixAction;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.editor.EditorExecutor;
+import de.zorro909.codecheck.validation.FixInteraction;
+import de.zorro909.codecheck.validation.FixerMetadata;
 import io.micronaut.core.annotation.Order;
 import jakarta.inject.Singleton;
 
@@ -19,6 +21,11 @@ public class ManualEditorFixAction implements FixAction {
 
     public ManualEditorFixAction(EditorExecutor editorExecutor) {
         this.editorExecutor = editorExecutor;
+    }
+
+    @Override
+    public FixerMetadata fixerMetadata() {
+        return new FixerMetadata("Manual IDE editor", FixInteraction.INTERACTIVE);
     }
 
     @Override

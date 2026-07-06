@@ -8,6 +8,9 @@ import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
+import de.zorro909.codecheck.validation.FileInterest;
+import de.zorro909.codecheck.validation.RuleId;
+import de.zorro909.codecheck.validation.RuleMetadata;
 import jakarta.inject.Singleton;
 
 import java.io.File;
@@ -28,6 +31,22 @@ public class NoMagicValuesCheck extends JavaChecker {
 
     public NoMagicValuesCheck(FileLoader fileLoader) {
         super(fileLoader);
+    }
+
+    @Override
+    public RuleId ruleId() {
+        return new RuleId("java.no-magic-values");
+    }
+
+    @Override
+    public RuleMetadata ruleMetadata() {
+        return new RuleMetadata("No magic values",
+                                "Rejects literal method and constructor arguments in main Java sources.");
+    }
+
+    @Override
+    public FileInterest validatedFiles() {
+        return FileInterest.javaMainSources();
     }
 
     @Override
