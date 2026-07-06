@@ -4,6 +4,10 @@ import com.github.javaparser.Position;
 import de.zorro909.codecheck.ValidationCheckPipeline;
 import de.zorro909.codecheck.actions.FixAction;
 import de.zorro909.codecheck.actions.PostAction;
+import de.zorro909.codecheck.changeset.ChangeSet;
+import de.zorro909.codecheck.changeset.ChangeSetEntry;
+import de.zorro909.codecheck.changeset.ChangeSetService;
+import de.zorro909.codecheck.changeset.GitFileStatus;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.config.CodeCheckConfig;
@@ -11,6 +15,14 @@ import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigException;
 import de.zorro909.codecheck.config.ConfigOverrides;
 import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.validation.Diagnostic;
+import de.zorro909.codecheck.validation.DiagnosticKind;
+import de.zorro909.codecheck.validation.FileValidationResult;
+import de.zorro909.codecheck.validation.RuleId;
+import de.zorro909.codecheck.validation.SourcePosition;
+import de.zorro909.codecheck.validation.ValidationEngine;
+import de.zorro909.codecheck.validation.ValidationMode;
+import de.zorro909.codecheck.validation.ValidationResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -152,7 +164,8 @@ class CodeCheckCommandServiceTest {
         assertThat(outcome.exitCode()).isEqualTo(1);
         assertThat(output()).doesNotContain("Low detail")
                             .contains("Medium warning")
-                            .contains("High failure");
+                            .contains("High failure")
+                            .contains("Blocking HIGH diagnostics found");
     }
 
     @Test
@@ -165,6 +178,49 @@ class CodeCheckCommandServiceTest {
 
         assertThat(outcome.exitCode()).isZero();
         assertThat(output()).contains("Medium warning");
+    }
+
+    @Test
+    void highParseErrorFromValidationEngineBlocksPreCommit(@TempDir Path tempDir)
+            throws Exception {
+        Path file = javaFile(tempDir);
+        CodeCheckCommandService service = createEngineService(file, List.of(
+                diagnostic(file, "Parse failed", ValidationError.Severity.HIGH,
+                           DiagnosticKind.PARSE_ERROR)));
+
+        CommandOutcome outcome = service.runPreCommit();
+
+        assertThat(outcome.exitCode()).isEqualTo(1);
+        assertThat(output()).contains("Parse failed")
+                            .contains("Blocking HIGH diagnostics found");
+    }
+
+    @Test
+    void mediumSymbolWarningFromValidationEnginePrintsWithoutBlockingPreCommit(
+            @TempDir Path tempDir) throws Exception {
+        Path file = javaFile(tempDir);
+        CodeCheckCommandService service = createEngineService(file, List.of(
+                diagnostic(file, "Symbol could not be resolved",
+                           ValidationError.Severity.MEDIUM, DiagnosticKind.SYMBOL_WARNING)));
+
+        CommandOutcome outcome = service.runPreCommit();
+
+        assertThat(outcome.exitCode()).isZero();
+        assertThat(output()).contains("Symbol could not be resolved")
+                            .doesNotContain("Blocking HIGH diagnostics found");
+    }
+
+    @Test
+    void batchCheckFailsWhenHighDiagnosticsExist(@TempDir Path tempDir) throws Exception {
+        Path file = javaFile(tempDir);
+        checks.add(alwaysError("Blocking batch issue", ValidationError.Severity.HIGH));
+        CodeCheckCommandService service = createService(() -> Stream.of(file));
+
+        CommandOutcome outcome = service.runBatchCheck();
+
+        assertThat(outcome.exitCode()).isEqualTo(1);
+        assertThat(output()).contains("Blocking batch issue")
+                            .contains("Blocking HIGH diagnostics found");
     }
 
     @Test
@@ -229,6 +285,15 @@ class CodeCheckCommandServiceTest {
                                            new PrintStream(stderr, true, StandardCharsets.UTF_8));
     }
 
+    private CodeCheckCommandService createEngineService(Path file,
+                                                        List<Diagnostic> diagnostics) {
+        return new CodeCheckCommandService(
+                daemonController, pipeline, new FixedValidationEngine(file, diagnostics),
+                new SingleFileChangeSetService(file), CodeCheckConfigLoader.defaultsOnly(),
+                new PrintStream(stdout, true, StandardCharsets.UTF_8),
+                new PrintStream(stderr, true, StandardCharsets.UTF_8));
+    }
+
     private Path javaFile(Path tempDir) throws Exception {
         Path file = tempDir.resolve("Example.java");
         Files.writeString(file, "class Example {}");
@@ -255,6 +320,12 @@ class CodeCheckCommandServiceTest {
 
     private ValidationError error(Path file, String message, ValidationError.Severity severity) {
         return new ValidationError(file, message, new Position(1, 1), severity);
+    }
+
+    private Diagnostic diagnostic(Path file, String message, ValidationError.Severity severity,
+                                  DiagnosticKind kind) {
+        return new Diagnostic(file, message, new SourcePosition(1, 1), severity, kind,
+                              new RuleId("test.rule"));
     }
 
     private String output() {
@@ -295,6 +366,61 @@ class CodeCheckCommandServiceTest {
 
         @Override
         public void applyFix(String diagnosticId) {
+        }
+    }
+
+    private static final class FixedValidationEngine implements ValidationEngine {
+        private final Path file;
+        private final List<Diagnostic> diagnostics;
+
+        private FixedValidationEngine(Path file, List<Diagnostic> diagnostics) {
+            this.file = file;
+            this.diagnostics = diagnostics;
+        }
+
+        @Override
+        public ValidationResult validate(ChangeSet changeSet, ValidationMode mode) {
+            return new ValidationResult(mode, List.of(new FileValidationResult(file, mode,
+                                                                               diagnostics)));
+        }
+
+        @Override
+        public FileValidationResult validateFile(Path file, ValidationMode mode) {
+            return new FileValidationResult(file, mode, diagnostics);
+        }
+    }
+
+    private static final class SingleFileChangeSetService implements ChangeSetService {
+        private final Path file;
+
+        private SingleFileChangeSetService(Path file) {
+            this.file = file;
+        }
+
+        @Override
+        public ChangeSet currentAssistantChangeSet() {
+            return changeSet();
+        }
+
+        @Override
+        public ChangeSet currentInteractiveCheckChangeSet() {
+            return changeSet();
+        }
+
+        @Override
+        public ChangeSet preCommitChangeSet() {
+            return changeSet();
+        }
+
+        @Override
+        public ChangeSet explicitFiles(java.util.Collection<Path> files) {
+            return changeSet();
+        }
+
+        private ChangeSet changeSet() {
+            return new ChangeSet(List.of(new ChangeSetEntry(file, GitFileStatus.MODIFIED,
+                                                            true, false, false, false,
+                                                            "test file")));
         }
     }
 }
