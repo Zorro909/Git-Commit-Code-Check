@@ -1,6 +1,9 @@
 package de.zorro909.codecheck.command;
 
 import de.zorro909.codecheck.ValidationCheckPipeline;
+import de.zorro909.codecheck.changeset.ChangeSet;
+import de.zorro909.codecheck.changeset.ChangeSetService;
+import de.zorro909.codecheck.changeset.GitCommandException;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigException;
@@ -15,6 +18,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
@@ -22,7 +26,7 @@ public class CodeCheckCommandService {
 
     private final AssistantDaemonController assistantDaemonController;
     private final ValidationCheckPipeline validationCheckPipeline;
-    private final FileSelector fileSelector;
+    private final ChangeSetService changeSetService;
     private final CodeCheckConfigLoader configLoader;
     private final PrintStream out;
     private final PrintStream err;
@@ -30,16 +34,16 @@ public class CodeCheckCommandService {
     @Inject
     public CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
                                    ValidationCheckPipeline validationCheckPipeline,
-                                   FileSelector fileSelector,
+                                   ChangeSetService changeSetService,
                                    CodeCheckConfigLoader configLoader) {
-        this(assistantDaemonController, validationCheckPipeline, fileSelector, configLoader,
+        this(assistantDaemonController, validationCheckPipeline, changeSetService, configLoader,
              System.out, System.err);
     }
 
     public CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
                                    ValidationCheckPipeline validationCheckPipeline,
                                    FileSelector fileSelector) {
-        this(assistantDaemonController, validationCheckPipeline, fileSelector,
+        this(assistantDaemonController, validationCheckPipeline, fromFileSelector(fileSelector),
              CodeCheckConfigLoader.defaultsOnly(), System.out, System.err);
     }
 
@@ -48,7 +52,7 @@ public class CodeCheckCommandService {
                             FileSelector fileSelector,
                             PrintStream out,
                             PrintStream err) {
-        this(assistantDaemonController, validationCheckPipeline, fileSelector,
+        this(assistantDaemonController, validationCheckPipeline, fromFileSelector(fileSelector),
              CodeCheckConfigLoader.defaultsOnly(), out, err);
     }
 
@@ -58,9 +62,19 @@ public class CodeCheckCommandService {
                             CodeCheckConfigLoader configLoader,
                             PrintStream out,
                             PrintStream err) {
+        this(assistantDaemonController, validationCheckPipeline, fromFileSelector(fileSelector),
+             configLoader, out, err);
+    }
+
+    CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
+                            ValidationCheckPipeline validationCheckPipeline,
+                            ChangeSetService changeSetService,
+                            CodeCheckConfigLoader configLoader,
+                            PrintStream out,
+                            PrintStream err) {
         this.assistantDaemonController = assistantDaemonController;
         this.validationCheckPipeline = validationCheckPipeline;
-        this.fileSelector = fileSelector;
+        this.changeSetService = changeSetService;
         this.configLoader = configLoader;
         this.out = out;
         this.err = err;
@@ -84,7 +98,8 @@ public class CodeCheckCommandService {
             return CommandOutcome.failure();
         }
         try {
-            Map<Path, List<ValidationError>> errorsMap = collectErrors();
+            Map<Path, List<ValidationError>> errorsMap = collectErrors(
+                    changeSetService.currentInteractiveCheckChangeSet());
             printOverview(errorsMap, _ -> true);
 
             if (errorsMap.isEmpty()) {
@@ -101,15 +116,19 @@ public class CodeCheckCommandService {
         } catch (IOException e) {
             err.println("Failed to run interactive check: " + e.getMessage());
             return CommandOutcome.failure();
+        } catch (GitCommandException e) {
+            err.println("Failed to select files for interactive check: " + e.getMessage());
+            return CommandOutcome.failure();
         }
     }
 
     public CommandOutcome runBatchCheck() {
-        return runNonInteractive("batch check", _ -> true);
+        return runNonInteractive("batch check", changeSetService::currentInteractiveCheckChangeSet,
+                                 _ -> true);
     }
 
     public CommandOutcome runPreCommit() {
-        return runNonInteractive("pre-commit check",
+        return runNonInteractive("pre-commit check", changeSetService::preCommitChangeSet,
                                  error -> error.severity() != ValidationError.Severity.LOW);
     }
 
@@ -135,22 +154,27 @@ public class CodeCheckCommandService {
     }
 
     private CommandOutcome runNonInteractive(String label,
+                                             Supplier<ChangeSet> changeSetSupplier,
                                              Predicate<ValidationError> diagnosticFilter) {
         if (!loadConfig()) {
             return CommandOutcome.failure();
         }
         try {
-            Map<Path, List<ValidationError>> errorsMap = collectErrors();
+            Map<Path, List<ValidationError>> errorsMap = collectErrors(changeSetSupplier.get());
             printOverview(errorsMap, diagnosticFilter);
             return hasHighSeverity(errorsMap) ? CommandOutcome.failure() : CommandOutcome.success();
         } catch (IOException e) {
             err.println("Failed to run " + label + ": " + e.getMessage());
             return CommandOutcome.failure();
+        } catch (GitCommandException e) {
+            err.println("Failed to select files for " + label + ": " + e.getMessage());
+            return CommandOutcome.failure();
         }
     }
 
-    private Map<Path, List<ValidationError>> collectErrors() throws IOException {
-        try (Stream<Path> changedFiles = fileSelector.selectFiles()) {
+    private Map<Path, List<ValidationError>> collectErrors(ChangeSet changeSet)
+            throws IOException {
+        try (Stream<Path> changedFiles = changeSet.paths()) {
             return validationCheckPipeline.checkForErrors(changedFiles);
         }
     }
@@ -199,5 +223,42 @@ public class CodeCheckCommandService {
             err.println(e.getMessage());
             return false;
         }
+    }
+
+    private static ChangeSetService fromFileSelector(FileSelector fileSelector) {
+        return new ChangeSetService() {
+            @Override
+            public ChangeSet currentAssistantChangeSet() {
+                return fromSelector();
+            }
+
+            @Override
+            public ChangeSet currentInteractiveCheckChangeSet() {
+                return fromSelector();
+            }
+
+            @Override
+            public ChangeSet preCommitChangeSet() {
+                return fromSelector();
+            }
+
+            @Override
+            public ChangeSet explicitFiles(java.util.Collection<Path> files) {
+                return new ChangeSet(files.stream()
+                                          .map(path -> new de.zorro909.codecheck.changeset.ChangeSetEntry(
+                                                  path,
+                                                  de.zorro909.codecheck.changeset.GitFileStatus.UNKNOWN,
+                                                  false, false, false, false, "explicit file"))
+                                          .toList());
+            }
+
+            private ChangeSet fromSelector() {
+                try (Stream<Path> selected = fileSelector.selectFiles()) {
+                    return explicitFiles(selected.toList());
+                } catch (IOException e) {
+                    throw new IllegalStateException("Failed to select files", e);
+                }
+            }
+        };
     }
 }
