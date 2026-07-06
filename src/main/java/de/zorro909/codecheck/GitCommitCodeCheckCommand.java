@@ -1,49 +1,37 @@
 package de.zorro909.codecheck;
 
-import de.zorro909.codecheck.checks.ValidationError;
-import de.zorro909.codecheck.daemon.DaemonServer;
-import de.zorro909.codecheck.daemon.FileWatcher;
-import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.command.CodeCheckCommandService;
 import io.micronaut.configuration.picocli.MicronautFactory;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.env.Environment;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParentCommand;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-
+import java.util.concurrent.Callable;
 
 /**
- * The GitCommitCodeCheckCommand class represents a command-line command that performs code checks on files
- * in a Git repository.
+ * Command-line entry point for Git Commit Code Check.
  */
 @Singleton
-@Command(name = "git-commit-code-check", description = "...", mixinStandardHelpOptions = true)
-public class GitCommitCodeCheckCommand implements Runnable {
+@Command(name = "git-commit-code-check",
+        description = "...",
+        mixinStandardHelpOptions = true,
+        subcommands = {
+                GitCommitCodeCheckCommand.CheckCommand.class,
+                GitCommitCodeCheckCommand.PreCommitCommand.class,
+                GitCommitCodeCheckCommand.StatusCommand.class,
+                GitCommitCodeCheckCommand.FixCommand.class
+        })
+public class GitCommitCodeCheckCommand implements Callable<Integer> {
 
     @Inject
-    RepositoryPathProvider repositoryPathProvider;
-
-    @Inject
-    Optional<DaemonServer> daemonServer;
-
-    @Inject
-    ValidationCheckPipeline validationCheckPipeline;
-
-    @Inject
-    FileSelector fileSelector;
-
-    @Inject
-    Optional<FileWatcher> fileWatcher;
+    CodeCheckCommandService commandService;
 
     @Getter
     @Option(names = {"-v", "--verbose"}, description = "...", defaultValue = "false")
@@ -66,10 +54,6 @@ public class GitCommitCodeCheckCommand implements Runnable {
     boolean git;
 
     @Getter
-    @Option(names = "--batch", defaultValue = "false")
-    boolean batch;
-
-    @Getter
     @Option(names = "--experimental", defaultValue = "false")
     boolean experimental;
 
@@ -83,57 +67,78 @@ public class GitCommitCodeCheckCommand implements Runnable {
 
     public static void main(String[] args) {
         try (ApplicationContext context = ApplicationContext.builder(
-                GitCommitCodeCheckCommand.class, Environment.CLI).start()) {
+                        GitCommitCodeCheckCommand.class, Environment.CLI)
+                .singletons((Object) args)
+                .start()) {
             CommandLine commandLine = new CommandLine(GitCommitCodeCheckCommand.class,
                                                       new MicronautFactory(
                                                               context)).setCaseInsensitiveEnumValuesAllowed(
                     true).setUsageHelpAutoWidth(true);
-            context.registerSingleton(args);
             int exitCode = commandLine.execute(args);
             System.exit(exitCode);
         }
     }
 
-    @SneakyThrows
-    public void run() {
-        // business logic here
-        if (verbose) {
-            System.out.println("Hi!");
-        }
-        if (daemon) {
-            if(watch){
-                fileWatcher.get().watch();
+    @Override
+    public Integer call() {
+        return commandService.startAssistantDaemon().exitCode();
+    }
+
+    @Command(name = "check", description = "Run a one-shot code check.")
+    static class CheckCommand implements Callable<Integer> {
+
+        @ParentCommand
+        GitCommitCodeCheckCommand parent;
+
+        @Option(names = "--batch", defaultValue = "false",
+                description = "Run without interactive fix actions.")
+        boolean batch;
+
+        @Override
+        public Integer call() {
+            if (batch) {
+                return parent.commandService.runBatchCheck().exitCode();
             }
-            daemonServer.get().run();
-            return;
-        }
-
-        Stream<Path> changedFiles = fileSelector.selectFiles();
-
-        Map<Path, List<ValidationError>> errorsMap = validationCheckPipeline.checkForErrors(
-                changedFiles);
-
-        // Can be dependent on IO Resources
-        changedFiles.close();
-
-        System.out.println("Overview of code checks:");
-        System.out.println("------------------------");
-        if (errorsMap.isEmpty()) {
-            System.out.println("No validation errors found. Great job!");
-        } else {
-            System.out.println("Validation errors found in " + errorsMap.size() + " files");
-            System.out.println("Here are the details:");
-
-            boolean success = validationCheckPipeline.executeFixActions(errorsMap);
-
-            if (!success && !noExitCode) {
-                System.exit(1);
-            }
-
-            validationCheckPipeline.executePostActions(errorsMap.keySet());
-
+            return parent.commandService.runInteractiveCheck(parent.noExitCode).exitCode();
         }
     }
 
+    @Command(name = "pre-commit", description = "Run deterministic pre-commit validation.")
+    static class PreCommitCommand implements Callable<Integer> {
 
+        @ParentCommand
+        GitCommitCodeCheckCommand parent;
+
+        @Override
+        public Integer call() {
+            return parent.commandService.runPreCommit().exitCode();
+        }
+    }
+
+    @Command(name = "status", description = "Print assistant daemon status.")
+    static class StatusCommand implements Callable<Integer> {
+
+        @ParentCommand
+        GitCommitCodeCheckCommand parent;
+
+        @Override
+        public Integer call() {
+            return parent.commandService.printStatus().exitCode();
+        }
+    }
+
+    @Command(name = "fix", description = "Apply an explicitly selected daemon fix.")
+    static class FixCommand implements Callable<Integer> {
+
+        @ParentCommand
+        GitCommitCodeCheckCommand parent;
+
+        @Parameters(index = "0", description = "Diagnostic identifier.")
+        String diagnosticId;
+
+        @Override
+        public Integer call() {
+            return parent.commandService.applyFix(diagnosticId).exitCode();
+        }
+    }
 }
