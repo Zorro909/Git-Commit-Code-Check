@@ -2,6 +2,7 @@ package de.zorro909.codecheck.daemon;
 
 import de.zorro909.codecheck.RepositoryPathProvider;
 import de.zorro909.codecheck.RequiresCliOption;
+import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Singleton;
 
@@ -30,10 +31,10 @@ public class FileWatcher implements Runnable {
     private static final String GIT_DIRECTORY = ".git";
     private static final String TARGET_DIRECTORY = "target/";
     private static final String FILE_CHANGE_INDICATOR = "~";
-    private static final long SLEEP_DURATION_MS = 5000L;
 
     private final DaemonServer daemonServer;
     private final RepositoryPathProvider repositoryPathProvider;
+    private final CodeCheckConfigLoader configLoader;
     private final Map<WatchKey, Path> watchKeys = new HashMap<>();
     private final CopyOnWriteArrayList<Path> filesToUpdate = new CopyOnWriteArrayList<>();
 
@@ -43,9 +44,12 @@ public class FileWatcher implements Runnable {
 
     private final Executor taskExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
-    public FileWatcher(DaemonServer daemonServer, RepositoryPathProvider repositoryPathProvider) {
+    public FileWatcher(DaemonServer daemonServer,
+                       RepositoryPathProvider repositoryPathProvider,
+                       CodeCheckConfigLoader configLoader) {
         this.daemonServer = daemonServer;
         this.repositoryPathProvider = repositoryPathProvider;
+        this.configLoader = configLoader;
     }
 
 
@@ -154,7 +158,7 @@ public class FileWatcher implements Runnable {
     private void initFileUpdate() {
         watchUpdateTask = CompletableFuture.runAsync(() -> {
             try {
-                Thread.sleep(SLEEP_DURATION_MS);
+                Thread.sleep(configLoader.load().daemon().saveDebounce().toMillis());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
