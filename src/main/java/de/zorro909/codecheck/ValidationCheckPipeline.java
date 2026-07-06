@@ -2,10 +2,18 @@ package de.zorro909.codecheck;
 
 import de.zorro909.codecheck.actions.FixAction;
 import de.zorro909.codecheck.actions.PostAction;
+import de.zorro909.codecheck.changeset.ChangeSet;
+import de.zorro909.codecheck.changeset.ChangeSetEntry;
+import de.zorro909.codecheck.changeset.GitFileStatus;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.editor.EditorExecutor;
 import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.validation.Diagnostic;
+import de.zorro909.codecheck.validation.DefaultValidationEngine;
+import de.zorro909.codecheck.validation.RuleRegistry;
+import de.zorro909.codecheck.validation.ValidationEngine;
+import de.zorro909.codecheck.validation.ValidationMode;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -34,6 +42,9 @@ public class ValidationCheckPipeline {
 
     @Inject
     List<PostAction> postActions;
+
+    @Inject
+    ValidationEngine validationEngine;
 
     /**
      * Execute all PostActions on a Set of Paths
@@ -90,15 +101,32 @@ public class ValidationCheckPipeline {
     }
 
     public Map<Path, List<ValidationError>> checkForErrors(Stream<Path> changedFiles) {
-        return changedFiles.flatMap(this::checkFile)
-                           .collect(Collectors.groupingBy(ValidationError::filePath));
+        ChangeSet changeSet = new ChangeSet(changedFiles.map(path -> new ChangeSetEntry(
+                                                     path, GitFileStatus.UNKNOWN, false, false,
+                                                     false, false, "validation pipeline"))
+                                             .toList());
+        return validationEngine().validate(changeSet, ValidationMode.INTERACTIVE)
+                                 .diagnostics()
+                                 .stream()
+                                 .map(Diagnostic::toValidationError)
+                                 .collect(Collectors.groupingBy(ValidationError::filePath));
     }
 
     public Stream<ValidationError> checkFile(Path file) {
-        codeChecker.forEach(cc -> cc.resetCache(file));
-        return codeChecker.stream()
-                          .filter(checker -> checker.isResponsible(file))
-                          .flatMap(checker -> checker.check(file).stream());
+        return validationEngine().validateFile(file, ValidationMode.INTERACTIVE)
+                                 .diagnostics()
+                                 .stream()
+                                 .map(Diagnostic::toValidationError);
+    }
+
+    private ValidationEngine validationEngine() {
+        if (validationEngine != null) {
+            return validationEngine;
+        }
+        RuleRegistry registry = new de.zorro909.codecheck.validation.DefaultRuleRegistry(
+                codeChecker == null ? List.of() : codeChecker,
+                fixActions == null ? List.of() : fixActions);
+        return new DefaultValidationEngine(registry);
     }
 
 }

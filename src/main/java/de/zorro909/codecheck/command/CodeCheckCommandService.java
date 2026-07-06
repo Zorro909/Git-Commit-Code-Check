@@ -9,6 +9,9 @@ import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigException;
 import de.zorro909.codecheck.config.ConfigOverrides;
 import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.validation.Diagnostic;
+import de.zorro909.codecheck.validation.ValidationEngine;
+import de.zorro909.codecheck.validation.ValidationMode;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -26,6 +29,7 @@ public class CodeCheckCommandService {
 
     private final AssistantDaemonController assistantDaemonController;
     private final ValidationCheckPipeline validationCheckPipeline;
+    private final ValidationEngine validationEngine;
     private final ChangeSetService changeSetService;
     private final CodeCheckConfigLoader configLoader;
     private final PrintStream out;
@@ -34,10 +38,11 @@ public class CodeCheckCommandService {
     @Inject
     public CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
                                    ValidationCheckPipeline validationCheckPipeline,
+                                   ValidationEngine validationEngine,
                                    ChangeSetService changeSetService,
                                    CodeCheckConfigLoader configLoader) {
-        this(assistantDaemonController, validationCheckPipeline, changeSetService, configLoader,
-             System.out, System.err);
+        this(assistantDaemonController, validationCheckPipeline, validationEngine,
+             changeSetService, configLoader, System.out, System.err);
     }
 
     public CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
@@ -72,8 +77,20 @@ public class CodeCheckCommandService {
                             CodeCheckConfigLoader configLoader,
                             PrintStream out,
                             PrintStream err) {
+        this(assistantDaemonController, validationCheckPipeline, null, changeSetService,
+             configLoader, out, err);
+    }
+
+    CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
+                            ValidationCheckPipeline validationCheckPipeline,
+                            ValidationEngine validationEngine,
+                            ChangeSetService changeSetService,
+                            CodeCheckConfigLoader configLoader,
+                            PrintStream out,
+                            PrintStream err) {
         this.assistantDaemonController = assistantDaemonController;
         this.validationCheckPipeline = validationCheckPipeline;
+        this.validationEngine = validationEngine;
         this.changeSetService = changeSetService;
         this.configLoader = configLoader;
         this.out = out;
@@ -99,7 +116,8 @@ public class CodeCheckCommandService {
         }
         try {
             Map<Path, List<ValidationError>> errorsMap = collectErrors(
-                    changeSetService.currentInteractiveCheckChangeSet());
+                    changeSetService.currentInteractiveCheckChangeSet(),
+                    ValidationMode.INTERACTIVE);
             printOverview(errorsMap, _ -> true);
 
             if (errorsMap.isEmpty()) {
@@ -160,7 +178,8 @@ public class CodeCheckCommandService {
             return CommandOutcome.failure();
         }
         try {
-            Map<Path, List<ValidationError>> errorsMap = collectErrors(changeSetSupplier.get());
+            Map<Path, List<ValidationError>> errorsMap = collectErrors(changeSetSupplier.get(),
+                                                                       modeFor(label));
             printOverview(errorsMap, diagnosticFilter);
             return hasHighSeverity(errorsMap) ? CommandOutcome.failure() : CommandOutcome.success();
         } catch (IOException e) {
@@ -172,8 +191,17 @@ public class CodeCheckCommandService {
         }
     }
 
-    private Map<Path, List<ValidationError>> collectErrors(ChangeSet changeSet)
+    private Map<Path, List<ValidationError>> collectErrors(ChangeSet changeSet,
+                                                           ValidationMode mode)
             throws IOException {
+        if (validationEngine != null) {
+            return validationEngine.validate(changeSet, mode)
+                                   .diagnostics()
+                                   .stream()
+                                   .map(Diagnostic::toValidationError)
+                                   .collect(java.util.stream.Collectors.groupingBy(
+                                           ValidationError::filePath));
+        }
         try (Stream<Path> changedFiles = changeSet.paths()) {
             return validationCheckPipeline.checkForErrors(changedFiles);
         }
@@ -223,6 +251,14 @@ public class CodeCheckCommandService {
             err.println(e.getMessage());
             return false;
         }
+    }
+
+    private ValidationMode modeFor(String label) {
+        return switch (label) {
+            case "batch check" -> ValidationMode.BATCH;
+            case "pre-commit check" -> ValidationMode.PRE_COMMIT;
+            default -> ValidationMode.INTERACTIVE;
+        };
     }
 
     private static ChangeSetService fromFileSelector(FileSelector fileSelector) {
