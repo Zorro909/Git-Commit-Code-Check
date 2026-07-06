@@ -18,9 +18,11 @@ jobs:
           - os: ubuntu-latest
             artifact_name: git-commit-code-check-linux
             output_path: git-commit-code-check-*
+            maven_command: ./mvnw
           - os: windows-latest
             artifact_name: git-commit-code-check-windows.exe
             output_path: git-commit-code-check-*.exe
+            maven_command: ./mvnw.cmd
 
     steps:
       - name: Checkout code
@@ -35,7 +37,7 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Build jar archive
-        run: mvn clean package
+        run: ${{ matrix.maven_command }} clean package
 
       - name: Build native image
         run: native-image -H:ConfigurationFileDirectories=src/main/resources/native-image -march=x86-64-v3 -jar target/git-commit-code-check-*.jar
