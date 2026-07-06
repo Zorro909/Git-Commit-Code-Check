@@ -2,7 +2,6 @@ package de.zorro909.codecheck.daemon;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import de.zorro909.codecheck.RequiresCliOption;
 import de.zorro909.codecheck.ValidationCheckPipeline;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.selector.FileSelector;
@@ -24,7 +23,6 @@ import java.util.stream.Stream;
 /**
  * Represents a daemon server that runs a file selection process, starts an HTTP server, and runs indefinitely.
  */
-@RequiresCliOption("--daemon")
 @Singleton
 public class DaemonServer {
 
@@ -47,7 +45,6 @@ public class DaemonServer {
      * @throws InterruptedException   if the current thread is interrupted while sleeping.
      */
     public void run() throws IOException, InterruptedException {
-        fileSelector.selectFiles().forEach(this::updateFile);
         HttpServer server = getHttpServer();
         server.start();
         runServerIndefinitely();
