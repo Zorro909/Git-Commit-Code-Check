@@ -6,6 +6,10 @@ import de.zorro909.codecheck.actions.FixAction;
 import de.zorro909.codecheck.actions.PostAction;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.config.CodeCheckConfig;
+import de.zorro909.codecheck.config.CodeCheckConfigLoader;
+import de.zorro909.codecheck.config.ConfigException;
+import de.zorro909.codecheck.config.ConfigOverrides;
 import de.zorro909.codecheck.selector.FileSelector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,6 +75,27 @@ class CodeCheckCommandServiceTest {
         assertThat(outcome.exitCode()).isEqualTo(1);
         assertThat(errorOutput()).contains("Failed to start or attach to assistant daemon")
                                  .contains("port is already in use");
+    }
+
+    @Test
+    void invalidConfigPreventsDaemonStartup() {
+        CodeCheckCommandService service = createService(Stream::empty, new CodeCheckConfigLoader() {
+            @Override
+            public CodeCheckConfig load() {
+                throw new ConfigException("Invalid config repo/.codecheck.yaml at git: expected");
+            }
+
+            @Override
+            public CodeCheckConfig load(ConfigOverrides overrides) {
+                throw new ConfigException("Invalid config repo/.codecheck.yaml at git: expected");
+            }
+        });
+
+        CommandOutcome outcome = service.startAssistantDaemon();
+
+        assertThat(outcome.exitCode()).isEqualTo(1);
+        assertThat(daemonController.startCalls).isZero();
+        assertThat(errorOutput()).contains("Invalid config repo/.codecheck.yaml at git");
     }
 
     @Test
@@ -193,7 +218,13 @@ class CodeCheckCommandServiceTest {
     }
 
     private CodeCheckCommandService createService(FileSelector fileSelector) {
+        return createService(fileSelector, CodeCheckConfigLoader.defaultsOnly());
+    }
+
+    private CodeCheckCommandService createService(FileSelector fileSelector,
+                                                 CodeCheckConfigLoader configLoader) {
         return new CodeCheckCommandService(daemonController, pipeline, fileSelector,
+                                           configLoader,
                                            new PrintStream(stdout, true, StandardCharsets.UTF_8),
                                            new PrintStream(stderr, true, StandardCharsets.UTF_8));
     }
