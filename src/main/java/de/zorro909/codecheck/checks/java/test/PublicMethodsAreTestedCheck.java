@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -18,6 +17,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
+import de.zorro909.codecheck.java.ParseOutcome;
 import de.zorro909.codecheck.utils.CompilationUnitExtensions;
 import de.zorro909.codecheck.utils.MethodDeclarationExtensions;
 
@@ -51,12 +51,12 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
             return new ArrayList<>();
         }
 
-        ParseResult<CompilationUnit> testUnitResult = load(filePath);
-        if (!testUnitResult.isSuccessful()) {
+        ParseOutcome testUnitResult = load(filePath);
+        if (testUnitResult.compilationUnit().isEmpty()) {
             return new ArrayList<>();
         }
 
-        CompilationUnit testUnit = testUnitResult.getResult().get();
+        CompilationUnit testUnit = testUnitResult.compilationUnit().get();
 
         testUnit.findAll(MethodCallExpr.class).stream().filter(MethodCallExpr::hasScope).forEach(callExpr -> {
             String name = callExpr.getNameAsString();

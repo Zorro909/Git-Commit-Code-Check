@@ -1,40 +1,26 @@
 package de.zorro909.codecheck.checks.java;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.ParserConfiguration;
-import com.github.javaparser.Position;
-import com.github.javaparser.Problem;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.CodeCheck;
 import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.java.DefaultJavaParserService;
+import de.zorro909.codecheck.java.JavaParserService;
+import de.zorro909.codecheck.java.MavenProjectModelService;
+import de.zorro909.codecheck.java.ParseOutcome;
+import de.zorro909.codecheck.validation.Diagnostic;
 
 public abstract class JavaChecker implements CodeCheck {
 
-    private static final Map<Path, ParseResult<CompilationUnit>> classCache = new HashMap<>();
-
-    private static final Map<String, JavaParser> javaParser = new HashMap<>();
-
     public static final String JAVA_FILE_SUFFIX = ".java";
-
-    public static final String PARSE_EXCEPTION = "Big Problem Exception";
 
     public static final String COMP_UNIT_NO_STORAGE = "Invalid compilation unit: storage not found";
 
@@ -47,9 +33,15 @@ public abstract class JavaChecker implements CodeCheck {
         "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
     protected final FileLoader fileLoader;
+    private final JavaParserService javaParserService;
 
     protected JavaChecker(FileLoader fileLoader) {
+        this(fileLoader, new DefaultJavaParserService(new MavenProjectModelService(Path.of(""))));
+    }
+
+    protected JavaChecker(FileLoader fileLoader, JavaParserService javaParserService) {
         this.fileLoader = fileLoader;
+        this.javaParserService = javaParserService;
     }
 
     /**
@@ -76,44 +68,31 @@ public abstract class JavaChecker implements CodeCheck {
 
     @Override
     public List<ValidationError> check(Path path) {
-        ParseResult<CompilationUnit> parseResult = load(path);
-        if (!parseResult.isSuccessful() || parseResult.getResult().isEmpty()) {
-            String errorMessage = "Failure parsing java file: " + parseResult.getProblems()
-                .stream()
-                .map(Problem::toString)
-                .collect(
-                    Collectors.joining(
-                        ", "));
-            return List.of(new ValidationError(path, errorMessage, new Position(Position.FIRST_LINE,
-                Position.FIRST_COLUMN),
-                ValidationError.Severity.HIGH));
+        ParseOutcome parseOutcome = load(path);
+        List<ValidationError> parserDiagnostics = parseOutcome.diagnostics()
+                                                              .stream()
+                                                              .map(Diagnostic::toValidationError)
+                                                              .toList();
+        if (parseOutcome.compilationUnit().isEmpty()) {
+            return parserDiagnostics;
         }
-        return check(parseResult.getResult().get());
+        List<ValidationError> checkDiagnostics = check(parseOutcome.compilationUnit().get());
+        return Stream.concat(parserDiagnostics.stream(), checkDiagnostics.stream()).toList();
     }
 
     /**
      * Loads a Java source file from the specified path and returns a ParseResult of CompilationUnit.
      * @param path The path of the Java source file to load.
-     * @return The ParseResult of CompilationUnit representing the loaded Java source file.
+     * @return The ParseOutcome representing the loaded Java source file.
      */
-    public ParseResult<CompilationUnit> load(Path path) {
-        try {
-            if (classCache.containsKey(path)) {
-                return classCache.get(path);
-            }
-            fileLoader.markFile(path);
-            ParseResult<CompilationUnit> parseResult = getJavaParser(path).parse(path);
-            classCache.put(path, parseResult);
-            return parseResult;
-        } catch (Exception e) {
-            System.err.println("Can't parse File '" + path.toString() + "'! (" + e.toString() + ")");
-            return new ParseResult<>(null, List.of(new Problem(PARSE_EXCEPTION, null, e)), null);
-        }
+    public ParseOutcome load(Path path) {
+        fileLoader.markFile(path);
+        return javaParserService.parse(path);
     }
 
     @Override
     public void resetCache(Path path) {
-        classCache.remove(path);
+        javaParserService.invalidate(path);
     }
 
     protected Path getPath(CompilationUnit javaUnit) {
@@ -125,39 +104,5 @@ public abstract class JavaChecker implements CodeCheck {
         return javaUnit.findAll(ClassOrInterfaceDeclaration.class,
                 clazz -> clazz.getAnnotationByName(GENERATED_ANNOTATION).isEmpty())
             .stream();
-    }
-
-    private JavaParser getJavaParser(Path filePath) {
-        String path = filePath.toAbsolutePath().toString();
-
-        if(path.contains(MAIN_FOLDER)){
-            path = path.substring(0, path.indexOf(MAIN_FOLDER));
-        }else if(path.contains(TEST_FOLDER)){
-            path = path.substring(0, path.indexOf(TEST_FOLDER));
-        }
-        path = path.toLowerCase();
-
-        if(javaParser.containsKey(path)){
-            return javaParser.get(path);
-        }
-
-        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-        combinedTypeSolver.add(new ReflectionTypeSolver());
-        Path mainFolder = Path.of(path + MAIN_FOLDER);
-        if(Files.exists(mainFolder)) {
-            combinedTypeSolver.add(new JavaParserTypeSolver(mainFolder));
-        }
-        Path testFolder = Path.of(path + TEST_FOLDER);
-        if(Files.exists(testFolder)) {
-            combinedTypeSolver.add(new JavaParserTypeSolver(testFolder));
-        }
-
-        JavaParser parser = new JavaParser();
-        parser.getParserConfiguration()
-            .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_25)
-            .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
-
-        javaParser.put(path, parser);
-        return parser;
     }
 }
