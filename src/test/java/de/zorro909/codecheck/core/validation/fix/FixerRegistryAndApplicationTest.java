@@ -1,11 +1,19 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation.fix;
 
 import com.github.javaparser.Position;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.diagnostic.DiagnosticKind;
+import de.zorro909.codecheck.core.diagnostic.SourcePosition;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
+import de.zorro909.codecheck.core.validation.DefaultValidationEngine;
+import de.zorro909.codecheck.core.validation.ValidationMode;
+import de.zorro909.codecheck.core.validation.rule.DefaultRuleRegistry;
+import de.zorro909.codecheck.core.validation.rule.RuleId;
+import de.zorro909.codecheck.core.validation.rule.RuleRegistry;
 import de.zorro909.codecheck.legacy.actions.FixAction;
 import de.zorro909.codecheck.legacy.actions.PostAction;
 import de.zorro909.codecheck.legacy.actions.fix.ManualEditorFixAction;
 import de.zorro909.codecheck.legacy.checks.CodeCheck;
-import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.editor.EditorExecutor;
 import org.junit.jupiter.api.Test;
 

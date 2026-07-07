@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.diagnostic;
 
 import com.github.javaparser.Position;
 

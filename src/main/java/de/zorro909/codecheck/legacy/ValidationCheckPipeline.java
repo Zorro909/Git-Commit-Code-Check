@@ -9,11 +9,11 @@ import de.zorro909.codecheck.legacy.checks.CodeCheck;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.editor.EditorExecutor;
 import de.zorro909.codecheck.legacy.selector.FileSelector;
-import de.zorro909.codecheck.validation.Diagnostic;
-import de.zorro909.codecheck.validation.DefaultValidationEngine;
-import de.zorro909.codecheck.validation.RuleRegistry;
-import de.zorro909.codecheck.validation.ValidationEngine;
-import de.zorro909.codecheck.validation.ValidationMode;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.validation.DefaultValidationEngine;
+import de.zorro909.codecheck.core.validation.rule.RuleRegistry;
+import de.zorro909.codecheck.core.validation.ValidationEngine;
+import de.zorro909.codecheck.core.validation.ValidationMode;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -123,7 +123,7 @@ public class ValidationCheckPipeline {
         if (validationEngine != null) {
             return validationEngine;
         }
-        RuleRegistry registry = new de.zorro909.codecheck.validation.DefaultRuleRegistry(
+        RuleRegistry registry = new de.zorro909.codecheck.core.validation.rule.DefaultRuleRegistry(
                 codeChecker == null ? List.of() : codeChecker, fixActions == null ? List.of() : fixActions);
         return new DefaultValidationEngine(registry);
     }

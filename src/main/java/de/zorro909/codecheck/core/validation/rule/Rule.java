@@ -1,4 +1,7 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation.rule;
+
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.validation.ValidationContext;
 
 import java.nio.file.Path;
 import java.util.List;

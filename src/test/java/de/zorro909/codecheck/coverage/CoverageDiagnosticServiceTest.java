@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.coverage;
 
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
-import de.zorro909.codecheck.validation.DiagnosticKind;
+import de.zorro909.codecheck.core.diagnostic.DiagnosticKind;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

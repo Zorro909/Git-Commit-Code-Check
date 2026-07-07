@@ -16,7 +16,7 @@ import de.zorro909.codecheck.java.DefaultJavaParserService;
 import de.zorro909.codecheck.java.JavaParserService;
 import de.zorro909.codecheck.java.MavenProjectModelService;
 import de.zorro909.codecheck.java.ParseOutcome;
-import de.zorro909.codecheck.validation.Diagnostic;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
 
 public abstract class JavaChecker implements CodeCheck {
 

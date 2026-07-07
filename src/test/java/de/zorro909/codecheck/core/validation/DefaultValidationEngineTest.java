@@ -1,11 +1,18 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation;
 
 import com.github.javaparser.Position;
 import de.zorro909.codecheck.changeset.ChangeSet;
 import de.zorro909.codecheck.changeset.ChangeSetEntry;
 import de.zorro909.codecheck.changeset.GitFileStatus;
-import de.zorro909.codecheck.legacy.checks.CodeCheck;
+import de.zorro909.codecheck.core.diagnostic.DiagnosticKind;
+import de.zorro909.codecheck.core.diagnostic.SourcePosition;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
+import de.zorro909.codecheck.core.validation.rule.DefaultRuleRegistry;
+import de.zorro909.codecheck.core.validation.rule.FileInterest;
+import de.zorro909.codecheck.core.validation.rule.RuleId;
+import de.zorro909.codecheck.core.validation.rule.RuleRegistry;
+import de.zorro909.codecheck.core.validation.rule.WatchPlan;
+import de.zorro909.codecheck.legacy.checks.CodeCheck;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;

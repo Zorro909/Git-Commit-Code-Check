@@ -1,9 +1,9 @@
 package de.zorro909.codecheck.legacy.actions;
 
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
-import de.zorro909.codecheck.validation.FixInteraction;
-import de.zorro909.codecheck.validation.FixerId;
-import de.zorro909.codecheck.validation.FixerMetadata;
+import de.zorro909.codecheck.core.validation.fix.FixInteraction;
+import de.zorro909.codecheck.core.validation.fix.FixerId;
+import de.zorro909.codecheck.core.validation.fix.FixerMetadata;
 
 import java.nio.file.Path;
 import java.util.Set;

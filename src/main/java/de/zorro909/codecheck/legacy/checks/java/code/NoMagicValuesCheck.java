@@ -9,9 +9,9 @@ import de.zorro909.codecheck.legacy.FileLoader;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.checks.java.JavaChecker;
 import de.zorro909.codecheck.java.JavaParserService;
-import de.zorro909.codecheck.validation.FileInterest;
-import de.zorro909.codecheck.validation.RuleId;
-import de.zorro909.codecheck.validation.RuleMetadata;
+import de.zorro909.codecheck.core.validation.rule.FileInterest;
+import de.zorro909.codecheck.core.validation.rule.RuleId;
+import de.zorro909.codecheck.core.validation.rule.RuleMetadata;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 

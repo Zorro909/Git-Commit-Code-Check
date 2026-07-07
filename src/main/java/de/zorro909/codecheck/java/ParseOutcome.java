@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.java;
 
 import com.github.javaparser.ast.CompilationUnit;
-import de.zorro909.codecheck.validation.Diagnostic;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -16,6 +16,7 @@ public record ParseOutcome(Path file, Optional<CompilationUnit> compilationUnit,
 
     public boolean parsed() {
         return compilationUnit.isPresent() && diagnostics.stream()
-            .noneMatch(diagnostic -> diagnostic.kind() == de.zorro909.codecheck.validation.DiagnosticKind.PARSE_ERROR);
+            .noneMatch(diagnostic -> diagnostic
+                .kind() == de.zorro909.codecheck.core.diagnostic.DiagnosticKind.PARSE_ERROR);
     }
 }

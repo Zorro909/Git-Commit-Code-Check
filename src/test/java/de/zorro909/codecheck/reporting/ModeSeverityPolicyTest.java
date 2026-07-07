@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.reporting;
 
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
-import de.zorro909.codecheck.validation.ValidationMode;
+import de.zorro909.codecheck.core.validation.ValidationMode;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

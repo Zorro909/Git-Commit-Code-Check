@@ -1,5 +1,10 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation.fix;
 
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.validation.FileValidationResult;
+import de.zorro909.codecheck.core.validation.ValidationEngine;
+import de.zorro909.codecheck.core.validation.ValidationMode;
+import de.zorro909.codecheck.core.validation.rule.RuleRegistry;
 import de.zorro909.codecheck.legacy.actions.PostAction;
 import jakarta.inject.Singleton;
 

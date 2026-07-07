@@ -4,11 +4,11 @@ import de.zorro909.codecheck.java.MavenModule;
 import de.zorro909.codecheck.java.ModuleId;
 import de.zorro909.codecheck.java.ProjectModel;
 import de.zorro909.codecheck.java.ProjectModelService;
-import de.zorro909.codecheck.validation.FileInterest;
-import de.zorro909.codecheck.validation.Fixer;
-import de.zorro909.codecheck.validation.Rule;
-import de.zorro909.codecheck.validation.RuleRegistry;
-import de.zorro909.codecheck.validation.WatchPlan;
+import de.zorro909.codecheck.core.validation.rule.FileInterest;
+import de.zorro909.codecheck.core.validation.fix.Fixer;
+import de.zorro909.codecheck.core.validation.rule.Rule;
+import de.zorro909.codecheck.core.validation.rule.RuleRegistry;
+import de.zorro909.codecheck.core.validation.rule.WatchPlan;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

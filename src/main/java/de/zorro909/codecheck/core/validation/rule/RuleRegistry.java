@@ -1,4 +1,7 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation.rule;
+
+import de.zorro909.codecheck.core.validation.ValidationMode;
+import de.zorro909.codecheck.core.validation.fix.Fixer;
 
 import java.util.List;
 

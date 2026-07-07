@@ -11,9 +11,9 @@ import de.zorro909.codecheck.config.ConfigOverrides;
 import de.zorro909.codecheck.reporting.ModeSeverityPolicy;
 import de.zorro909.codecheck.reporting.TerminalDiagnosticRenderer;
 import de.zorro909.codecheck.legacy.selector.FileSelector;
-import de.zorro909.codecheck.validation.Diagnostic;
-import de.zorro909.codecheck.validation.ValidationEngine;
-import de.zorro909.codecheck.validation.ValidationMode;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.validation.ValidationEngine;
+import de.zorro909.codecheck.core.validation.ValidationMode;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 

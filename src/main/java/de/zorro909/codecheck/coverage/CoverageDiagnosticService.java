@@ -1,10 +1,10 @@
 package de.zorro909.codecheck.coverage;
 
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
-import de.zorro909.codecheck.validation.Diagnostic;
-import de.zorro909.codecheck.validation.DiagnosticKind;
-import de.zorro909.codecheck.validation.RuleId;
-import de.zorro909.codecheck.validation.SourcePosition;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.diagnostic.DiagnosticKind;
+import de.zorro909.codecheck.core.validation.rule.RuleId;
+import de.zorro909.codecheck.core.diagnostic.SourcePosition;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

@@ -1,9 +1,9 @@
 package de.zorro909.codecheck.legacy.checks;
 
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
-import de.zorro909.codecheck.validation.FileInterest;
-import de.zorro909.codecheck.validation.RuleId;
-import de.zorro909.codecheck.validation.RuleMetadata;
+import de.zorro909.codecheck.core.validation.rule.FileInterest;
+import de.zorro909.codecheck.core.validation.rule.RuleId;
+import de.zorro909.codecheck.core.validation.rule.RuleMetadata;
 
 import java.nio.file.Path;
 import java.util.List;

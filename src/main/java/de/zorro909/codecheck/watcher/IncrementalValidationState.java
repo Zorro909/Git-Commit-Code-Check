@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.watcher;
 
-import de.zorro909.codecheck.validation.Diagnostic;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
 
 import java.nio.file.Path;
 import java.util.List;

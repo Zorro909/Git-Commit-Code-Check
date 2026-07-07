@@ -1,6 +1,10 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation;
 
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.diagnostic.DiagnosticKind;
+import de.zorro909.codecheck.core.diagnostic.SourcePosition;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
+import de.zorro909.codecheck.core.validation.rule.RuleId;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;

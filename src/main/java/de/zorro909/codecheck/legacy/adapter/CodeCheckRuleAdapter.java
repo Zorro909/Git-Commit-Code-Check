@@ -1,12 +1,12 @@
 package de.zorro909.codecheck.legacy.adapter;
 
 import de.zorro909.codecheck.legacy.checks.CodeCheck;
-import de.zorro909.codecheck.validation.Diagnostic;
-import de.zorro909.codecheck.validation.FileInterest;
-import de.zorro909.codecheck.validation.Rule;
-import de.zorro909.codecheck.validation.RuleId;
-import de.zorro909.codecheck.validation.RuleMetadata;
-import de.zorro909.codecheck.validation.ValidationContext;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.validation.rule.FileInterest;
+import de.zorro909.codecheck.core.validation.rule.Rule;
+import de.zorro909.codecheck.core.validation.rule.RuleId;
+import de.zorro909.codecheck.core.validation.rule.RuleMetadata;
+import de.zorro909.codecheck.core.validation.ValidationContext;
 
 import java.nio.file.Path;
 import java.util.List;

@@ -1,4 +1,6 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation;
+
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
 
 import java.nio.file.Path;
 import java.util.List;

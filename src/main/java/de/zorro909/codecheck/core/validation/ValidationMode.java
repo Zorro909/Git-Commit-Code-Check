@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation;
 
 public enum ValidationMode {
 

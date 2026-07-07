@@ -1,12 +1,12 @@
 package de.zorro909.codecheck.legacy.adapter;
 
 import de.zorro909.codecheck.legacy.actions.FixAction;
-import de.zorro909.codecheck.validation.Diagnostic;
-import de.zorro909.codecheck.validation.FixPlan;
-import de.zorro909.codecheck.validation.FixResult;
-import de.zorro909.codecheck.validation.Fixer;
-import de.zorro909.codecheck.validation.FixerId;
-import de.zorro909.codecheck.validation.FixerMetadata;
+import de.zorro909.codecheck.core.diagnostic.Diagnostic;
+import de.zorro909.codecheck.core.validation.fix.FixPlan;
+import de.zorro909.codecheck.core.validation.fix.FixResult;
+import de.zorro909.codecheck.core.validation.fix.Fixer;
+import de.zorro909.codecheck.core.validation.fix.FixerId;
+import de.zorro909.codecheck.core.validation.fix.FixerMetadata;
 
 public final class FixActionFixerAdapter implements Fixer {
 

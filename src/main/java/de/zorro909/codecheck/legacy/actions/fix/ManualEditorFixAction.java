@@ -5,8 +5,8 @@ import de.zorro909.codecheck.RequiresCliOption;
 import de.zorro909.codecheck.legacy.actions.FixAction;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.editor.EditorExecutor;
-import de.zorro909.codecheck.validation.FixInteraction;
-import de.zorro909.codecheck.validation.FixerMetadata;
+import de.zorro909.codecheck.core.validation.fix.FixInteraction;
+import de.zorro909.codecheck.core.validation.fix.FixerMetadata;
 import io.micronaut.core.annotation.Order;
 import jakarta.inject.Singleton;
 

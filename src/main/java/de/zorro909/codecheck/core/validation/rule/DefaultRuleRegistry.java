@@ -1,5 +1,6 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation.rule;
 
+import de.zorro909.codecheck.core.validation.fix.Fixer;
 import de.zorro909.codecheck.legacy.actions.FixAction;
 import de.zorro909.codecheck.legacy.adapter.CodeCheckRuleAdapter;
 import de.zorro909.codecheck.legacy.adapter.FixActionFixerAdapter;

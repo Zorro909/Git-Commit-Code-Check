@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.validation;
+package de.zorro909.codecheck.core.validation.rule;
 
 import de.zorro909.codecheck.legacy.FileLoader;
 import de.zorro909.codecheck.legacy.checks.java.code.NoMagicValuesCheck;
