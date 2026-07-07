@@ -141,12 +141,14 @@ public class CodeCheckCommandService {
     }
 
     public CommandOutcome runBatchCheck() {
-        return runNonInteractive("batch check", changeSetService::currentInteractiveCheckChangeSet,
+        return runNonInteractive("batch check", ValidationMode.BATCH,
+                                 changeSetService::currentInteractiveCheckChangeSet,
                                  _ -> true);
     }
 
     public CommandOutcome runPreCommit() {
-        return runNonInteractive("pre-commit check", changeSetService::preCommitChangeSet,
+        return runNonInteractive("pre-commit check", ValidationMode.PRE_COMMIT,
+                                 changeSetService::preCommitChangeSet,
                                  error -> error.severity() != ValidationError.Severity.LOW);
     }
 
@@ -172,6 +174,7 @@ public class CodeCheckCommandService {
     }
 
     private CommandOutcome runNonInteractive(String label,
+                                             ValidationMode mode,
                                              Supplier<ChangeSet> changeSetSupplier,
                                              Predicate<ValidationError> diagnosticFilter) {
         if (!loadConfig()) {
@@ -179,7 +182,7 @@ public class CodeCheckCommandService {
         }
         try {
             Map<Path, List<ValidationError>> errorsMap = collectErrors(changeSetSupplier.get(),
-                                                                       modeFor(label));
+                                                                       mode);
             printOverview(errorsMap, diagnosticFilter);
             return hasHighSeverity(errorsMap) ? CommandOutcome.failure() : CommandOutcome.success();
         } catch (IOException e) {
@@ -251,14 +254,6 @@ public class CodeCheckCommandService {
             err.println(e.getMessage());
             return false;
         }
-    }
-
-    private ValidationMode modeFor(String label) {
-        return switch (label) {
-            case "batch check" -> ValidationMode.BATCH;
-            case "pre-commit check" -> ValidationMode.PRE_COMMIT;
-            default -> ValidationMode.INTERACTIVE;
-        };
     }
 
     private static ChangeSetService fromFileSelector(FileSelector fileSelector) {
