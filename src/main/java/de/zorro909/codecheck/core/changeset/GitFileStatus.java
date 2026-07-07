@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.changeset;
+package de.zorro909.codecheck.core.changeset;
 
 public enum GitFileStatus {
     ADDED,

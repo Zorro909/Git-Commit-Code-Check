@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.core.validation;
 
-import de.zorro909.codecheck.changeset.ChangeSet;
+import de.zorro909.codecheck.core.changeset.ChangeSet;
 
 import java.nio.file.Path;
 

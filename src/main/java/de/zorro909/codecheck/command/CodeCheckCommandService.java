@@ -1,9 +1,9 @@
 package de.zorro909.codecheck.command;
 
 import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
-import de.zorro909.codecheck.changeset.ChangeSet;
-import de.zorro909.codecheck.changeset.ChangeSetService;
-import de.zorro909.codecheck.changeset.GitCommandException;
+import de.zorro909.codecheck.core.changeset.ChangeSet;
+import de.zorro909.codecheck.core.changeset.ChangeSetService;
+import de.zorro909.codecheck.infra.git.GitCommandException;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigException;
@@ -242,8 +242,8 @@ public class CodeCheckCommandService {
             @Override
             public ChangeSet explicitFiles(java.util.Collection<Path> files) {
                 return new ChangeSet(files.stream()
-                    .map(path -> new de.zorro909.codecheck.changeset.ChangeSetEntry(path,
-                            de.zorro909.codecheck.changeset.GitFileStatus.UNKNOWN, false, false, false, false,
+                    .map(path -> new de.zorro909.codecheck.core.changeset.ChangeSetEntry(path,
+                            de.zorro909.codecheck.core.changeset.GitFileStatus.UNKNOWN, false, false, false, false,
                             "explicit file"))
                     .toList());
             }

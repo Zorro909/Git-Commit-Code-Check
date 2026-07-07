@@ -1,5 +1,6 @@
-package de.zorro909.codecheck.changeset;
+package de.zorro909.codecheck.infra.git;
 
+import de.zorro909.codecheck.core.changeset.ChangeSetService;
 import io.micronaut.context.ApplicationContext;
 import org.junit.jupiter.api.Test;
 
@@ -15,4 +16,5 @@ class GitChangeSetServiceBeanTest {
             assertThat(service).isInstanceOf(GitChangeSetService.class);
         }
     }
+
 }

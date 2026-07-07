@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.changeset;
+package de.zorro909.codecheck.infra.git;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,23 +18,21 @@ public class GitCommandRunner {
         builder.directory(repositoryDirectory.toFile());
         try {
             Process process = builder.start();
-            String stdout = new String(process.getInputStream().readAllBytes(),
-                                       StandardCharsets.UTF_8);
-            String stderr = new String(process.getErrorStream().readAllBytes(),
-                                       StandardCharsets.UTF_8);
+            String stdout = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String stderr = new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new GitCommandException("git " + String.join(" ", args)
-                                              + " failed with exit code " + exitCode + ": "
-                                              + stderr.strip());
+                throw new GitCommandException(
+                        "git " + String.join(" ", args) + " failed with exit code " + exitCode + ": " + stderr.strip());
             }
             return stdout.lines().filter(line -> !line.isBlank()).toList();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new GitCommandException("Failed to execute git " + String.join(" ", args), e);
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new GitCommandException("Interrupted while executing git "
-                                          + String.join(" ", args), e);
+            throw new GitCommandException("Interrupted while executing git " + String.join(" ", args), e);
         }
     }
 
@@ -46,12 +44,13 @@ public class GitCommandRunner {
             process.getInputStream().readAllBytes();
             process.getErrorStream().readAllBytes();
             return process.waitFor() == 0;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new GitCommandException("Failed to execute git " + String.join(" ", args), e);
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new GitCommandException("Interrupted while executing git "
-                                          + String.join(" ", args), e);
+            throw new GitCommandException("Interrupted while executing git " + String.join(" ", args), e);
         }
     }
 
@@ -61,4 +60,5 @@ public class GitCommandRunner {
         command.addAll(List.of(args));
         return command;
     }
+
 }

@@ -1,8 +1,9 @@
-package de.zorro909.codecheck.changeset;
+package de.zorro909.codecheck.infra.git;
 
 import de.zorro909.codecheck.config.CodeCheckConfig;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigOverrides;
+import de.zorro909.codecheck.core.changeset.ChangeSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -16,8 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GitChangeSetServiceTest {
 
     @Test
-    void mainBranchSelectionIncludesStagedAndUnstagedChangesAndIgnoresDeleted(
-            @TempDir Path repo) throws Exception {
+    void mainBranchSelectionIncludesStagedAndUnstagedChangesAndIgnoresDeleted(@TempDir Path repo) throws Exception {
         initRepo(repo, "develop");
         write(repo, "Modified.java", "class Modified {}\n");
         write(repo, "Staged.java", "class Staged {}\n");
@@ -43,8 +43,7 @@ class GitChangeSetServiceTest {
     }
 
     @Test
-    void featureBranchUsesDirectDiffAgainstFirstExistingMainBranch(@TempDir Path repo)
-            throws Exception {
+    void featureBranchUsesDirectDiffAgainstFirstExistingMainBranch(@TempDir Path repo) throws Exception {
         initRepo(repo, "develop");
         write(repo, "Feature.java", "class Feature {}\n");
         git(repo, "add", ".");
@@ -114,10 +113,7 @@ class GitChangeSetServiceTest {
 
     private CodeCheckConfigLoader loader(List<String> mainBranches) {
         CodeCheckConfig config = CodeCheckConfig.defaults()
-                                               .withGit(new CodeCheckConfig.Git(
-                                                       mainBranches,
-                                                       "release/.*",
-                                                       true));
+            .withGit(new CodeCheckConfig.Git(mainBranches, "release/.*", true));
         return new CodeCheckConfigLoader() {
             @Override
             public CodeCheckConfig load() {
@@ -157,8 +153,8 @@ class GitChangeSetServiceTest {
         String stdout = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            throw new AssertionError("git " + String.join(" ", args) + " failed: "
-                                     + stdout + stderr);
+            throw new AssertionError("git " + String.join(" ", args) + " failed: " + stdout + stderr);
         }
     }
+
 }

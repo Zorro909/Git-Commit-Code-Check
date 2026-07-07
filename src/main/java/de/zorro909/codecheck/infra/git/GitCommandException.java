@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.changeset;
+package de.zorro909.codecheck.infra.git;
 
 public class GitCommandException extends RuntimeException {
 
@@ -9,4 +9,5 @@ public class GitCommandException extends RuntimeException {
     public GitCommandException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }

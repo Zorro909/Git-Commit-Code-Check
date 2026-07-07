@@ -2,9 +2,9 @@ package de.zorro909.codecheck.legacy;
 
 import de.zorro909.codecheck.legacy.actions.FixAction;
 import de.zorro909.codecheck.legacy.actions.PostAction;
-import de.zorro909.codecheck.changeset.ChangeSet;
-import de.zorro909.codecheck.changeset.ChangeSetEntry;
-import de.zorro909.codecheck.changeset.GitFileStatus;
+import de.zorro909.codecheck.core.changeset.ChangeSet;
+import de.zorro909.codecheck.core.changeset.ChangeSetEntry;
+import de.zorro909.codecheck.core.changeset.GitFileStatus;
 import de.zorro909.codecheck.legacy.checks.CodeCheck;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.editor.EditorExecutor;

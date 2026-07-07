@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.core.validation;
 
-import de.zorro909.codecheck.changeset.ChangeSet;
+import de.zorro909.codecheck.core.changeset.ChangeSet;
 import de.zorro909.codecheck.core.diagnostic.Diagnostic;
 import de.zorro909.codecheck.core.validation.rule.RuleRegistry;
 import jakarta.inject.Singleton;
