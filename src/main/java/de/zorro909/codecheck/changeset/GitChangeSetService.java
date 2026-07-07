@@ -1,7 +1,10 @@
 package de.zorro909.codecheck.changeset;
 
+import de.zorro909.codecheck.RepositoryPathProvider;
 import de.zorro909.codecheck.config.CodeCheckConfig;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
@@ -19,7 +22,10 @@ public class GitChangeSetService implements ChangeSetService {
     private final CodeCheckConfigLoader configLoader;
     private final GitCommandRunner git;
 
-    public GitChangeSetService(Path repositoryDirectory, CodeCheckConfigLoader configLoader) {
+    @Inject
+    public GitChangeSetService(
+            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryDirectory,
+            CodeCheckConfigLoader configLoader) {
         this(repositoryDirectory, configLoader, new GitCommandRunner(repositoryDirectory));
     }
 
