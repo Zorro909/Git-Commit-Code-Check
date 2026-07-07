@@ -8,9 +8,11 @@ import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
+import de.zorro909.codecheck.java.JavaParserService;
 import de.zorro909.codecheck.validation.FileInterest;
 import de.zorro909.codecheck.validation.RuleId;
 import de.zorro909.codecheck.validation.RuleMetadata;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.io.File;
@@ -31,6 +33,11 @@ public class NoMagicValuesCheck extends JavaChecker {
 
     public NoMagicValuesCheck(FileLoader fileLoader) {
         super(fileLoader);
+    }
+
+    @Inject
+    public NoMagicValuesCheck(FileLoader fileLoader, JavaParserService javaParserService) {
+        super(fileLoader, javaParserService);
     }
 
     @Override

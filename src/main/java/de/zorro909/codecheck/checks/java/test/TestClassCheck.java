@@ -4,7 +4,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
+import de.zorro909.codecheck.java.JavaParserService;
 import de.zorro909.codecheck.utils.CompilationUnitExtensions;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.io.File;
@@ -28,6 +30,11 @@ public class TestClassCheck extends JavaChecker {
 
     public TestClassCheck(FileLoader fileLoader) {
         super(fileLoader);
+    }
+
+    @Inject
+    public TestClassCheck(FileLoader fileLoader, JavaParserService javaParserService) {
+        super(fileLoader, javaParserService);
     }
 
     @Override

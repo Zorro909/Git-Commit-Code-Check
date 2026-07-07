@@ -1,6 +1,9 @@
 package de.zorro909.codecheck.java;
 
+import de.zorro909.codecheck.RepositoryPathProvider;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -20,7 +23,10 @@ public class MavenProjectModelService implements ProjectModelService {
     private final CodeCheckConfigLoader configLoader;
     private volatile ProjectModel currentModel;
 
-    public MavenProjectModelService(Path repositoryRoot, CodeCheckConfigLoader configLoader) {
+    @Inject
+    public MavenProjectModelService(
+            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryRoot,
+            CodeCheckConfigLoader configLoader) {
         this.repositoryRoot = repositoryRoot.toAbsolutePath().normalize();
         this.configLoader = configLoader;
     }

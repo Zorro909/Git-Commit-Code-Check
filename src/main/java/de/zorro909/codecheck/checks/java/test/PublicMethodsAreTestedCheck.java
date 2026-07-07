@@ -1,5 +1,6 @@
 package de.zorro909.codecheck.checks.java.test;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.nio.file.Files;
@@ -17,6 +18,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
+import de.zorro909.codecheck.java.JavaParserService;
 import de.zorro909.codecheck.java.ParseOutcome;
 import de.zorro909.codecheck.utils.CompilationUnitExtensions;
 import de.zorro909.codecheck.utils.MethodDeclarationExtensions;
@@ -29,6 +31,12 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
 
     protected PublicMethodsAreTestedCheck(FileLoader fileLoader) {
         super(fileLoader);
+    }
+
+    @Inject
+    public PublicMethodsAreTestedCheck(FileLoader fileLoader,
+                                       JavaParserService javaParserService) {
+        super(fileLoader, javaParserService);
     }
 
     @Override
