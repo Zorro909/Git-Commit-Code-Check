@@ -7,18 +7,26 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 final class DaemonMetadataStore {
 
     private static final String DAEMON_JSON = "daemon.json";
     private static final String DAEMON_PID = "daemon.pid";
+    private static final boolean POSIX_PERMISSIONS_SUPPORTED = FileSystems.getDefault()
+            .supportedFileAttributeViews()
+            .contains("posix");
 
     private final Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 
@@ -49,14 +57,34 @@ final class DaemonMetadataStore {
 
     void write(Path metadataDirectory, DaemonMetadata metadata) {
         try {
-            Files.createDirectories(metadataDirectory);
-            Files.writeString(metadataDirectory.resolve(DAEMON_JSON), toJson(metadata),
-                              StandardCharsets.UTF_8);
-            Files.writeString(metadataDirectory.resolve(DAEMON_PID),
-                              Long.toString(metadata.pid()), StandardCharsets.UTF_8);
+            createOwnerOnlyDirectories(metadataDirectory);
+            writeOwnerOnly(metadataDirectory.resolve(DAEMON_JSON), toJson(metadata));
+            writeOwnerOnly(metadataDirectory.resolve(DAEMON_PID),
+                           Long.toString(metadata.pid()));
         } catch (IOException e) {
             throw new IllegalStateException("Unable to write daemon metadata", e);
         }
+    }
+
+    private void createOwnerOnlyDirectories(Path directory) throws IOException {
+        if (!POSIX_PERMISSIONS_SUPPORTED) {
+            Files.createDirectories(directory);
+            return;
+        }
+        Set<PosixFilePermission> ownerOnly = PosixFilePermissions.fromString("rwx------");
+        FileAttribute<Set<PosixFilePermission>> attribute =
+                PosixFilePermissions.asFileAttribute(ownerOnly);
+        Files.createDirectories(directory, attribute);
+        Files.setPosixFilePermissions(directory, ownerOnly);
+    }
+
+    private void writeOwnerOnly(Path file, String content) throws IOException {
+        if (POSIX_PERMISSIONS_SUPPORTED) {
+            Files.deleteIfExists(file);
+            Files.createFile(file, PosixFilePermissions.asFileAttribute(
+                    PosixFilePermissions.fromString("rw-------")));
+        }
+        Files.writeString(file, content, StandardCharsets.UTF_8);
     }
 
     void delete(Path metadataDirectory) {

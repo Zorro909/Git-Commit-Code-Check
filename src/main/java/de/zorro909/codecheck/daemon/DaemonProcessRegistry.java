@@ -1,5 +1,8 @@
 package de.zorro909.codecheck.daemon;
 
+import de.zorro909.codecheck.RepositoryPathProvider;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
 import java.io.IOException;
@@ -26,7 +29,9 @@ public class DaemonProcessRegistry {
     private final DaemonMetadataStore metadataStore;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public DaemonProcessRegistry(Path repositoryDirectory) {
+    @Inject
+    public DaemonProcessRegistry(
+            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryDirectory) {
         this(repositoryDirectory, defaultCacheRoot());
     }
 

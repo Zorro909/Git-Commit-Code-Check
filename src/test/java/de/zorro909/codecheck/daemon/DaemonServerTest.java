@@ -51,6 +51,56 @@ class DaemonServerTest {
         }
     }
 
+    @Test
+    void emptyTokenMetadataRejectsAllRequests(@TempDir Path tempDir) throws Exception {
+        DaemonProcessRegistry registry = new DaemonProcessRegistry(tempDir.resolve("repo"),
+                                                                   tempDir.resolve("cache"));
+        DaemonMetadata withToken = registry.createMetadata();
+        DaemonMetadata metadata = new DaemonMetadata(withToken.pid(), withToken.repoRoot(),
+                                                     withToken.transport(), withToken.host(),
+                                                     withToken.port(), "",
+                                                     withToken.startedAt());
+        DaemonServer server = new DaemonServer(emptySelector(), emptyPipelineProvider());
+        Thread serverThread = Thread.ofVirtual().start(() -> run(server, metadata));
+        try {
+            URI healthUri = URI.create("http://" + metadata.host() + ":" + metadata.port()
+                                       + "/health");
+            waitUntilResponding(healthUri);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> withoutHeader = client.send(
+                    HttpRequest.newBuilder(healthUri).GET().build(),
+                    HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> withEmptyHeader = client.send(
+                    HttpRequest.newBuilder(healthUri)
+                               .header("X-CodeCheck-Token", "")
+                               .GET()
+                               .build(),
+                    HttpResponse.BodyHandlers.ofString());
+
+            assertThat(withoutHeader.statusCode()).isEqualTo(401);
+            assertThat(withEmptyHeader.statusCode()).isEqualTo(401);
+        } finally {
+            serverThread.interrupt();
+            serverThread.join(Duration.ofSeconds(5));
+        }
+    }
+
+    private void waitUntilResponding(URI healthUri) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        Instant deadline = Instant.now().plusSeconds(5);
+        while (Instant.now().isBefore(deadline)) {
+            try {
+                client.send(HttpRequest.newBuilder(healthUri).GET().build(),
+                            HttpResponse.BodyHandlers.ofString());
+                return;
+            } catch (Exception ignored) {
+                Thread.sleep(50);
+            }
+        }
+        throw new AssertionError("Daemon server did not become ready");
+    }
+
     private void run(DaemonServer server, DaemonMetadata metadata) {
         try {
             server.run(metadata, Duration.ofMinutes(5));
