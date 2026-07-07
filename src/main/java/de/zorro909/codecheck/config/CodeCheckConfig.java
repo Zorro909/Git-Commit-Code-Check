@@ -2,7 +2,6 @@ package de.zorro909.codecheck.config;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public record CodeCheckConfig(Git git,
                               Daemon daemon,
@@ -12,8 +11,7 @@ public record CodeCheckConfig(Git git,
 
     public static CodeCheckConfig defaults() {
         return new CodeCheckConfig(
-                new Git(List.of("develop", "main", "master"), Pattern.compile("release/.*"),
-                        true),
+                new Git(List.of("develop", "main", "master"), "release/.*", true),
                 new Daemon(Duration.ofMinutes(30), Duration.ofSeconds(5), Transport.WEBSOCKET),
                 new JavaProject(25, GeneratedSourceDetection.MAVEN_DEFAULTS),
                 new Maven(MavenRunner.DOCKER_MVND, true,
@@ -45,7 +43,7 @@ public record CodeCheckConfig(Git git,
     }
 
     public record Git(List<String> mainBranches,
-                      Pattern releaseBranchPattern,
+                      String releaseBranchPattern,
                       boolean restageAfterFix) {
     }
 

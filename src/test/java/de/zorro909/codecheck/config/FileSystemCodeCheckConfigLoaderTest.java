@@ -6,6 +6,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +19,7 @@ class FileSystemCodeCheckConfigLoaderTest {
         CodeCheckConfig config = loader(tempDir).load();
 
         assertThat(config.git().mainBranches()).containsExactly("develop", "main", "master");
+        assertThat(config.git().releaseBranchPattern()).isEqualTo("release/.*");
         assertThat(config.daemon().inactivityTimeout()).isEqualTo(Duration.ofMinutes(30));
         assertThat(config.maven().docker().image()).isEqualTo("team/mvnd-jdk25:latest");
     }
@@ -55,7 +57,7 @@ class FileSystemCodeCheckConfigLoaderTest {
         CodeCheckConfig config = loader(repo, userConfig).load();
 
         assertThat(config.git().mainBranches()).containsExactly("trunk", "main");
-        assertThat(config.git().releaseBranchPattern().pattern()).isEqualTo("release/.+");
+        assertThat(config.git().releaseBranchPattern()).isEqualTo("release/.+");
     }
 
     @Test
@@ -118,6 +120,21 @@ class FileSystemCodeCheckConfigLoaderTest {
     }
 
     @Test
+    void invalidReleaseBranchPatternFailsWithFieldPath(@TempDir Path tempDir) throws Exception {
+        Path repo = tempDir.resolve("repo");
+        Files.createDirectories(repo);
+        Files.writeString(repo.resolve(".codecheck.yaml"), """
+                git:
+                  releaseBranchPattern: "release/["
+                """);
+
+        assertThatThrownBy(() -> loader(repo).load())
+                .isInstanceOf(ConfigException.class)
+                .hasMessageContaining("git.releaseBranchPattern")
+                .hasMessageContaining("invalid regular expression");
+    }
+
+    @Test
     void unknownEnumValueFailsWithFieldPath(@TempDir Path tempDir) throws Exception {
         Path repo = tempDir.resolve("repo");
         Files.createDirectories(repo);
@@ -130,6 +147,51 @@ class FileSystemCodeCheckConfigLoaderTest {
                 .isInstanceOf(ConfigException.class)
                 .hasMessageContaining("maven.runner")
                 .hasMessageContaining("unknown value");
+    }
+
+    @Test
+    void unknownConfigKeysProduceWarnings(@TempDir Path tempDir) throws Exception {
+        Path repo = tempDir.resolve("repo");
+        Files.createDirectories(repo);
+        Files.writeString(repo.resolve(".codecheck.yaml"), """
+                git:
+                  mainbranches: [trunk]
+                unknownSection:
+                  foo: bar
+                """);
+        List<String> warnings = new ArrayList<>();
+        FileSystemCodeCheckConfigLoader loader = new FileSystemCodeCheckConfigLoader(
+                repo, repo.resolve("missing-user.yaml"), warnings::add);
+
+        CodeCheckConfig config = loader.load();
+
+        assertThat(config.git().mainBranches()).containsExactly("develop", "main", "master");
+        assertThat(warnings).anySatisfy(warning -> assertThat(warning)
+                .contains(".codecheck.yaml")
+                .contains("git")
+                .contains("unknown key 'mainbranches'"));
+        assertThat(warnings).anySatisfy(warning -> assertThat(warning)
+                .contains("unknown key 'unknownSection'"));
+    }
+
+    @Test
+    void knownConfigKeysProduceNoWarnings(@TempDir Path tempDir) throws Exception {
+        Path repo = tempDir.resolve("repo");
+        Files.createDirectories(repo);
+        Files.writeString(repo.resolve(".codecheck.yaml"), """
+                git:
+                  mainBranches: [trunk]
+                maven:
+                  docker:
+                    image: "example/mvnd:jdk25"
+                """);
+        List<String> warnings = new ArrayList<>();
+        FileSystemCodeCheckConfigLoader loader = new FileSystemCodeCheckConfigLoader(
+                repo, repo.resolve("missing-user.yaml"), warnings::add);
+
+        loader.load();
+
+        assertThat(warnings).isEmpty();
     }
 
     private FileSystemCodeCheckConfigLoader loader(Path repo) {
