@@ -1,8 +1,12 @@
 package de.zorro909.codecheck.config;
 
+import de.zorro909.codecheck.RepositoryPathProvider;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 @Singleton
 public class FileSystemCodeCheckConfigLoader implements CodeCheckConfigLoader {
@@ -13,14 +17,21 @@ public class FileSystemCodeCheckConfigLoader implements CodeCheckConfigLoader {
     private final Path userConfig;
     private final CodeCheckConfigParser parser;
 
-    public FileSystemCodeCheckConfigLoader(Path repoDirectory) {
+    @Inject
+    public FileSystemCodeCheckConfigLoader(
+            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repoDirectory) {
         this(repoDirectory, defaultUserConfigPath());
     }
 
     public FileSystemCodeCheckConfigLoader(Path repoDirectory, Path userConfig) {
+        this(repoDirectory, userConfig, System.err::println);
+    }
+
+    public FileSystemCodeCheckConfigLoader(Path repoDirectory, Path userConfig,
+                                           Consumer<String> warningConsumer) {
         this.repoDirectory = repoDirectory.toAbsolutePath().normalize();
         this.userConfig = userConfig.toAbsolutePath().normalize();
-        this.parser = new CodeCheckConfigParser();
+        this.parser = new CodeCheckConfigParser(warningConsumer);
     }
 
     @Override

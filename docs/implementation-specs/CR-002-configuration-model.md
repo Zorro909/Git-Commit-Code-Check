@@ -38,8 +38,12 @@ accept YAML names such as `docker-mvnd`, `maven-defaults`, and `reuse-if-fresh`.
 
 ## Validation
 
-Invalid YAML, wrong node types, unknown enum values, invalid durations, and invalid integer ranges
-raise `ConfigException` with the config file and field path in the message.
+Invalid YAML, wrong node types, unknown enum values, invalid durations, invalid regular
+expressions, and invalid integer ranges raise `ConfigException` with the config file and field
+path in the message.
+
+Unknown config keys do not fail loading; they produce a warning naming the config file, the field
+path, and the unknown key, so typos are surfaced without breaking existing configs.
 
 ## Command Integration
 
@@ -54,3 +58,5 @@ configuration prevents the command from running and returns a non-zero exit code
 - Maven goals and Docker image are configurable from repo config.
 - CLI overrides win over file config.
 - Invalid config fails fast with field-specific diagnostics.
+- Unknown config keys produce warnings with field paths; known keys stay silent.
+- The loader bean resolves through the qualified repository directory path.

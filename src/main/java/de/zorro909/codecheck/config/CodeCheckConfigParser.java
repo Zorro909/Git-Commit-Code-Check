@@ -15,12 +15,34 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 final class CodeCheckConfigParser {
 
+    private static final Set<String> ROOT_KEYS = Set.of("git", "daemon", "java", "maven",
+                                                        "coverage");
+    private static final Set<String> GIT_KEYS = Set.of("mainBranches", "releaseBranchPattern",
+                                                       "restageAfterFix");
+    private static final Set<String> DAEMON_KEYS = Set.of("inactivityTimeout", "saveDebounce",
+                                                          "transport");
+    private static final Set<String> JAVA_KEYS = Set.of("languageLevel",
+                                                        "generatedSourceDetection");
+    private static final Set<String> MAVEN_KEYS = Set.of("runner", "preferMvnd", "docker",
+                                                         "goals", "args", "targetedTestProperty");
+    private static final Set<String> DOCKER_KEYS = Set.of("image", "containerIdleTimeout",
+                                                          "mountM2");
+    private static final Set<String> COVERAGE_KEYS = Set.of("provider", "freshnessMode",
+                                                            "reportPaths");
+
     private final Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
+    private final Consumer<String> warningConsumer;
+
+    CodeCheckConfigParser(Consumer<String> warningConsumer) {
+        this.warningConsumer = warningConsumer;
+    }
 
     CodeCheckConfig applyIfPresent(Path configPath, CodeCheckConfig base) {
         if (!Files.exists(configPath)) {
@@ -46,6 +68,7 @@ final class CodeCheckConfigParser {
         }
 
         Map<String, Object> rootObject = stringKeyMap(rootMap, configPath, "<root>");
+        warnUnknownKeys(rootObject, ROOT_KEYS, configPath, "<root>");
         CodeCheckConfig config = base;
         Map<String, Object> git = object(rootObject, "git", configPath, "git");
         if (git != null) {
@@ -72,11 +95,12 @@ final class CodeCheckConfigParser {
 
     private CodeCheckConfig.Git applyGit(Path configPath, Map<String, Object> node,
                                          CodeCheckConfig.Git base) {
+        warnUnknownKeys(node, GIT_KEYS, configPath, "git");
         List<String> mainBranches = stringList(node, "mainBranches", configPath,
                                                "git.mainBranches", base.mainBranches());
-        Pattern releaseBranchPattern = pattern(node, "releaseBranchPattern", configPath,
-                                               "git.releaseBranchPattern",
-                                               base.releaseBranchPattern());
+        String releaseBranchPattern = pattern(node, "releaseBranchPattern", configPath,
+                                              "git.releaseBranchPattern",
+                                              base.releaseBranchPattern());
         Boolean restageAfterFix = bool(node, "restageAfterFix", configPath,
                                        "git.restageAfterFix");
         return new CodeCheckConfig.Git(mainBranches, releaseBranchPattern,
@@ -86,6 +110,7 @@ final class CodeCheckConfigParser {
 
     private CodeCheckConfig.Daemon applyDaemon(Path configPath, Map<String, Object> node,
                                                CodeCheckConfig.Daemon base) {
+        warnUnknownKeys(node, DAEMON_KEYS, configPath, "daemon");
         Duration inactivityTimeout = duration(node, "inactivityTimeout", configPath,
                                               "daemon.inactivityTimeout",
                                               base.inactivityTimeout());
@@ -100,6 +125,7 @@ final class CodeCheckConfigParser {
 
     private CodeCheckConfig.JavaProject applyJava(Path configPath, Map<String, Object> node,
                                                   CodeCheckConfig.JavaProject base) {
+        warnUnknownKeys(node, JAVA_KEYS, configPath, "java");
         Integer languageLevel = integer(node, "languageLevel", configPath, "java.languageLevel");
         if (languageLevel != null && languageLevel < 8) {
             throw invalid(configPath, "java.languageLevel", "must be at least 8");
@@ -114,6 +140,7 @@ final class CodeCheckConfigParser {
 
     private CodeCheckConfig.Maven applyMaven(Path configPath, Map<String, Object> node,
                                              CodeCheckConfig.Maven base) {
+        warnUnknownKeys(node, MAVEN_KEYS, configPath, "maven");
         CodeCheckConfig.MavenRunner runner = enumValue(node, "runner", configPath,
                                                        "maven.runner",
                                                        CodeCheckConfig.MavenRunner.class,
@@ -135,6 +162,7 @@ final class CodeCheckConfigParser {
 
     private CodeCheckConfig.Docker applyDocker(Path configPath, Map<String, Object> node,
                                                CodeCheckConfig.Docker base) {
+        warnUnknownKeys(node, DOCKER_KEYS, configPath, "maven.docker");
         String image = string(node, "image", configPath, "maven.docker.image", base.image());
         Duration containerIdleTimeout = duration(node, "containerIdleTimeout", configPath,
                                                  "maven.docker.containerIdleTimeout",
@@ -146,6 +174,7 @@ final class CodeCheckConfigParser {
 
     private CodeCheckConfig.Coverage applyCoverage(Path configPath, Map<String, Object> node,
                                                    CodeCheckConfig.Coverage base) {
+        warnUnknownKeys(node, COVERAGE_KEYS, configPath, "coverage");
         CodeCheckConfig.CoverageProvider provider = enumValue(node, "provider", configPath,
                                                               "coverage.provider",
                                                               CodeCheckConfig.CoverageProvider.class,
@@ -247,17 +276,18 @@ final class CodeCheckConfigParser {
         return parseDuration(configPath, path, value);
     }
 
-    private Pattern pattern(Map<String, Object> parent, String field, Path configPath,
-                            String path, Pattern fallback) {
+    private String pattern(Map<String, Object> parent, String field, Path configPath,
+                           String path, String fallback) {
         String value = string(parent, field, configPath, path, null);
         if (value == null) {
             return fallback;
         }
         try {
-            return Pattern.compile(value);
+            Pattern.compile(value);
         } catch (PatternSyntaxException e) {
             throw invalid(configPath, path, "invalid regular expression: " + e.getDescription());
         }
+        return value;
     }
 
     private <T extends Enum<T>> T enumValue(Map<String, Object> parent, String field,
@@ -300,6 +330,16 @@ final class CodeCheckConfigParser {
 
     private long longPrefix(String value, int suffixLength) {
         return Long.parseLong(value.substring(0, value.length() - suffixLength));
+    }
+
+    private void warnUnknownKeys(Map<String, Object> node, Set<String> knownKeys,
+                                 Path configPath, String path) {
+        for (String key : node.keySet()) {
+            if (!knownKeys.contains(key)) {
+                warningConsumer.accept("Config warning in " + configPath + " at " + path
+                                       + ": unknown key '" + key + "'");
+            }
+        }
     }
 
     private ConfigException invalid(Path configPath, String path, String message) {
