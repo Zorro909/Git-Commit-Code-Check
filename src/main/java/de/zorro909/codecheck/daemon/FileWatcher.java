@@ -17,11 +17,10 @@ import java.util.concurrent.*;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
-
 /**
- * Monitors a directory and its subdirectories for file events (creation, deletion, modification).
- * When a file event occurs, it updates the files in the DaemonServer.
- * This class implements the Runnable interface, so it can be run in a separate thread.
+ * Monitors a directory and its subdirectories for file events (creation, deletion,
+ * modification). When a file event occurs, it updates the files in the DaemonServer. This
+ * class implements the Runnable interface, so it can be run in a separate thread.
  */
 @RequiresCliOption("--watch")
 @Requires(beans = DaemonServer.class)
@@ -29,35 +28,43 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public class FileWatcher implements Runnable {
 
     private static final String IDEA_DIRECTORY = ".idea";
+
     private static final String GIT_DIRECTORY = ".git";
+
     private static final String TARGET_DIRECTORY = "target/";
+
     private static final String FILE_CHANGE_INDICATOR = "~";
 
     private final DaemonServer daemonServer;
+
     private final RepositoryPathProvider repositoryPathProvider;
+
     private final CodeCheckConfigLoader configLoader;
+
     private final Map<WatchKey, Path> watchKeys = new HashMap<>();
+
     private final CopyOnWriteArrayList<Path> filesToUpdate = new CopyOnWriteArrayList<>();
 
     private Thread watchThread;
+
     private Future<?> watchUpdateTask;
+
     private WatchService watchService;
+
     private volatile Duration saveDebounce = Duration.ofSeconds(5);
 
     private final Executor taskExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
-    public FileWatcher(DaemonServer daemonServer,
-                       RepositoryPathProvider repositoryPathProvider,
-                       CodeCheckConfigLoader configLoader) {
+    public FileWatcher(DaemonServer daemonServer, RepositoryPathProvider repositoryPathProvider,
+            CodeCheckConfigLoader configLoader) {
         this.daemonServer = daemonServer;
         this.repositoryPathProvider = repositoryPathProvider;
         this.configLoader = configLoader;
     }
 
-
     /**
-     * Watches the repository directory and its subdirectories for file events (creation, deletion, modification).
-     *
+     * Watches the repository directory and its subdirectories for file events (creation,
+     * deletion, modification).
      * @throws IOException if an I/O error occurs while watching the directory
      */
     public void watch() throws IOException {
@@ -74,11 +81,11 @@ public class FileWatcher implements Runnable {
         path.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 
         Files.walk(path)
-             .filter(Files::isDirectory)
-             .filter(dir -> !dir.toString().contains(IDEA_DIRECTORY))
-             .filter(dir -> !dir.toString().contains(GIT_DIRECTORY))
-             .filter(dir -> !dir.toString().contains(TARGET_DIRECTORY))
-             .forEach(this::registerDirectory);
+            .filter(Files::isDirectory)
+            .filter(dir -> !dir.toString().contains(IDEA_DIRECTORY))
+            .filter(dir -> !dir.toString().contains(GIT_DIRECTORY))
+            .filter(dir -> !dir.toString().contains(TARGET_DIRECTORY))
+            .forEach(this::registerDirectory);
 
         watchThread = Thread.ofVirtual().name("file-watcher").start(this);
     }
@@ -87,16 +94,16 @@ public class FileWatcher implements Runnable {
         try {
             WatchKey key = directory.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
             watchKeys.put(key, directory);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
         System.out.println("Registered directory: " + directory);
     }
 
-
     /**
-     * Runs the file watcher in an infinite loop to listen for file events.
-     * This method will keep running until it is interrupted or an error occurs.
+     * Runs the file watcher in an infinite loop to listen for file events. This method
+     * will keep running until it is interrupted or an error occurs.
      */
     @Override
     public void run() {
@@ -104,7 +111,8 @@ public class FileWatcher implements Runnable {
             WatchKey key;
             try {
                 key = watchService.take();
-            } catch (InterruptedException ex) {
+            }
+            catch (InterruptedException ex) {
                 System.out.println("Directory watching interrupted");
                 return;
             }
@@ -154,16 +162,16 @@ public class FileWatcher implements Runnable {
     }
 
     private boolean isUnwantedFileChange(String fileName) {
-        return fileName.endsWith(FILE_CHANGE_INDICATOR) || fileName.contains(
-                IDEA_DIRECTORY) || fileName.contains(GIT_DIRECTORY) || fileName.contains(
-                TARGET_DIRECTORY);
+        return fileName.endsWith(FILE_CHANGE_INDICATOR) || fileName.contains(IDEA_DIRECTORY)
+                || fileName.contains(GIT_DIRECTORY) || fileName.contains(TARGET_DIRECTORY);
     }
 
     private void initFileUpdate() {
         watchUpdateTask = CompletableFuture.runAsync(() -> {
             try {
                 Thread.sleep(saveDebounce.toMillis());
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
@@ -172,4 +180,5 @@ public class FileWatcher implements Runnable {
             paths.stream().distinct().forEach(daemonServer::updateFile);
         }, taskExecutor);
     }
+
 }

@@ -23,27 +23,24 @@ class JavaCheckerSharedParserTest {
         Files.writeString(file, "class Sample {}");
 
         try (ApplicationContext context = ApplicationContext.builder()
-                                                            .singletons(new String[0],
-                                                                        new FileLoader(
-                                                                                Path.of(""),
-                                                                                Optional.empty()))
-                                                            .start()) {
+            .singletons(new String[0], new FileLoader(Path.of(""), Optional.empty()))
+            .start()) {
             JavaParserService parserService = context.getBean(JavaParserService.class);
             ParseOutcome expected = parserService.parse(file);
 
             List<JavaChecker> checkers = context.getBeansOfType(CodeCheck.class)
-                                                .stream()
-                                                .filter(JavaChecker.class::isInstance)
-                                                .map(JavaChecker.class::cast)
-                                                .toList();
+                .stream()
+                .filter(JavaChecker.class::isInstance)
+                .map(JavaChecker.class::cast)
+                .toList();
 
             assertThat(checkers).isNotEmpty();
             for (JavaChecker checker : checkers) {
                 assertThat(checker.load(file))
-                        .as(checker.getClass().getSimpleName()
-                            + " should reuse the singleton parser cache")
-                        .isSameAs(expected);
+                    .as(checker.getClass().getSimpleName() + " should reuse the singleton parser cache")
+                    .isSameAs(expected);
             }
         }
     }
+
 }

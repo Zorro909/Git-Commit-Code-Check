@@ -9,4 +9,5 @@ public interface AssistantDaemonController {
     void printStatus(PrintStream out);
 
     void applyFix(String diagnosticId) throws Exception;
+
 }

@@ -35,29 +35,24 @@ class MavenProjectModelServiceTest {
 
         assertThat(model.languageLevel()).isEqualTo(21);
         assertThat(model.modules()).extracting(module -> module.id().value())
-                                   .containsExactly(".", "service-a", "service-b");
+            .containsExactly(".", "service-a", "service-b");
         MavenModule serviceA = model.modules()
-                                    .stream()
-                                    .filter(module -> module.id().equals(new ModuleId("service-a")))
-                                    .findFirst()
-                                    .orElseThrow();
-        assertThat(serviceA.sourceRoots()).contains(repo.resolve("service-a/src/main/java")
-                                                        .toAbsolutePath().normalize());
-        assertThat(serviceA.testRoots()).contains(repo.resolve("service-a/src/test/java")
-                                                      .toAbsolutePath().normalize());
+            .stream()
+            .filter(module -> module.id().equals(new ModuleId("service-a")))
+            .findFirst()
+            .orElseThrow();
+        assertThat(serviceA.sourceRoots())
+            .contains(repo.resolve("service-a/src/main/java").toAbsolutePath().normalize());
+        assertThat(serviceA.testRoots()).contains(repo.resolve("service-a/src/test/java").toAbsolutePath().normalize());
     }
 
     @Test
     void generatedSourceRootsAreContextOnly(@TempDir Path repo) throws Exception {
         writePom(repo, "<project><modelVersion>4.0.0</modelVersion></project>");
 
-        MavenModule module = new MavenProjectModelService(repo, loader(25)).currentModel()
-                                                                         .modules()
-                                                                         .getFirst();
+        MavenModule module = new MavenProjectModelService(repo, loader(25)).currentModel().modules().getFirst();
 
-        Path generated = repo.resolve("target/generated-sources/annotations")
-                             .toAbsolutePath()
-                             .normalize();
+        Path generated = repo.resolve("target/generated-sources/annotations").toAbsolutePath().normalize();
         assertThat(module.generatedSourceRoots()).contains(generated);
         assertThat(module.contextRoots()).contains(generated);
         assertThat(module.validationSourceRoots()).doesNotContain(generated);
@@ -70,9 +65,8 @@ class MavenProjectModelServiceTest {
 
     private CodeCheckConfigLoader loader(int languageLevel) {
         CodeCheckConfig config = CodeCheckConfig.defaults()
-                                               .withJavaProject(new CodeCheckConfig.JavaProject(
-                                                       languageLevel,
-                                                       CodeCheckConfig.GeneratedSourceDetection.MAVEN_DEFAULTS));
+            .withJavaProject(new CodeCheckConfig.JavaProject(languageLevel,
+                    CodeCheckConfig.GeneratedSourceDetection.MAVEN_DEFAULTS));
         return new CodeCheckConfigLoader() {
             @Override
             public CodeCheckConfig load() {
@@ -85,4 +79,5 @@ class MavenProjectModelServiceTest {
             }
         };
     }
+
 }

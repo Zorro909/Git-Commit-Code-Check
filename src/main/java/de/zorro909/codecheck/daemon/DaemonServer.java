@@ -27,75 +27,68 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Represents a daemon server that runs a file selection process, starts an HTTP server, and runs indefinitely.
+ * Represents a daemon server that runs a file selection process, starts an HTTP server,
+ * and runs indefinitely.
  */
 @Singleton
 public class DaemonServer {
 
     private final FileSelector fileSelector;
+
     private final Provider<ValidationCheckPipeline> validationCheckPipeline;
 
     private final Map<Path, Set<Path>> fileDependencies = new HashMap<>();
+
     private Path currentFile;
+
     private final AtomicReference<Instant> lastActivity = new AtomicReference<>(Instant.now());
 
-    public DaemonServer(FileSelector fileSelector,
-                        Provider<ValidationCheckPipeline> validationCheckPipeline) {
+    public DaemonServer(FileSelector fileSelector, Provider<ValidationCheckPipeline> validationCheckPipeline) {
         this.fileSelector = fileSelector;
         this.validationCheckPipeline = validationCheckPipeline;
     }
 
     /**
-     * Starts the daemon control server described by the metadata and blocks until it is shut
-     * down via the control endpoint or the inactivity timeout elapses.
-     *
-     * @param metadata          host, port, and auth token the server binds and authorizes with.
+     * Starts the daemon control server described by the metadata and blocks until it is
+     * shut down via the control endpoint or the inactivity timeout elapses.
+     * @param metadata host, port, and auth token the server binds and authorizes with.
      * @param inactivityTimeout idle time after which the server stops itself.
-     * @throws IOException          if the server cannot bind to the configured address.
+     * @throws IOException if the server cannot bind to the configured address.
      * @throws InterruptedException if the current thread is interrupted while waiting.
      */
-    public void run(DaemonMetadata metadata, Duration inactivityTimeout)
-            throws IOException, InterruptedException {
+    public void run(DaemonMetadata metadata, Duration inactivityTimeout) throws IOException, InterruptedException {
         CountDownLatch shutdownLatch = new CountDownLatch(1);
         HttpServer server = getHttpServer(metadata, shutdownLatch);
-        ScheduledExecutorService idleMonitor = startIdleMonitor(server, shutdownLatch,
-                                                                inactivityTimeout);
+        ScheduledExecutorService idleMonitor = startIdleMonitor(server, shutdownLatch, inactivityTimeout);
         server.start();
         try {
             shutdownLatch.await();
-        } finally {
+        }
+        finally {
             idleMonitor.shutdownNow();
             server.stop(0);
         }
     }
 
-    private HttpServer getHttpServer(DaemonMetadata metadata, CountDownLatch shutdownLatch)
-            throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(metadata.host(),
-                                                                    metadata.port()), 4);
+    private HttpServer getHttpServer(DaemonMetadata metadata, CountDownLatch shutdownLatch) throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress(metadata.host(), metadata.port()), 4);
         server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
         server.createContext("/health",
-                             httpExchange -> handleAuthorized(metadata, httpExchange,
-                                                              () -> sendResponse(httpExchange,
-                                                                                 204, "")));
+                httpExchange -> handleAuthorized(metadata, httpExchange, () -> sendResponse(httpExchange, 204, "")));
         server.createContext("/check",
-                             httpExchange -> handleAuthorized(metadata, httpExchange,
-                                                              () -> handleCheck(httpExchange)));
-        server.createContext("/shutdown",
-                             httpExchange -> handleAuthorized(metadata, httpExchange, () -> {
-                                 sendResponse(httpExchange, 204, "");
-                                 shutdownLatch.countDown();
-                             }));
+                httpExchange -> handleAuthorized(metadata, httpExchange, () -> handleCheck(httpExchange)));
+        server.createContext("/shutdown", httpExchange -> handleAuthorized(metadata, httpExchange, () -> {
+            sendResponse(httpExchange, 204, "");
+            shutdownLatch.countDown();
+        }));
         return server;
     }
 
-    private ScheduledExecutorService startIdleMonitor(HttpServer server,
-                                                      CountDownLatch shutdownLatch,
-                                                      Duration inactivityTimeout) {
+    private ScheduledExecutorService startIdleMonitor(HttpServer server, CountDownLatch shutdownLatch,
+            Duration inactivityTimeout) {
         ScheduledExecutorService idleMonitor = Executors.newSingleThreadScheduledExecutor();
         idleMonitor.scheduleAtFixedRate(() -> {
-            if (Duration.between(lastActivity.get(), Instant.now())
-                        .compareTo(inactivityTimeout) >= 0) {
+            if (Duration.between(lastActivity.get(), Instant.now()).compareTo(inactivityTimeout) >= 0) {
                 server.stop(0);
                 shutdownLatch.countDown();
             }
@@ -103,11 +96,10 @@ public class DaemonServer {
         return idleMonitor;
     }
 
-    private void handleAuthorized(DaemonMetadata metadata, HttpExchange httpExchange,
-                                  ThrowingRunnable handler) throws IOException {
+    private void handleAuthorized(DaemonMetadata metadata, HttpExchange httpExchange, ThrowingRunnable handler)
+            throws IOException {
         if (metadata.token().isEmpty()
-            || !metadata.token().equals(httpExchange.getRequestHeaders()
-                                                    .getFirst("X-CodeCheck-Token"))) {
+                || !metadata.token().equals(httpExchange.getRequestHeaders().getFirst("X-CodeCheck-Token"))) {
             sendResponse(httpExchange, 401, "Unauthorized");
             return;
         }
@@ -121,8 +113,7 @@ public class DaemonServer {
         sendResponse(httpExchange, 200, validationOutput);
     }
 
-    private void sendResponse(HttpExchange httpExchange, int statusCode, String body)
-            throws IOException {
+    private void sendResponse(HttpExchange httpExchange, int statusCode, String body) throws IOException {
         byte[] response = body.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(statusCode, response.length == 0 ? -1 : response.length);
         try (var responseBody = httpExchange.getResponseBody()) {
@@ -132,29 +123,26 @@ public class DaemonServer {
 
     private String getValidationOutput(ValidationCheckPipeline vcp) throws IOException {
         return fileSelector.selectFiles()
-                           .map(vcp::checkFile)
-                           .reduce(Stream::concat)
-                           .orElse(Stream.empty())
-                           .map(ValidationError::toString)
-                           .collect(Collectors.joining("\n"));
+            .map(vcp::checkFile)
+            .reduce(Stream::concat)
+            .orElse(Stream.empty())
+            .map(ValidationError::toString)
+            .collect(Collectors.joining("\n"));
     }
 
     /**
      * Marks the specified file as a dependency for the currently computed File.
-     *
      * @param path The path of the file to mark.
      */
     public void markFile(Path path) {
         if (currentFile.equals(path)) {
             return;
         }
-        fileDependencies.computeIfAbsent(currentFile, _ -> new HashSet<>())
-                        .add(path);
+        fileDependencies.computeIfAbsent(currentFile, _ -> new HashSet<>()).add(path);
     }
 
     /**
      * Updates the specified file and its dependencies.
-     *
      * @param path The path of the file to update.
      */
     public synchronized void updateFile(Path path) {
@@ -163,10 +151,7 @@ public class DaemonServer {
             fileDependencies.get(path).forEach(this::updateFile);
         }
         this.currentFile = path;
-        validationCheckPipeline.get()
-                               .checkFile(path)
-                               .map(ValidationError::toString)
-                               .forEach(System.out::println);
+        validationCheckPipeline.get().checkFile(path).map(ValidationError::toString).forEach(System.out::println);
     }
 
     private void refreshActivity() {
@@ -175,6 +160,9 @@ public class DaemonServer {
 
     @FunctionalInterface
     private interface ThrowingRunnable {
+
         void run() throws IOException;
+
     }
+
 }

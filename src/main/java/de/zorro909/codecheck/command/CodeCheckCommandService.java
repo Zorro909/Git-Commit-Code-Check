@@ -29,82 +29,69 @@ import java.util.stream.Stream;
 public class CodeCheckCommandService {
 
     private final AssistantDaemonController assistantDaemonController;
+
     private final ValidationCheckPipeline validationCheckPipeline;
+
     private final ValidationEngine validationEngine;
+
     private final ChangeSetService changeSetService;
+
     private final CodeCheckConfigLoader configLoader;
+
     private final TerminalDiagnosticRenderer diagnosticRenderer;
+
     private final PrintStream out;
+
     private final PrintStream err;
 
     @Inject
     public CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
-                                   ValidationCheckPipeline validationCheckPipeline,
-                                   ValidationEngine validationEngine,
-                                   ChangeSetService changeSetService,
-                                   CodeCheckConfigLoader configLoader) {
-        this(assistantDaemonController, validationCheckPipeline, validationEngine,
-             changeSetService, configLoader,
-             new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), System.out, System.err);
+            ValidationCheckPipeline validationCheckPipeline, ValidationEngine validationEngine,
+            ChangeSetService changeSetService, CodeCheckConfigLoader configLoader) {
+        this(assistantDaemonController, validationCheckPipeline, validationEngine, changeSetService, configLoader,
+                new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), System.out, System.err);
     }
 
     public CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
-                                   ValidationCheckPipeline validationCheckPipeline,
-                                   FileSelector fileSelector) {
+            ValidationCheckPipeline validationCheckPipeline, FileSelector fileSelector) {
         this(assistantDaemonController, validationCheckPipeline, null, fromFileSelector(fileSelector),
-             CodeCheckConfigLoader.defaultsOnly(),
-             new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), System.out, System.err);
+                CodeCheckConfigLoader.defaultsOnly(), new TerminalDiagnosticRenderer(new ModeSeverityPolicy()),
+                System.out, System.err);
     }
 
     CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
-                            ValidationCheckPipeline validationCheckPipeline,
-                            FileSelector fileSelector,
-                            PrintStream out,
-                            PrintStream err) {
+            ValidationCheckPipeline validationCheckPipeline, FileSelector fileSelector, PrintStream out,
+            PrintStream err) {
         this(assistantDaemonController, validationCheckPipeline, null, fromFileSelector(fileSelector),
-             CodeCheckConfigLoader.defaultsOnly(),
-             new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out, err);
+                CodeCheckConfigLoader.defaultsOnly(), new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out,
+                err);
     }
 
     CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
-                            ValidationCheckPipeline validationCheckPipeline,
-                            FileSelector fileSelector,
-                            CodeCheckConfigLoader configLoader,
-                            PrintStream out,
-                            PrintStream err) {
-        this(assistantDaemonController, validationCheckPipeline, null, fromFileSelector(fileSelector),
-             configLoader, new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out, err);
+            ValidationCheckPipeline validationCheckPipeline, FileSelector fileSelector,
+            CodeCheckConfigLoader configLoader, PrintStream out, PrintStream err) {
+        this(assistantDaemonController, validationCheckPipeline, null, fromFileSelector(fileSelector), configLoader,
+                new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out, err);
     }
 
     CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
-                            ValidationCheckPipeline validationCheckPipeline,
-                            ChangeSetService changeSetService,
-                            CodeCheckConfigLoader configLoader,
-                            PrintStream out,
-                            PrintStream err) {
-        this(assistantDaemonController, validationCheckPipeline, null, changeSetService,
-             configLoader, new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out, err);
+            ValidationCheckPipeline validationCheckPipeline, ChangeSetService changeSetService,
+            CodeCheckConfigLoader configLoader, PrintStream out, PrintStream err) {
+        this(assistantDaemonController, validationCheckPipeline, null, changeSetService, configLoader,
+                new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out, err);
     }
 
     CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
-                            ValidationCheckPipeline validationCheckPipeline,
-                            ValidationEngine validationEngine,
-                            ChangeSetService changeSetService,
-                            CodeCheckConfigLoader configLoader,
-                            PrintStream out,
-                            PrintStream err) {
-        this(assistantDaemonController, validationCheckPipeline, validationEngine, changeSetService,
-             configLoader, new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out, err);
+            ValidationCheckPipeline validationCheckPipeline, ValidationEngine validationEngine,
+            ChangeSetService changeSetService, CodeCheckConfigLoader configLoader, PrintStream out, PrintStream err) {
+        this(assistantDaemonController, validationCheckPipeline, validationEngine, changeSetService, configLoader,
+                new TerminalDiagnosticRenderer(new ModeSeverityPolicy()), out, err);
     }
 
     CodeCheckCommandService(AssistantDaemonController assistantDaemonController,
-                            ValidationCheckPipeline validationCheckPipeline,
-                            ValidationEngine validationEngine,
-                            ChangeSetService changeSetService,
-                            CodeCheckConfigLoader configLoader,
-                            TerminalDiagnosticRenderer diagnosticRenderer,
-                            PrintStream out,
-                            PrintStream err) {
+            ValidationCheckPipeline validationCheckPipeline, ValidationEngine validationEngine,
+            ChangeSetService changeSetService, CodeCheckConfigLoader configLoader,
+            TerminalDiagnosticRenderer diagnosticRenderer, PrintStream out, PrintStream err) {
         this.assistantDaemonController = assistantDaemonController;
         this.validationCheckPipeline = validationCheckPipeline;
         this.validationEngine = validationEngine;
@@ -122,7 +109,8 @@ public class CodeCheckCommandService {
         try {
             assistantDaemonController.startOrAttach();
             return CommandOutcome.success();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             err.println("Failed to start or attach to assistant daemon: " + e.getMessage());
             return CommandOutcome.failure();
         }
@@ -134,8 +122,7 @@ public class CodeCheckCommandService {
         }
         try {
             Map<Path, List<ValidationError>> errorsMap = collectErrors(
-                    changeSetService.currentInteractiveCheckChangeSet(),
-                    ValidationMode.INTERACTIVE);
+                    changeSetService.currentInteractiveCheckChangeSet(), ValidationMode.INTERACTIVE);
             diagnosticRenderer.render(ValidationMode.INTERACTIVE, errorsMap, out);
 
             if (errorsMap.isEmpty()) {
@@ -149,10 +136,12 @@ public class CodeCheckCommandService {
             }
 
             return noExitCode ? CommandOutcome.success() : CommandOutcome.failure();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             err.println("Failed to run interactive check: " + e.getMessage());
             return CommandOutcome.failure();
-        } catch (GitCommandException e) {
+        }
+        catch (GitCommandException e) {
             err.println("Failed to select files for interactive check: " + e.getMessage());
             return CommandOutcome.failure();
         }
@@ -160,12 +149,11 @@ public class CodeCheckCommandService {
 
     public CommandOutcome runBatchCheck() {
         return runNonInteractive("batch check", changeSetService::currentInteractiveCheckChangeSet,
-                                 ValidationMode.BATCH);
+                ValidationMode.BATCH);
     }
 
     public CommandOutcome runPreCommit() {
-        return runNonInteractive("pre-commit check", changeSetService::preCommitChangeSet,
-                                 ValidationMode.PRE_COMMIT);
+        return runNonInteractive("pre-commit check", changeSetService::preCommitChangeSet, ValidationMode.PRE_COMMIT);
     }
 
     public CommandOutcome printStatus() {
@@ -183,42 +171,40 @@ public class CodeCheckCommandService {
         try {
             assistantDaemonController.applyFix(diagnosticId);
             return CommandOutcome.success();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             err.println("Failed to apply fix: " + e.getMessage());
             return CommandOutcome.failure();
         }
     }
 
-    private CommandOutcome runNonInteractive(String label,
-                                             Supplier<ChangeSet> changeSetSupplier,
-                                             ValidationMode mode) {
+    private CommandOutcome runNonInteractive(String label, Supplier<ChangeSet> changeSetSupplier, ValidationMode mode) {
         if (!loadConfig()) {
             return CommandOutcome.failure();
         }
         try {
             Map<Path, List<ValidationError>> errorsMap = collectErrors(changeSetSupplier.get(), mode);
             diagnosticRenderer.render(mode, errorsMap, out);
-            return diagnosticRenderer.blocks(mode, errorsMap) ? CommandOutcome.failure()
-                                                              : CommandOutcome.success();
-        } catch (IOException e) {
+            return diagnosticRenderer.blocks(mode, errorsMap) ? CommandOutcome.failure() : CommandOutcome.success();
+        }
+        catch (IOException e) {
             err.println("Failed to run " + label + ": " + e.getMessage());
             return CommandOutcome.failure();
-        } catch (GitCommandException e) {
+        }
+        catch (GitCommandException e) {
             err.println("Failed to select files for " + label + ": " + e.getMessage());
             return CommandOutcome.failure();
         }
     }
 
-    private Map<Path, List<ValidationError>> collectErrors(ChangeSet changeSet,
-                                                           ValidationMode mode)
+    private Map<Path, List<ValidationError>> collectErrors(ChangeSet changeSet, ValidationMode mode)
             throws IOException {
         if (validationEngine != null) {
             return validationEngine.validate(changeSet, mode)
-                                   .diagnostics()
-                                   .stream()
-                                   .map(Diagnostic::toValidationError)
-                                   .collect(java.util.stream.Collectors.groupingBy(
-                                           ValidationError::filePath));
+                .diagnostics()
+                .stream()
+                .map(Diagnostic::toValidationError)
+                .collect(java.util.stream.Collectors.groupingBy(ValidationError::filePath));
         }
         try (Stream<Path> changedFiles = changeSet.paths()) {
             return validationCheckPipeline.checkForErrors(changedFiles);
@@ -229,7 +215,8 @@ public class CodeCheckCommandService {
         try {
             configLoader.load(ConfigOverrides.none());
             return true;
-        } catch (ConfigException e) {
+        }
+        catch (ConfigException e) {
             err.println(e.getMessage());
             return false;
         }
@@ -255,20 +242,21 @@ public class CodeCheckCommandService {
             @Override
             public ChangeSet explicitFiles(java.util.Collection<Path> files) {
                 return new ChangeSet(files.stream()
-                                          .map(path -> new de.zorro909.codecheck.changeset.ChangeSetEntry(
-                                                  path,
-                                                  de.zorro909.codecheck.changeset.GitFileStatus.UNKNOWN,
-                                                  false, false, false, false, "explicit file"))
-                                          .toList());
+                    .map(path -> new de.zorro909.codecheck.changeset.ChangeSetEntry(path,
+                            de.zorro909.codecheck.changeset.GitFileStatus.UNKNOWN, false, false, false, false,
+                            "explicit file"))
+                    .toList());
             }
 
             private ChangeSet fromSelector() {
                 try (Stream<Path> selected = fileSelector.selectFiles()) {
                     return explicitFiles(selected.toList());
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     throw new IllegalStateException("Failed to select files", e);
                 }
             }
         };
     }
+
 }

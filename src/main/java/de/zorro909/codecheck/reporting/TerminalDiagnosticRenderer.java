@@ -20,9 +20,7 @@ public class TerminalDiagnosticRenderer {
         this.severityPolicy = severityPolicy;
     }
 
-    public void render(ValidationMode mode,
-                       Map<Path, List<ValidationError>> errorsMap,
-                       PrintStream out) {
+    public void render(ValidationMode mode, Map<Path, List<ValidationError>> errorsMap, PrintStream out) {
         out.println("Overview of code checks:");
         out.println("------------------------");
         if (errorsMap.isEmpty()) {
@@ -31,11 +29,10 @@ public class TerminalDiagnosticRenderer {
         }
 
         List<ValidationError> visibleErrors = errorsMap.values()
-                                                       .stream()
-                                                       .flatMap(List::stream)
-                                                       .filter(error -> severityPolicy.visible(mode,
-                                                                                               error.severity()))
-                                                       .toList();
+            .stream()
+            .flatMap(List::stream)
+            .filter(error -> severityPolicy.visible(mode, error.severity()))
+            .toList();
 
         if (visibleErrors.isEmpty()) {
             out.println("No blocking validation errors found.");
@@ -43,20 +40,18 @@ public class TerminalDiagnosticRenderer {
         }
 
         out.println("Validation diagnostics:");
-        visibleErrors.stream()
-                     .map(ValidationError::toString)
-                     .forEach(out::println);
+        visibleErrors.stream().map(ValidationError::toString).forEach(out::println);
 
-        if ((mode == ValidationMode.BATCH || mode == ValidationMode.PRE_COMMIT)
-            && blocks(mode, errorsMap)) {
+        if ((mode == ValidationMode.BATCH || mode == ValidationMode.PRE_COMMIT) && blocks(mode, errorsMap)) {
             out.println("Blocking HIGH diagnostics found; exiting with failure.");
         }
     }
 
     public boolean blocks(ValidationMode mode, Map<Path, List<ValidationError>> errorsMap) {
         return errorsMap.values()
-                        .stream()
-                        .flatMap(List::stream)
-                        .anyMatch(error -> severityPolicy.blocks(mode, error.severity()));
+            .stream()
+            .flatMap(List::stream)
+            .anyMatch(error -> severityPolicy.blocks(mode, error.severity()));
     }
+
 }

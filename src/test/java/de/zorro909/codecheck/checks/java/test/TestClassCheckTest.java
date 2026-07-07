@@ -16,12 +16,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for TestClassCheck which enforces that test classes extend a base
- * class and carry a @Tests annotation.
+ * Tests for TestClassCheck which enforces that test classes extend a base class and carry
+ * a @Tests annotation.
  */
 class TestClassCheckTest {
 
     private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
+
     private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
     @TempDir
@@ -187,8 +188,7 @@ class TestClassCheckTest {
 
     // --- helper ---
 
-    private List<ValidationError> parseAndCheck(String source, String packageDir, String fileName)
-            throws IOException {
+    private List<ValidationError> parseAndCheck(String source, String packageDir, String fileName) throws IOException {
         Path srcDir = tempDir.resolve(TEST_FOLDER).resolve(packageDir);
         Files.createDirectories(srcDir);
         Path filePath = srcDir.resolve(fileName);
@@ -197,4 +197,5 @@ class TestClassCheckTest {
 
         return check.check(filePath);
     }
+
 }

@@ -11,26 +11,24 @@ import java.util.Set;
 public class FixApplicationService {
 
     private final RuleRegistry ruleRegistry;
+
     private final ValidationEngine validationEngine;
+
     private final List<PostAction> postActions;
 
-    public FixApplicationService(RuleRegistry ruleRegistry,
-                                 ValidationEngine validationEngine,
-                                 List<PostAction> postActions) {
+    public FixApplicationService(RuleRegistry ruleRegistry, ValidationEngine validationEngine,
+            List<PostAction> postActions) {
         this.ruleRegistry = ruleRegistry;
         this.validationEngine = validationEngine;
         this.postActions = postActions == null ? List.of() : List.copyOf(postActions);
     }
 
-    public FixResult applyUserSelectedFix(Diagnostic diagnostic,
-                                          ValidationMode mode,
-                                          FixerId fixerId) {
+    public FixResult applyUserSelectedFix(Diagnostic diagnostic, ValidationMode mode, FixerId fixerId) {
         Fixer fixer = ruleRegistry.activeFixers()
-                                  .stream()
-                                  .filter(candidate -> candidate.id().equals(fixerId))
-                                  .findFirst()
-                                  .orElseThrow(() -> new IllegalArgumentException(
-                                          "Unknown fixer " + fixerId.value()));
+            .stream()
+            .filter(candidate -> candidate.id().equals(fixerId))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown fixer " + fixerId.value()));
         if (!fixer.availableIn(mode) || !fixer.canFix(diagnostic)) {
             return FixResult.notApplied("Fixer is unavailable for " + mode);
         }
@@ -42,8 +40,8 @@ public class FixApplicationService {
 
         Set<Path> affectedFiles = fixResult.affectedFiles();
         boolean recheckPassed = affectedFiles.stream()
-                                             .map(file -> validationEngine.validateFile(file, mode))
-                                             .allMatch(FileValidationResult::passed);
+            .map(file -> validationEngine.validateFile(file, mode))
+            .allMatch(FileValidationResult::passed);
         if (recheckPassed) {
             postActions.forEach(action -> action.perform(affectedFiles));
             return fixResult.withRestaged(true);
@@ -51,4 +49,5 @@ public class FixApplicationService {
 
         return fixResult.withRestaged(false);
     }
+
 }

@@ -4,9 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Predicate;
 
-public record FileInterest(String description,
-                           List<String> includeGlobs,
-                           Predicate<Path> predicate) {
+public record FileInterest(String description, List<String> includeGlobs, Predicate<Path> predicate) {
 
     public FileInterest {
         includeGlobs = List.copyOf(includeGlobs);
@@ -21,12 +19,10 @@ public record FileInterest(String description,
     }
 
     public static FileInterest javaMainSources() {
-        return new FileInterest("Java main sources", List.of("src/main/java/**/*.java"),
-                                path -> {
-                                    String normalized = path.toString().replace('\\', '/');
-                                    return normalized.contains("src/main/java/")
-                                           && normalized.endsWith(".java");
-                                });
+        return new FileInterest("Java main sources", List.of("src/main/java/**/*.java"), path -> {
+            String normalized = path.toString().replace('\\', '/');
+            return normalized.contains("src/main/java/") && normalized.endsWith(".java");
+        });
     }
 
     public boolean matches(Path path) {

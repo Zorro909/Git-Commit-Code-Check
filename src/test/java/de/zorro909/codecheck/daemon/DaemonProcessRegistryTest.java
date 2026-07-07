@@ -15,8 +15,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 class DaemonProcessRegistryTest {
 
     @Test
-    void repoIdIsStableHashAndMetadataPathDoesNotExposeRawRepoName(@TempDir Path tempDir)
-            throws Exception {
+    void repoIdIsStableHashAndMetadataPathDoesNotExposeRawRepoName(@TempDir Path tempDir) throws Exception {
         Path repo = tempDir.resolve("repo with spaces");
         Files.createDirectories(repo);
         DaemonProcessRegistry first = new DaemonProcessRegistry(repo, tempDir.resolve("cache"));
@@ -56,18 +55,12 @@ class DaemonProcessRegistryTest {
 
         registry.write(registry.createMetadata());
 
-        assertThat(Files.getPosixFilePermissions(registry.metadataDirectory()))
-                .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ,
-                                           PosixFilePermission.OWNER_WRITE,
-                                           PosixFilePermission.OWNER_EXECUTE);
-        assertThat(Files.getPosixFilePermissions(
-                registry.metadataDirectory().resolve("daemon.json")))
-                .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ,
-                                           PosixFilePermission.OWNER_WRITE);
-        assertThat(Files.getPosixFilePermissions(
-                registry.metadataDirectory().resolve("daemon.pid")))
-                .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ,
-                                           PosixFilePermission.OWNER_WRITE);
+        assertThat(Files.getPosixFilePermissions(registry.metadataDirectory())).containsExactlyInAnyOrder(
+                PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE);
+        assertThat(Files.getPosixFilePermissions(registry.metadataDirectory().resolve("daemon.json")))
+            .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
+        assertThat(Files.getPosixFilePermissions(registry.metadataDirectory().resolve("daemon.pid")))
+            .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
     }
 
     @Test
@@ -75,9 +68,8 @@ class DaemonProcessRegistryTest {
         Path repo = tempDir.resolve("repo");
         Files.createDirectories(repo);
         DaemonProcessRegistry registry = new DaemonProcessRegistry(repo, tempDir.resolve("cache"));
-        DaemonMetadata stale = new DaemonMetadata(Long.MAX_VALUE, repo, "websocket",
-                                                  "127.0.0.1", 49152, "token",
-                                                  java.time.Instant.now());
+        DaemonMetadata stale = new DaemonMetadata(Long.MAX_VALUE, repo, "websocket", "127.0.0.1", 49152, "token",
+                java.time.Instant.now());
         registry.write(stale);
 
         Optional<DaemonMetadata> loaded = registry.aliveMetadata();
@@ -85,4 +77,5 @@ class DaemonProcessRegistryTest {
         assertThat(loaded).isEmpty();
         assertThat(registry.metadataDirectory()).doesNotExist();
     }
+
 }

@@ -23,10 +23,12 @@ import java.util.stream.Stream;
 final class DaemonMetadataStore {
 
     private static final String DAEMON_JSON = "daemon.json";
+
     private static final String DAEMON_PID = "daemon.pid";
+
     private static final boolean POSIX_PERMISSIONS_SUPPORTED = FileSystems.getDefault()
-            .supportedFileAttributeViews()
-            .contains("posix");
+        .supportedFileAttributeViews()
+        .contains("posix");
 
     private final Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 
@@ -41,15 +43,12 @@ final class DaemonMetadataStore {
             if (!(loaded instanceof Map<?, ?> values)) {
                 return Optional.empty();
             }
-            return Optional.of(new DaemonMetadata(
-                    number(values, "pid").longValue(),
-                    Path.of(string(values, "repoRoot")),
-                    string(values, "transport"),
-                    string(values, "host"),
-                    number(values, "port").intValue(),
-                    string(values, "token"),
-                    Instant.parse(string(values, "startedAt"))));
-        } catch (RuntimeException | IOException e) {
+            return Optional
+                .of(new DaemonMetadata(number(values, "pid").longValue(), Path.of(string(values, "repoRoot")),
+                        string(values, "transport"), string(values, "host"), number(values, "port").intValue(),
+                        string(values, "token"), Instant.parse(string(values, "startedAt"))));
+        }
+        catch (RuntimeException | IOException e) {
             delete(metadataDirectory);
             return Optional.empty();
         }
@@ -59,9 +58,9 @@ final class DaemonMetadataStore {
         try {
             createOwnerOnlyDirectories(metadataDirectory);
             writeOwnerOnly(metadataDirectory.resolve(DAEMON_JSON), toJson(metadata));
-            writeOwnerOnly(metadataDirectory.resolve(DAEMON_PID),
-                           Long.toString(metadata.pid()));
-        } catch (IOException e) {
+            writeOwnerOnly(metadataDirectory.resolve(DAEMON_PID), Long.toString(metadata.pid()));
+        }
+        catch (IOException e) {
             throw new IllegalStateException("Unable to write daemon metadata", e);
         }
     }
@@ -72,8 +71,7 @@ final class DaemonMetadataStore {
             return;
         }
         Set<PosixFilePermission> ownerOnly = PosixFilePermissions.fromString("rwx------");
-        FileAttribute<Set<PosixFilePermission>> attribute =
-                PosixFilePermissions.asFileAttribute(ownerOnly);
+        FileAttribute<Set<PosixFilePermission>> attribute = PosixFilePermissions.asFileAttribute(ownerOnly);
         Files.createDirectories(directory, attribute);
         Files.setPosixFilePermissions(directory, ownerOnly);
     }
@@ -81,8 +79,7 @@ final class DaemonMetadataStore {
     private void writeOwnerOnly(Path file, String content) throws IOException {
         if (POSIX_PERMISSIONS_SUPPORTED) {
             Files.deleteIfExists(file);
-            Files.createFile(file, PosixFilePermissions.asFileAttribute(
-                    PosixFilePermissions.fromString("rw-------")));
+            Files.createFile(file, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
         }
         Files.writeString(file, content, StandardCharsets.UTF_8);
     }
@@ -93,7 +90,8 @@ final class DaemonMetadataStore {
         }
         try (Stream<Path> paths = Files.walk(metadataDirectory)) {
             paths.sorted(Comparator.reverseOrder()).forEach(this::deletePath);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IllegalStateException("Unable to delete daemon metadata", e);
         }
     }
@@ -101,7 +99,8 @@ final class DaemonMetadataStore {
     private void deletePath(Path path) {
         try {
             Files.deleteIfExists(path);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IllegalStateException("Unable to delete " + path, e);
         }
     }
@@ -117,9 +116,8 @@ final class DaemonMetadataStore {
                   "token": "%s",
                   "startedAt": "%s"
                 }
-                """.formatted(metadata.pid(), escape(metadata.repoRoot().toString()),
-                               escape(metadata.transport()), escape(metadata.host()),
-                               metadata.port(), escape(metadata.token()), metadata.startedAt());
+                """.formatted(metadata.pid(), escape(metadata.repoRoot().toString()), escape(metadata.transport()),
+                escape(metadata.host()), metadata.port(), escape(metadata.token()), metadata.startedAt());
     }
 
     private String escape(String value) {
@@ -141,4 +139,5 @@ final class DaemonMetadataStore {
         }
         throw new IllegalArgumentException("Missing string metadata field " + key);
     }
+
 }

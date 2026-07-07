@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for GitStageAction — the post-action that stages modified files
- * using git add in batches.
+ * Tests for GitStageAction — the post-action that stages modified files using git add in
+ * batches.
  */
 class GitStageActionTest {
 
@@ -140,11 +140,11 @@ class GitStageActionTest {
         Process process = pb.start();
 
         String output;
-        try (BufferedReader reader =
-                     new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             output = reader.lines().collect(Collectors.joining("\n"));
         }
         process.waitFor();
         return output;
     }
+
 }

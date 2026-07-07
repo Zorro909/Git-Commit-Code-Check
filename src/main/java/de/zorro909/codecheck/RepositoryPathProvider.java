@@ -13,7 +13,7 @@ public class RepositoryPathProvider {
 
     @Bean
     @Named(REPOSITORY_DIRECTORY)
-    public Path repositoryDirectory(){
+    public Path repositoryDirectory() {
         return Path.of("");
     }
 

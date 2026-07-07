@@ -14,4 +14,5 @@ public interface DockerCommandExecutor {
     void stopContainer(String containerId);
 
     void removeContainersForRepository(Path repositoryRoot);
+
 }

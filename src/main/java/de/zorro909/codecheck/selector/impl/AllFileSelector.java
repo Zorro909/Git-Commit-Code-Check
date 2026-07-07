@@ -24,8 +24,10 @@ public class AllFileSelector implements FileSelector {
     public Stream<Path> selectFiles() throws IOException {
         try {
             return Files.walk(this.repositoryDirectory).filter(Files::isRegularFile);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IOException("Error walking files in repository directory ", e);
         }
     }
+
 }

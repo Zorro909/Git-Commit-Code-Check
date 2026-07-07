@@ -26,13 +26,12 @@ public abstract class JavaChecker implements CodeCheck {
 
     public static final String GENERATED_ANNOTATION = "Generated";
 
-    private static final String MAIN_FOLDER =
-        "src" + File.separatorChar + "main" + File.separatorChar + "java";
+    private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
 
-    private static final String TEST_FOLDER =
-        "src" + File.separatorChar + "test" + File.separatorChar + "java";
+    private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
     protected final FileLoader fileLoader;
+
     private final JavaParserService javaParserService;
 
     protected JavaChecker(FileLoader fileLoader) {
@@ -47,7 +46,8 @@ public abstract class JavaChecker implements CodeCheck {
     /**
      * Checks if a given file path is responsible for Java code validation.
      * @param path The file path to check.
-     * @return True if the file path is responsible for Java code validation, false otherwise.
+     * @return True if the file path is responsible for Java code validation, false
+     * otherwise.
      */
     public abstract boolean isJavaResponsible(Path path);
 
@@ -70,9 +70,9 @@ public abstract class JavaChecker implements CodeCheck {
     public List<ValidationError> check(Path path) {
         ParseOutcome parseOutcome = load(path);
         List<ValidationError> parserDiagnostics = parseOutcome.diagnostics()
-                                                              .stream()
-                                                              .map(Diagnostic::toValidationError)
-                                                              .toList();
+            .stream()
+            .map(Diagnostic::toValidationError)
+            .toList();
         if (parseOutcome.compilationUnit().isEmpty()) {
             return parserDiagnostics;
         }
@@ -81,7 +81,8 @@ public abstract class JavaChecker implements CodeCheck {
     }
 
     /**
-     * Loads a Java source file from the specified path and returns a ParseResult of CompilationUnit.
+     * Loads a Java source file from the specified path and returns a ParseResult of
+     * CompilationUnit.
      * @param path The path of the Java source file to load.
      * @return The ParseOutcome representing the loaded Java source file.
      */
@@ -101,8 +102,10 @@ public abstract class JavaChecker implements CodeCheck {
     }
 
     protected Stream<ClassOrInterfaceDeclaration> filterGeneratedClasses(CompilationUnit javaUnit) {
-        return javaUnit.findAll(ClassOrInterfaceDeclaration.class,
-                clazz -> clazz.getAnnotationByName(GENERATED_ANNOTATION).isEmpty())
+        return javaUnit
+            .findAll(ClassOrInterfaceDeclaration.class,
+                    clazz -> clazz.getAnnotationByName(GENERATED_ANNOTATION).isEmpty())
             .stream();
     }
+
 }

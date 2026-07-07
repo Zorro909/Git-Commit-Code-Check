@@ -26,4 +26,5 @@ class NoMagicValuesRuleMetadataTest {
         assertThat(rule.validatedFiles().matches(Path.of("src/main/java/demo/Example.java"))).isTrue();
         assertThat(rule.validatedFiles().matches(Path.of("src/test/java/demo/ExampleTest.java"))).isFalse();
     }
+
 }

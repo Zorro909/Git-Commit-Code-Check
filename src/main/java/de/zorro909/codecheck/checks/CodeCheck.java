@@ -8,7 +8,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * The CodeCheck interface provides methods to check code files for certain conditions and validate them.
+ * The CodeCheck interface provides methods to check code files for certain conditions and
+ * validate them.
  */
 public interface CodeCheck {
 

@@ -150,8 +150,7 @@ class AllFileSelectorTest {
 
         AllFileSelector selector = new AllFileSelector(nonExistent);
 
-        assertThatThrownBy(() -> selector.selectFiles().toList())
-                .isInstanceOf(IOException.class);
+        assertThatThrownBy(() -> selector.selectFiles().toList()).isInstanceOf(IOException.class);
     }
 
     // --- multiple files in same directory ---
@@ -167,4 +166,5 @@ class AllFileSelectorTest {
 
         assertThat(files).hasSize(5);
     }
+
 }

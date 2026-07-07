@@ -44,11 +44,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CodeCheckCommandServiceTest {
 
     private RecordingDaemonController daemonController;
+
     private ValidationCheckPipeline pipeline;
+
     private List<CodeCheck> checks;
+
     private List<FixAction> fixActions;
+
     private List<PostAction> postActions;
+
     private ByteArrayOutputStream stdout;
+
     private ByteArrayOutputStream stderr;
 
     @BeforeEach
@@ -86,7 +92,7 @@ class CodeCheckCommandServiceTest {
 
         assertThat(outcome.exitCode()).isEqualTo(1);
         assertThat(errorOutput()).contains("Failed to start or attach to assistant daemon")
-                                 .contains("port is already in use");
+            .contains("port is already in use");
     }
 
     @Test
@@ -147,8 +153,7 @@ class CodeCheckCommandServiceTest {
 
             @Override
             public List<ValidationError> check(Path checkedFile) {
-                return List.of(
-                        error(checkedFile, "Low detail", ValidationError.Severity.LOW),
+                return List.of(error(checkedFile, "Low detail", ValidationError.Severity.LOW),
                         error(checkedFile, "Medium warning", ValidationError.Severity.MEDIUM),
                         error(checkedFile, "High failure", ValidationError.Severity.HIGH));
             }
@@ -163,9 +168,9 @@ class CodeCheckCommandServiceTest {
 
         assertThat(outcome.exitCode()).isEqualTo(1);
         assertThat(output()).doesNotContain("Low detail")
-                            .contains("Medium warning")
-                            .contains("High failure")
-                            .contains("Blocking HIGH diagnostics found");
+            .contains("Medium warning")
+            .contains("High failure")
+            .contains("Blocking HIGH diagnostics found");
     }
 
     @Test
@@ -181,33 +186,27 @@ class CodeCheckCommandServiceTest {
     }
 
     @Test
-    void highParseErrorFromValidationEngineBlocksPreCommit(@TempDir Path tempDir)
-            throws Exception {
+    void highParseErrorFromValidationEngineBlocksPreCommit(@TempDir Path tempDir) throws Exception {
         Path file = javaFile(tempDir);
-        CodeCheckCommandService service = createEngineService(file, List.of(
-                diagnostic(file, "Parse failed", ValidationError.Severity.HIGH,
-                           DiagnosticKind.PARSE_ERROR)));
+        CodeCheckCommandService service = createEngineService(file,
+                List.of(diagnostic(file, "Parse failed", ValidationError.Severity.HIGH, DiagnosticKind.PARSE_ERROR)));
 
         CommandOutcome outcome = service.runPreCommit();
 
         assertThat(outcome.exitCode()).isEqualTo(1);
-        assertThat(output()).contains("Parse failed")
-                            .contains("Blocking HIGH diagnostics found");
+        assertThat(output()).contains("Parse failed").contains("Blocking HIGH diagnostics found");
     }
 
     @Test
-    void mediumSymbolWarningFromValidationEnginePrintsWithoutBlockingPreCommit(
-            @TempDir Path tempDir) throws Exception {
+    void mediumSymbolWarningFromValidationEnginePrintsWithoutBlockingPreCommit(@TempDir Path tempDir) throws Exception {
         Path file = javaFile(tempDir);
-        CodeCheckCommandService service = createEngineService(file, List.of(
-                diagnostic(file, "Symbol could not be resolved",
-                           ValidationError.Severity.MEDIUM, DiagnosticKind.SYMBOL_WARNING)));
+        CodeCheckCommandService service = createEngineService(file, List.of(diagnostic(file,
+                "Symbol could not be resolved", ValidationError.Severity.MEDIUM, DiagnosticKind.SYMBOL_WARNING)));
 
         CommandOutcome outcome = service.runPreCommit();
 
         assertThat(outcome.exitCode()).isZero();
-        assertThat(output()).contains("Symbol could not be resolved")
-                            .doesNotContain("Blocking HIGH diagnostics found");
+        assertThat(output()).contains("Symbol could not be resolved").doesNotContain("Blocking HIGH diagnostics found");
     }
 
     @Test
@@ -219,13 +218,11 @@ class CodeCheckCommandServiceTest {
         CommandOutcome outcome = service.runBatchCheck();
 
         assertThat(outcome.exitCode()).isEqualTo(1);
-        assertThat(output()).contains("Blocking batch issue")
-                            .contains("Blocking HIGH diagnostics found");
+        assertThat(output()).contains("Blocking batch issue").contains("Blocking HIGH diagnostics found");
     }
 
     @Test
-    void interactiveCheckInvokesFixActionsAndPostActionsAfterSuccessfulRecheck(
-            @TempDir Path tempDir) throws Exception {
+    void interactiveCheckInvokesFixActionsAndPostActionsAfterSuccessfulRecheck(@TempDir Path tempDir) throws Exception {
         Path file = javaFile(tempDir);
         AtomicInteger checkCalls = new AtomicInteger();
         AtomicBoolean fixInvoked = new AtomicBoolean(false);
@@ -277,18 +274,14 @@ class CodeCheckCommandServiceTest {
         return createService(fileSelector, CodeCheckConfigLoader.defaultsOnly());
     }
 
-    private CodeCheckCommandService createService(FileSelector fileSelector,
-                                                 CodeCheckConfigLoader configLoader) {
-        return new CodeCheckCommandService(daemonController, pipeline, fileSelector,
-                                           configLoader,
-                                           new PrintStream(stdout, true, StandardCharsets.UTF_8),
-                                           new PrintStream(stderr, true, StandardCharsets.UTF_8));
+    private CodeCheckCommandService createService(FileSelector fileSelector, CodeCheckConfigLoader configLoader) {
+        return new CodeCheckCommandService(daemonController, pipeline, fileSelector, configLoader,
+                new PrintStream(stdout, true, StandardCharsets.UTF_8),
+                new PrintStream(stderr, true, StandardCharsets.UTF_8));
     }
 
-    private CodeCheckCommandService createEngineService(Path file,
-                                                        List<Diagnostic> diagnostics) {
-        return new CodeCheckCommandService(
-                daemonController, pipeline, new FixedValidationEngine(file, diagnostics),
+    private CodeCheckCommandService createEngineService(Path file, List<Diagnostic> diagnostics) {
+        return new CodeCheckCommandService(daemonController, pipeline, new FixedValidationEngine(file, diagnostics),
                 new SingleFileChangeSetService(file), CodeCheckConfigLoader.defaultsOnly(),
                 new PrintStream(stdout, true, StandardCharsets.UTF_8),
                 new PrintStream(stderr, true, StandardCharsets.UTF_8));
@@ -322,10 +315,8 @@ class CodeCheckCommandServiceTest {
         return new ValidationError(file, message, new Position(1, 1), severity);
     }
 
-    private Diagnostic diagnostic(Path file, String message, ValidationError.Severity severity,
-                                  DiagnosticKind kind) {
-        return new Diagnostic(file, message, new SourcePosition(1, 1), severity, kind,
-                              new RuleId("test.rule"));
+    private Diagnostic diagnostic(Path file, String message, ValidationError.Severity severity, DiagnosticKind kind) {
+        return new Diagnostic(file, message, new SourcePosition(1, 1), severity, kind, new RuleId("test.rule"));
     }
 
     private String output() {
@@ -341,7 +332,8 @@ class CodeCheckCommandServiceTest {
             java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(target, value);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException("Failed to set field: " + fieldName, e);
         }
     }
@@ -349,6 +341,7 @@ class CodeCheckCommandServiceTest {
     private static final class RecordingDaemonController implements AssistantDaemonController {
 
         private int startCalls;
+
         private RuntimeException startFailure;
 
         @Override
@@ -367,10 +360,13 @@ class CodeCheckCommandServiceTest {
         @Override
         public void applyFix(String diagnosticId) {
         }
+
     }
 
     private static final class FixedValidationEngine implements ValidationEngine {
+
         private final Path file;
+
         private final List<Diagnostic> diagnostics;
 
         private FixedValidationEngine(Path file, List<Diagnostic> diagnostics) {
@@ -380,17 +376,18 @@ class CodeCheckCommandServiceTest {
 
         @Override
         public ValidationResult validate(ChangeSet changeSet, ValidationMode mode) {
-            return new ValidationResult(mode, List.of(new FileValidationResult(file, mode,
-                                                                               diagnostics)));
+            return new ValidationResult(mode, List.of(new FileValidationResult(file, mode, diagnostics)));
         }
 
         @Override
         public FileValidationResult validateFile(Path file, ValidationMode mode) {
             return new FileValidationResult(file, mode, diagnostics);
         }
+
     }
 
     private static final class SingleFileChangeSetService implements ChangeSetService {
+
         private final Path file;
 
         private SingleFileChangeSetService(Path file) {
@@ -418,9 +415,10 @@ class CodeCheckCommandServiceTest {
         }
 
         private ChangeSet changeSet() {
-            return new ChangeSet(List.of(new ChangeSetEntry(file, GitFileStatus.MODIFIED,
-                                                            true, false, false, false,
-                                                            "test file")));
+            return new ChangeSet(
+                    List.of(new ChangeSetEntry(file, GitFileStatus.MODIFIED, true, false, false, false, "test file")));
         }
+
     }
+
 }

@@ -5,4 +5,5 @@ public interface TestRunner {
     TestRunResult runTests(TestRunRequest request);
 
     void stop();
+
 }

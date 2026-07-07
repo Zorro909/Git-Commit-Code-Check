@@ -9,9 +9,8 @@ public class DependencyInvalidationGraph {
     private final ConcurrentHashMap<Path, Set<Path>> dependentsByContext = new ConcurrentHashMap<>();
 
     public void recordDependency(Path contextFile, Path dependentValidatedFile) {
-        dependentsByContext.computeIfAbsent(normalize(contextFile),
-                                            _ -> ConcurrentHashMap.newKeySet())
-                           .add(normalize(dependentValidatedFile));
+        dependentsByContext.computeIfAbsent(normalize(contextFile), _ -> ConcurrentHashMap.newKeySet())
+            .add(normalize(dependentValidatedFile));
     }
 
     public Set<Path> dependents(Path contextFile) {
@@ -27,4 +26,5 @@ public class DependencyInvalidationGraph {
     private Path normalize(Path path) {
         return path.toAbsolutePath().normalize();
     }
+
 }

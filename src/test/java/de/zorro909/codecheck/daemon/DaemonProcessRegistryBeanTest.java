@@ -15,4 +15,5 @@ class DaemonProcessRegistryBeanTest {
             assertThat(registry.repoId()).matches("[0-9a-f]{64}");
         }
     }
+
 }

@@ -31,9 +31,8 @@ class DefaultValidationEngineTest {
 
             @Override
             public List<ValidationError> check(Path checkedFile) {
-                return List.of(new ValidationError(checkedFile, "structured",
-                                                   new Position(2, 3),
-                                                   ValidationError.Severity.HIGH));
+                return List.of(new ValidationError(checkedFile, "structured", new Position(2, 3),
+                        ValidationError.Severity.HIGH));
             }
 
             @Override
@@ -42,9 +41,10 @@ class DefaultValidationEngineTest {
         }), List.of());
         ValidationEngine engine = new DefaultValidationEngine(registry);
 
-        ValidationResult result = engine.validate(new ChangeSet(List.of(new ChangeSetEntry(
-                file, GitFileStatus.UNKNOWN, false, false, false, false, "test"))),
-                                                  ValidationMode.PRE_COMMIT);
+        ValidationResult result = engine.validate(
+                new ChangeSet(
+                        List.of(new ChangeSetEntry(file, GitFileStatus.UNKNOWN, false, false, false, false, "test"))),
+                ValidationMode.PRE_COMMIT);
 
         assertThat(result.mode()).isEqualTo(ValidationMode.PRE_COMMIT);
         assertThat(result.diagnostics()).singleElement().satisfies(diagnostic -> {
@@ -63,8 +63,7 @@ class DefaultValidationEngineTest {
         RuleRegistry registry = registry(List.of(check), List.of());
         ValidationEngine engine = new DefaultValidationEngine(registry);
 
-        FileValidationResult result = engine.validateFile(Path.of("README.md"),
-                                                          ValidationMode.INTERACTIVE);
+        FileValidationResult result = engine.validateFile(Path.of("README.md"), ValidationMode.INTERACTIVE);
 
         assertThat(result.diagnostics()).isEmpty();
         assertThat(check.checkCalls).isZero();
@@ -78,13 +77,10 @@ class DefaultValidationEngineTest {
         WatchPlan watchPlan = registry.watchPlan();
 
         assertThat(watchPlan.validatedFiles()).singleElement()
-                                              .satisfies(interest -> assertThat(
-                                                      interest.includeGlobs()).containsExactly(
-                                                      "src/main/java/**/*.java"));
+            .satisfies(interest -> assertThat(interest.includeGlobs()).containsExactly("src/main/java/**/*.java"));
     }
 
-    private RuleRegistry registry(List<CodeCheck> checks,
-                                  List<de.zorro909.codecheck.actions.FixAction> fixActions) {
+    private RuleRegistry registry(List<CodeCheck> checks, List<de.zorro909.codecheck.actions.FixAction> fixActions) {
         return new DefaultRuleRegistry(checks, fixActions);
     }
 
@@ -111,5 +107,7 @@ class DefaultValidationEngineTest {
         @Override
         public void resetCache(Path file) {
         }
+
     }
+
 }

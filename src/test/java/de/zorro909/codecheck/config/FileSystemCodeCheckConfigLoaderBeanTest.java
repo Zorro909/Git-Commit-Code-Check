@@ -15,4 +15,5 @@ class FileSystemCodeCheckConfigLoaderBeanTest {
             assertThat(loader).isInstanceOf(FileSystemCodeCheckConfigLoader.class);
         }
     }
+
 }

@@ -33,8 +33,8 @@ final class FixActionFixerAdapter implements Fixer {
     @Override
     public FixResult apply(FixPlan plan) {
         boolean fixed = fixAction.fixError(plan.diagnostic().toValidationError());
-        return fixed ? FixResult.applied(fixAction.affectedFiles(
-                             plan.diagnostic().toValidationError()))
-                     : FixResult.notApplied("Fix action returned false");
+        return fixed ? FixResult.applied(fixAction.affectedFiles(plan.diagnostic().toValidationError()))
+                : FixResult.notApplied("Fix action returned false");
     }
+
 }

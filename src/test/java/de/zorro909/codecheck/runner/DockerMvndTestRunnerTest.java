@@ -50,8 +50,8 @@ class DockerMvndTestRunnerTest {
         FakeDockerExecutor docker = new FakeDockerExecutor();
         DockerMvndTestRunner runner = runner(repo, docker, new MutableClock());
 
-        TestRunResult result = runner.runTests(TestRunRequest.targeted(
-                List.of("service-a"), List.of("UserTest", "OrderTest")));
+        TestRunResult result = runner
+            .runTests(TestRunRequest.targeted(List.of("service-a"), List.of("UserTest", "OrderTest")));
 
         assertThat(result.mavenCommand()).containsSubsequence("mvnd", "-pl", "service-a");
         assertThat(result.mavenCommand()).contains("-Dtest=UserTest,OrderTest");
@@ -63,8 +63,8 @@ class DockerMvndTestRunnerTest {
         FakeDockerExecutor docker = new FakeDockerExecutor();
         DockerMvndTestRunner runner = runner(repo, docker, new MutableClock());
 
-        TestRunResult result = runner.runTests(new TestRunRequest(
-                List.of(), List.of(), false, true, false, List.of("-DskipITs")));
+        TestRunResult result = runner
+            .runTests(new TestRunRequest(List.of(), List.of(), false, true, false, List.of("-DskipITs")));
 
         assertThat(result.mavenCommand()).containsSubsequence("mvnd", "-DskipITs", "test");
         assertThat(result.mavenCommand()).doesNotContain("jacoco:report");
@@ -90,8 +90,7 @@ class DockerMvndTestRunnerTest {
 
         runner.runTests(TestRunRequest.full());
 
-        assertThat(docker.removedRepositories)
-                .containsExactly(repo.toAbsolutePath().normalize());
+        assertThat(docker.removedRepositories).containsExactly(repo.toAbsolutePath().normalize());
         assertThat(docker.startedImages).hasSize(1);
     }
 
@@ -129,9 +128,13 @@ class DockerMvndTestRunnerTest {
     private static final class FakeDockerExecutor implements DockerCommandExecutor {
 
         private final List<String> startedImages = new ArrayList<>();
+
         private final List<List<String>> executedCommands = new ArrayList<>();
+
         private final List<String> stoppedContainers = new ArrayList<>();
+
         private final List<Path> removedRepositories = new ArrayList<>();
+
         private boolean running = true;
 
         @Override
@@ -162,6 +165,7 @@ class DockerMvndTestRunnerTest {
         public void removeContainersForRepository(Path repositoryRoot) {
             removedRepositories.add(repositoryRoot);
         }
+
     }
 
     private static final class MutableClock extends Clock {
@@ -186,5 +190,7 @@ class DockerMvndTestRunnerTest {
         private void advance(Duration duration) {
             now = now.plus(duration);
         }
+
     }
+
 }

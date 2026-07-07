@@ -14,12 +14,13 @@ public class FileSystemCodeCheckConfigLoader implements CodeCheckConfigLoader {
     static final String REPO_CONFIG_FILE = ".codecheck.yaml";
 
     private final Path repoDirectory;
+
     private final Path userConfig;
+
     private final CodeCheckConfigParser parser;
 
     @Inject
-    public FileSystemCodeCheckConfigLoader(
-            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repoDirectory) {
+    public FileSystemCodeCheckConfigLoader(@Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repoDirectory) {
         this(repoDirectory, defaultUserConfigPath());
     }
 
@@ -27,8 +28,7 @@ public class FileSystemCodeCheckConfigLoader implements CodeCheckConfigLoader {
         this(repoDirectory, userConfig, System.err::println);
     }
 
-    public FileSystemCodeCheckConfigLoader(Path repoDirectory, Path userConfig,
-                                           Consumer<String> warningConsumer) {
+    public FileSystemCodeCheckConfigLoader(Path repoDirectory, Path userConfig, Consumer<String> warningConsumer) {
         this.repoDirectory = repoDirectory.toAbsolutePath().normalize();
         this.userConfig = userConfig.toAbsolutePath().normalize();
         this.parser = new CodeCheckConfigParser(warningConsumer);
@@ -48,7 +48,7 @@ public class FileSystemCodeCheckConfigLoader implements CodeCheckConfigLoader {
     }
 
     private static Path defaultUserConfigPath() {
-        return Path.of(System.getProperty("user.home"), ".config", "git-commit-code-check",
-                       "config.yaml");
+        return Path.of(System.getProperty("user.home"), ".config", "git-commit-code-check", "config.yaml");
     }
+
 }

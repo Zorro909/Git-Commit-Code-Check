@@ -16,18 +16,20 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for ImplClassesHaveTestsCheck which ensures every *Impl.java class
- * in src/main/java has a corresponding *ImplTest.java in src/test/java.
+ * Tests for ImplClassesHaveTestsCheck which ensures every *Impl.java class in
+ * src/main/java has a corresponding *ImplTest.java in src/test/java.
  */
 class ImplClassesHaveTestsCheckTest {
 
     private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
+
     private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
     @TempDir
     Path tempDir;
 
     private FileLoader fileLoader;
+
     private ImplClassesHaveTestsCheck check;
 
     @BeforeEach
@@ -105,4 +107,5 @@ class ImplClassesHaveTestsCheckTest {
         assertThat(errors).hasSize(1);
         assertThat(errors.get(0).errorMessage()).contains("RepositoryImpl.java");
     }
+
 }

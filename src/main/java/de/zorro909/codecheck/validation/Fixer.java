@@ -15,4 +15,5 @@ public interface Fixer {
     default boolean availableIn(ValidationMode mode) {
         return metadata().interaction() != FixInteraction.INTERACTIVE || mode.allowsInteractiveFixers();
     }
+
 }

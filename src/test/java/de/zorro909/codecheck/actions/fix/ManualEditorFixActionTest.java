@@ -13,12 +13,13 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for ManualEditorFixAction — the fix action that opens an editor
- * for the user to manually fix validation errors.
+ * Tests for ManualEditorFixAction — the fix action that opens an editor for the user to
+ * manually fix validation errors.
  */
 class ManualEditorFixActionTest {
 
     private ManualEditorFixAction action;
+
     private StubEditorExecutor stubEditorExecutor;
 
     @BeforeEach
@@ -31,10 +32,7 @@ class ManualEditorFixActionTest {
 
     @Test
     void canFixError_alwaysReturnsTrue() {
-        ValidationError error = new ValidationError(
-                Path.of("src/Example.java"),
-                "Some error",
-                new Position(1, 1),
+        ValidationError error = new ValidationError(Path.of("src/Example.java"), "Some error", new Position(1, 1),
                 ValidationError.Severity.LOW);
 
         assertThat(action.canFixError(error)).isTrue();
@@ -44,14 +42,11 @@ class ManualEditorFixActionTest {
     void canFixError_returnsTrueForDifferentSeverities() {
         Path filePath = Path.of("src/Example.java");
 
-        ValidationError lowError = new ValidationError(
-                filePath, "Low error", new Position(1, 1),
+        ValidationError lowError = new ValidationError(filePath, "Low error", new Position(1, 1),
                 ValidationError.Severity.LOW);
-        ValidationError mediumError = new ValidationError(
-                filePath, "Medium error", new Position(5, 10),
+        ValidationError mediumError = new ValidationError(filePath, "Medium error", new Position(5, 10),
                 ValidationError.Severity.MEDIUM);
-        ValidationError highError = new ValidationError(
-                filePath, "High error", new Position(20, 3),
+        ValidationError highError = new ValidationError(filePath, "High error", new Position(20, 3),
                 ValidationError.Severity.HIGH);
 
         assertThat(action.canFixError(lowError)).isTrue();
@@ -65,9 +60,7 @@ class ManualEditorFixActionTest {
     void fixError_delegatesToEditorExecutor() {
         Path filePath = Path.of("src/Example.java");
         Position position = new Position(10, 5);
-        ValidationError error = new ValidationError(
-                filePath, "Test error", position,
-                ValidationError.Severity.MEDIUM);
+        ValidationError error = new ValidationError(filePath, "Test error", position, ValidationError.Severity.MEDIUM);
 
         stubEditorExecutor.setOpenAndWaitResult(true);
         action.fixError(error);
@@ -79,10 +72,7 @@ class ManualEditorFixActionTest {
 
     @Test
     void fixError_returnsTrueWhenEditorSucceeds() {
-        ValidationError error = new ValidationError(
-                Path.of("src/Example.java"),
-                "Test error",
-                new Position(1, 1),
+        ValidationError error = new ValidationError(Path.of("src/Example.java"), "Test error", new Position(1, 1),
                 ValidationError.Severity.LOW);
 
         stubEditorExecutor.setOpenAndWaitResult(true);
@@ -92,10 +82,7 @@ class ManualEditorFixActionTest {
 
     @Test
     void fixError_returnsFalseWhenEditorFails() {
-        ValidationError error = new ValidationError(
-                Path.of("src/Example.java"),
-                "Test error",
-                new Position(1, 1),
+        ValidationError error = new ValidationError(Path.of("src/Example.java"), "Test error", new Position(1, 1),
                 ValidationError.Severity.LOW);
 
         stubEditorExecutor.setOpenAndWaitResult(false);
@@ -107,28 +94,21 @@ class ManualEditorFixActionTest {
     void fixError_passesCorrectPositionToEditor() {
         Position expectedPosition = new Position(42, 17);
         Path expectedPath = Path.of("src/deep/nested/MyClass.java");
-        ValidationError error = new ValidationError(
-                expectedPath, "Position test", expectedPosition,
+        ValidationError error = new ValidationError(expectedPath, "Position test", expectedPosition,
                 ValidationError.Severity.HIGH);
 
         stubEditorExecutor.setOpenAndWaitResult(true);
         action.fixError(error);
 
-        assertThat(stubEditorExecutor.getLastOpenAndWaitPosition().line)
-                .isEqualTo(42);
-        assertThat(stubEditorExecutor.getLastOpenAndWaitPosition().column)
-                .isEqualTo(17);
-        assertThat(stubEditorExecutor.getLastOpenAndWaitPath())
-                .isEqualTo(expectedPath);
+        assertThat(stubEditorExecutor.getLastOpenAndWaitPosition().line).isEqualTo(42);
+        assertThat(stubEditorExecutor.getLastOpenAndWaitPosition().column).isEqualTo(17);
+        assertThat(stubEditorExecutor.getLastOpenAndWaitPath()).isEqualTo(expectedPath);
     }
 
     @Test
     void fixError_printsValidationError() {
-        ValidationError error = new ValidationError(
-                Path.of("src/Example.java"),
-                "Missing semicolon",
-                new Position(5, 10),
-                ValidationError.Severity.HIGH);
+        ValidationError error = new ValidationError(Path.of("src/Example.java"), "Missing semicolon",
+                new Position(5, 10), ValidationError.Severity.HIGH);
 
         PrintStream originalOut = System.out;
         ByteArrayOutputStream capturedOutput = new ByteArrayOutputStream();
@@ -137,7 +117,8 @@ class ManualEditorFixActionTest {
 
             stubEditorExecutor.setOpenAndWaitResult(true);
             action.fixError(error);
-        } finally {
+        }
+        finally {
             System.setOut(originalOut);
         }
 
@@ -152,8 +133,11 @@ class ManualEditorFixActionTest {
     private static class StubEditorExecutor implements EditorExecutor {
 
         private boolean openAndWaitResult;
+
         private Path lastOpenAndWaitPath;
+
         private Position lastOpenAndWaitPosition;
+
         private int openAndWaitCallCount;
 
         void setOpenAndWaitResult(boolean result) {
@@ -184,5 +168,7 @@ class ManualEditorFixActionTest {
             lastOpenAndWaitPosition = line;
             return openAndWaitResult;
         }
+
     }
+
 }

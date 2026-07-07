@@ -7,4 +7,5 @@ public interface CoverageService {
     CoverageFreshness freshness(CoverageRequest request);
 
     CoverageSnapshot refreshCoverage(CoverageRequest request);
+
 }

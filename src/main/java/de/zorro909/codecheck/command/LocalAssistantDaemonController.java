@@ -13,12 +13,13 @@ import java.io.PrintStream;
 public class LocalAssistantDaemonController implements AssistantDaemonController {
 
     private final DaemonServer daemonServer;
+
     private final DaemonProcessRegistry daemonProcessRegistry;
+
     private final CodeCheckConfigLoader configLoader;
 
-    public LocalAssistantDaemonController(DaemonServer daemonServer,
-                                          DaemonProcessRegistry daemonProcessRegistry,
-                                          CodeCheckConfigLoader configLoader) {
+    public LocalAssistantDaemonController(DaemonServer daemonServer, DaemonProcessRegistry daemonProcessRegistry,
+            CodeCheckConfigLoader configLoader) {
         this.daemonServer = daemonServer;
         this.daemonProcessRegistry = daemonProcessRegistry;
         this.configLoader = configLoader;
@@ -35,7 +36,8 @@ public class LocalAssistantDaemonController implements AssistantDaemonController
         daemonProcessRegistry.write(metadata);
         try {
             daemonServer.run(metadata, config.daemon().inactivityTimeout());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             daemonProcessRegistry.clear();
             throw e;
         }
@@ -44,11 +46,9 @@ public class LocalAssistantDaemonController implements AssistantDaemonController
     @Override
     public void printStatus(PrintStream out) {
         daemonProcessRegistry.aliveMetadata()
-                             .ifPresentOrElse(
-                                     metadata -> out.println("Assistant daemon running on "
-                                                             + metadata.host() + ":"
-                                                             + metadata.port()),
-                                     () -> out.println("Assistant daemon is not running."));
+            .ifPresentOrElse(
+                    metadata -> out.println("Assistant daemon running on " + metadata.host() + ":" + metadata.port()),
+                    () -> out.println("Assistant daemon is not running."));
     }
 
     @Override
@@ -56,4 +56,5 @@ public class LocalAssistantDaemonController implements AssistantDaemonController
         throw new UnsupportedOperationException(
                 "Daemon-backed fix selection is not available yet for diagnostic " + diagnosticId);
     }
+
 }

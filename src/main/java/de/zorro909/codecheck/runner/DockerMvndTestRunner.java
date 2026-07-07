@@ -17,24 +17,25 @@ import java.util.List;
 public class DockerMvndTestRunner implements TestRunner {
 
     private final Path repositoryRoot;
+
     private final CodeCheckConfigLoader configLoader;
+
     private final DockerCommandExecutor docker;
+
     private final Clock clock;
+
     private String containerId;
+
     private Instant lastUsed;
 
     @Inject
-    public DockerMvndTestRunner(
-            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryRoot,
-            CodeCheckConfigLoader configLoader,
-            DockerCommandExecutor docker) {
+    public DockerMvndTestRunner(@Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryRoot,
+            CodeCheckConfigLoader configLoader, DockerCommandExecutor docker) {
         this(repositoryRoot, configLoader, docker, Clock.systemUTC());
     }
 
-    DockerMvndTestRunner(Path repositoryRoot,
-                         CodeCheckConfigLoader configLoader,
-                         DockerCommandExecutor docker,
-                         Clock clock) {
+    DockerMvndTestRunner(Path repositoryRoot, CodeCheckConfigLoader configLoader, DockerCommandExecutor docker,
+            Clock clock) {
         this.repositoryRoot = repositoryRoot.toAbsolutePath().normalize();
         this.configLoader = configLoader;
         this.docker = docker;
@@ -48,8 +49,8 @@ public class DockerMvndTestRunner implements TestRunner {
         List<String> command = mavenCommand(config, request);
         CommandResult result = docker.exec(activeContainer, repositoryRoot, command);
         lastUsed = clock.instant();
-        return new TestRunResult(result.success(), result.exitCode(), result.stdout(),
-                                 result.stderr(), activeContainer, command);
+        return new TestRunResult(result.success(), result.exitCode(), result.stdout(), result.stderr(), activeContainer,
+                command);
     }
 
     @Override
@@ -65,10 +66,8 @@ public class DockerMvndTestRunner implements TestRunner {
         if (containerId == null || lastUsed == null) {
             return;
         }
-        if (lastUsed.plus(configLoader.load().maven().docker().containerIdleTimeout())
-                    .isBefore(clock.instant())
-            || lastUsed.plus(configLoader.load().maven().docker().containerIdleTimeout())
-                       .equals(clock.instant())) {
+        if (lastUsed.plus(configLoader.load().maven().docker().containerIdleTimeout()).isBefore(clock.instant())
+                || lastUsed.plus(configLoader.load().maven().docker().containerIdleTimeout()).equals(clock.instant())) {
             stop();
         }
     }
@@ -76,8 +75,7 @@ public class DockerMvndTestRunner implements TestRunner {
     private String ensureContainer(CodeCheckConfig.Maven config) {
         if (containerId == null || !docker.isRunning(containerId)) {
             docker.removeContainersForRepository(repositoryRoot);
-            containerId = docker.startContainer(config.docker().image(), repositoryRoot,
-                                                config.docker().mountM2());
+            containerId = docker.startContainer(config.docker().image(), repositoryRoot, config.docker().mountM2());
         }
         lastUsed = clock.instant();
         return containerId;
@@ -93,8 +91,7 @@ public class DockerMvndTestRunner implements TestRunner {
         command.addAll(config.args());
         command.addAll(request.additionalMavenArgs());
         if (!request.testClasses().isEmpty()) {
-            command.add(config.targetedTestProperty() + "="
-                        + String.join(",", request.testClasses()));
+            command.add(config.targetedTestProperty() + "=" + String.join(",", request.testClasses()));
         }
         command.addAll(config.goals());
         if (!request.generateCoverageReport()) {
@@ -102,4 +99,5 @@ public class DockerMvndTestRunner implements TestRunner {
         }
         return command;
     }
+
 }

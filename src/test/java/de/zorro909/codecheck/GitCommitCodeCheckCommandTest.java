@@ -118,5 +118,7 @@ class GitCommitCodeCheckCommandTest {
             calledMode = "fix:" + diagnosticId;
             return CommandOutcome.success();
         }
+
     }
+
 }

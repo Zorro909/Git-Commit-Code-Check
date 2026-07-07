@@ -2,8 +2,7 @@ package de.zorro909.codecheck.validation;
 
 import java.util.List;
 
-public record ValidationResult(ValidationMode mode,
-                               List<FileValidationResult> fileResults) {
+public record ValidationResult(ValidationMode mode, List<FileValidationResult> fileResults) {
 
     public ValidationResult {
         fileResults = List.copyOf(fileResults);

@@ -20,12 +20,13 @@ import java.util.Set;
 public class MavenProjectModelService implements ProjectModelService {
 
     private final Path repositoryRoot;
+
     private final CodeCheckConfigLoader configLoader;
+
     private volatile ProjectModel currentModel;
 
     @Inject
-    public MavenProjectModelService(
-            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryRoot,
+    public MavenProjectModelService(@Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryRoot,
             CodeCheckConfigLoader configLoader) {
         this.repositoryRoot = repositoryRoot.toAbsolutePath().normalize();
         this.configLoader = configLoader;
@@ -47,8 +48,7 @@ public class MavenProjectModelService implements ProjectModelService {
     @Override
     public ProjectModel refresh() {
         int languageLevel = configLoader.load().javaProject().languageLevel();
-        ProjectModel model = new ProjectModel(repositoryRoot, repositoryRoot,
-                                              discoverModules(), languageLevel);
+        ProjectModel model = new ProjectModel(repositoryRoot, repositoryRoot, discoverModules(), languageLevel);
         currentModel = model;
         return model;
     }
@@ -77,20 +77,18 @@ public class MavenProjectModelService implements ProjectModelService {
                 }
             }
             return modules;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new IllegalStateException("Unable to read Maven modules from " + pom, e);
         }
     }
 
     private MavenModule module(Path moduleRoot) {
-        String relative = repositoryRoot.equals(moduleRoot)
-                          ? "."
-                          : repositoryRoot.relativize(moduleRoot).toString();
-        return new MavenModule(new ModuleId(relative), moduleRoot,
-                               List.of(moduleRoot.resolve("src/main/java")),
-                               List.of(moduleRoot.resolve("src/test/java")),
-                               List.of(moduleRoot.resolve("target/generated-sources/annotations")),
-                               List.of(moduleRoot.resolve(
-                                       "target/generated-test-sources/test-annotations")));
+        String relative = repositoryRoot.equals(moduleRoot) ? "." : repositoryRoot.relativize(moduleRoot).toString();
+        return new MavenModule(new ModuleId(relative), moduleRoot, List.of(moduleRoot.resolve("src/main/java")),
+                List.of(moduleRoot.resolve("src/test/java")),
+                List.of(moduleRoot.resolve("target/generated-sources/annotations")),
+                List.of(moduleRoot.resolve("target/generated-test-sources/test-annotations")));
     }
+
 }

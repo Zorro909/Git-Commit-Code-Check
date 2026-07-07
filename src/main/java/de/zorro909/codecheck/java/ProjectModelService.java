@@ -5,4 +5,5 @@ public interface ProjectModelService {
     ProjectModel currentModel();
 
     ProjectModel refresh();
+
 }

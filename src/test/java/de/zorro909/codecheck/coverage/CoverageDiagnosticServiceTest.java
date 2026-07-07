@@ -16,8 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CoverageDiagnosticServiceTest {
 
     @Test
-    void mapStructMapperDiagnosticsUseGeneratedImplementationCoverage(@TempDir Path repo)
-            throws Exception {
+    void mapStructMapperDiagnosticsUseGeneratedImplementationCoverage(@TempDir Path repo) throws Exception {
         Path mapper = write(repo.resolve("src/main/java/com/example/UserMapper.java"), """
                 package com.example;
 
@@ -26,11 +25,8 @@ class CoverageDiagnosticServiceTest {
                 @Mapper
                 public interface UserMapper {}
                 """);
-        CoverageSnapshot snapshot = new CoverageSnapshot(Map.of(
-                "com/example/UserMapperImpl",
-                new ClassCoverage("com/example/UserMapperImpl",
-                                  new CoverageMetric(3, 7),
-                                  new CoverageMetric(2, 2))));
+        CoverageSnapshot snapshot = new CoverageSnapshot(Map.of("com/example/UserMapperImpl",
+                new ClassCoverage("com/example/UserMapperImpl", new CoverageMetric(3, 7), new CoverageMetric(2, 2))));
         CoverageThreshold fallback = new CoverageThreshold(new CoverageThresholdMatch(null, null), 0.80, 0.70);
         CoverageDiagnosticService service = new CoverageDiagnosticService(
                 new CoverageThresholdPolicy(List.of(), fallback), new MapStructCoverageAttributor());
@@ -43,12 +39,12 @@ class CoverageDiagnosticServiceTest {
             assertThat(diagnostic.kind()).isEqualTo(DiagnosticKind.COVERAGE_FAILURE);
             assertThat(diagnostic.severity()).isEqualTo(ValidationError.Severity.HIGH);
         });
-        assertThat(diagnostics).extracting(diagnostic -> diagnostic.ruleId().value())
-                               .containsOnly("coverage.jacoco");
+        assertThat(diagnostics).extracting(diagnostic -> diagnostic.ruleId().value()).containsOnly("coverage.jacoco");
     }
 
     private static Path write(Path path, String content) throws IOException {
         Files.createDirectories(path.getParent());
         return Files.writeString(path, content);
     }
+
 }

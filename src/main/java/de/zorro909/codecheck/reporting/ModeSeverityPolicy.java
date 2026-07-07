@@ -21,4 +21,5 @@ public class ModeSeverityPolicy {
             case ASSISTANT -> false;
         };
     }
+
 }

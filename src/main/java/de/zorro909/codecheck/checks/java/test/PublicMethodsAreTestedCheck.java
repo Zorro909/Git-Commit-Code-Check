@@ -34,8 +34,7 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
     }
 
     @Inject
-    public PublicMethodsAreTestedCheck(FileLoader fileLoader,
-                                       JavaParserService javaParserService) {
+    public PublicMethodsAreTestedCheck(FileLoader fileLoader, JavaParserService javaParserService) {
         super(fileLoader, javaParserService);
     }
 
@@ -47,13 +46,14 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
     @Override
     public List<ValidationError> check(CompilationUnit javaUnit) {
 
-        List<MethodDeclaration> publicMethods =
-            javaUnit.findAll(MethodDeclaration.class).stream().filter(MethodDeclaration::isPublic).filter(
-                Predicate.not(MethodDeclarationExtensions::isSimpleGetterOrSetter)).toList();
+        List<MethodDeclaration> publicMethods = javaUnit.findAll(MethodDeclaration.class)
+            .stream()
+            .filter(MethodDeclaration::isPublic)
+            .filter(Predicate.not(MethodDeclarationExtensions::isSimpleGetterOrSetter))
+            .toList();
 
         Path filePath = getPath(javaUnit);
-        filePath =
-            Path.of(filePath.toString().replace("main", "test").replace("Impl.java", "ImplTest.java"));
+        filePath = Path.of(filePath.toString().replace("main", "test").replace("Impl.java", "ImplTest.java"));
 
         if (!Files.exists(filePath)) {
             return new ArrayList<>();
@@ -72,8 +72,8 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
             while (methodDeclarationIterator.hasNext()) {
                 MethodDeclaration methodDeclaration = methodDeclarationIterator.next();
                 if (methodDeclaration.getNameAsString().equals(name)) {
-                    if (methodDeclaration.getTypeParameters().size() == callExpr.getTypeArguments().map(
-                        NodeList::size).orElse(0)) {
+                    if (methodDeclaration.getTypeParameters()
+                        .size() == callExpr.getTypeArguments().map(NodeList::size).orElse(0)) {
                         methodDeclarationIterator.remove();
                         return;
                     }
@@ -81,10 +81,10 @@ public class PublicMethodsAreTestedCheck extends JavaChecker {
             }
         });
 
-        return publicMethods.stream().map(method ->
-            CompilationUnitExtensions.validationError(javaUnit, method, ValidationError.Severity.MEDIUM,
-                "Method '" + method.getNameAsString()
-                    + "' is not used in any Tests! Probably missing coverage.")
-        ).toList();
+        return publicMethods.stream()
+            .map(method -> CompilationUnitExtensions.validationError(javaUnit, method, ValidationError.Severity.MEDIUM,
+                    "Method '" + method.getNameAsString() + "' is not used in any Tests! Probably missing coverage."))
+            .toList();
     }
+
 }

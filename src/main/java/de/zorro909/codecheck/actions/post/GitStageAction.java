@@ -34,21 +34,20 @@ public class GitStageAction implements PostAction {
                 commandList.add("add");
 
                 // Constructing the command list
-                files.stream()
-                     .skip(startIndex)
-                     .limit(filesPerBatch)
-                     .map(Path::toString)
-                     .forEach(commandList::add);
+                files.stream().skip(startIndex).limit(filesPerBatch).map(Path::toString).forEach(commandList::add);
 
                 ProcessBuilder builder = new ProcessBuilder(commandList);
                 builder.directory(repositoryPath.toAbsolutePath().toFile());
                 Process process = builder.start();
                 process.waitFor();
                 startIndex += filesPerBatch;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 if (filesPerBatch > 1) {
-                    filesPerBatch /= 2; // decrease the number of files to process at a time
-                } else {
+                    filesPerBatch /= 2; // decrease the number of files to process at a
+                                        // time
+                }
+                else {
                     System.err.println("Failed to add file");
                     ex.printStackTrace();
                     return false;
@@ -57,4 +56,5 @@ public class GitStageAction implements PostAction {
         }
         return true;
     }
+
 }

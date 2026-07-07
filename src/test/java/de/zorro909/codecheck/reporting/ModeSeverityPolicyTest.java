@@ -12,24 +12,17 @@ class ModeSeverityPolicyTest {
 
     @Test
     void preCommitHidesLowButShowsMediumAndHigh() {
-        assertThat(policy.visible(ValidationMode.PRE_COMMIT, ValidationError.Severity.LOW))
-                .isFalse();
-        assertThat(policy.visible(ValidationMode.PRE_COMMIT, ValidationError.Severity.MEDIUM))
-                .isTrue();
-        assertThat(policy.visible(ValidationMode.PRE_COMMIT, ValidationError.Severity.HIGH))
-                .isTrue();
+        assertThat(policy.visible(ValidationMode.PRE_COMMIT, ValidationError.Severity.LOW)).isFalse();
+        assertThat(policy.visible(ValidationMode.PRE_COMMIT, ValidationError.Severity.MEDIUM)).isTrue();
+        assertThat(policy.visible(ValidationMode.PRE_COMMIT, ValidationError.Severity.HIGH)).isTrue();
     }
 
     @Test
     void preCommitAndBatchOnlyBlockOnHigh() {
-        assertThat(policy.blocks(ValidationMode.PRE_COMMIT, ValidationError.Severity.MEDIUM))
-                .isFalse();
-        assertThat(policy.blocks(ValidationMode.PRE_COMMIT, ValidationError.Severity.HIGH))
-                .isTrue();
-        assertThat(policy.blocks(ValidationMode.BATCH, ValidationError.Severity.LOW))
-                .isFalse();
-        assertThat(policy.blocks(ValidationMode.BATCH, ValidationError.Severity.HIGH))
-                .isTrue();
+        assertThat(policy.blocks(ValidationMode.PRE_COMMIT, ValidationError.Severity.MEDIUM)).isFalse();
+        assertThat(policy.blocks(ValidationMode.PRE_COMMIT, ValidationError.Severity.HIGH)).isTrue();
+        assertThat(policy.blocks(ValidationMode.BATCH, ValidationError.Severity.LOW)).isFalse();
+        assertThat(policy.blocks(ValidationMode.BATCH, ValidationError.Severity.HIGH)).isTrue();
     }
 
     @Test
@@ -39,4 +32,5 @@ class ModeSeverityPolicyTest {
             assertThat(policy.visible(ValidationMode.INTERACTIVE, severity)).isTrue();
         }
     }
+
 }

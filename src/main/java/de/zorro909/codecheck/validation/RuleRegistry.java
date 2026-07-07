@@ -13,4 +13,5 @@ public interface RuleRegistry {
     default List<Fixer> activeFixers(ValidationMode mode) {
         return activeFixers().stream().filter(fixer -> fixer.availableIn(mode)).toList();
     }
+
 }

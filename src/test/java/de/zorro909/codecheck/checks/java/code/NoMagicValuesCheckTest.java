@@ -16,12 +16,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for NoMagicValuesCheck which detects hardcoded literal values
- * passed as arguments to method calls and constructors.
+ * Tests for NoMagicValuesCheck which detects hardcoded literal values passed as arguments
+ * to method calls and constructors.
  */
 class NoMagicValuesCheckTest {
 
     private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
+
     private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
     @TempDir
@@ -200,8 +201,7 @@ class NoMagicValuesCheckTest {
 
     // --- helper ---
 
-    private List<ValidationError> parseAndCheck(String source, String packageDir, String fileName)
-            throws IOException {
+    private List<ValidationError> parseAndCheck(String source, String packageDir, String fileName) throws IOException {
         Path srcDir = tempDir.resolve(MAIN_FOLDER).resolve(packageDir);
         Files.createDirectories(srcDir);
         Path filePath = srcDir.resolve(fileName);
@@ -210,4 +210,5 @@ class NoMagicValuesCheckTest {
 
         return check.check(filePath);
     }
+
 }

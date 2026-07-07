@@ -7,4 +7,5 @@ public class DaemonRestartRequiredException extends RuntimeException {
     public DaemonRestartRequiredException(Path configPath) {
         super("Configuration changed; daemon restart required: " + configPath);
     }
+
 }

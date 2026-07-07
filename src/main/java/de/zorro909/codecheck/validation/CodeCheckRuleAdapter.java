@@ -39,9 +39,7 @@ final class CodeCheckRuleAdapter implements Rule {
         if (!codeCheck.isResponsible(file)) {
             return List.of();
         }
-        return codeCheck.check(file)
-                        .stream()
-                        .map(error -> Diagnostic.fromValidationError(error, id()))
-                        .toList();
+        return codeCheck.check(file).stream().map(error -> Diagnostic.fromValidationError(error, id())).toList();
     }
+
 }

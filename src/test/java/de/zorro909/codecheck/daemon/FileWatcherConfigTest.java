@@ -32,9 +32,7 @@ class FileWatcherConfigTest {
                 return load();
             }
         };
-        FileWatcher watcher = new FileWatcher(daemonServer(),
-                                              repositoryPathProvider(tempDir),
-                                              countingLoader);
+        FileWatcher watcher = new FileWatcher(daemonServer(), repositoryPathProvider(tempDir), countingLoader);
 
         watcher.watch();
 
@@ -63,8 +61,10 @@ class FileWatcherConfigTest {
             java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(target, value);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException("Failed to set field: " + fieldName, e);
         }
     }
+
 }

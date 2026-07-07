@@ -18,17 +18,15 @@ public class MethodDeclarationExtensions {
                 return true;
             }
             Optional<ReturnStmt> returnStmt = method.getBody()
-                .flatMap(block -> block.getStatements()
-                    .getFirst())
+                .flatMap(block -> block.getStatements().getFirst())
                 .filter(Statement::isReturnStmt)
                 .map(Statement::asReturnStmt);
             if (returnStmt.isPresent()) {
                 Optional<Expression> firstExpression = returnStmt.get().getExpression();
                 if (firstExpression.isPresent()) {
                     String expression = firstExpression.get().toString().trim();
-                    if (expression.equalsIgnoreCase(
-                        "this." + method.getNameAsString()) || expression.equalsIgnoreCase(
-                        method.getNameAsString())) {
+                    if (expression.equalsIgnoreCase("this." + method.getNameAsString())
+                            || expression.equalsIgnoreCase(method.getNameAsString())) {
                         return true;
                     }
                 }

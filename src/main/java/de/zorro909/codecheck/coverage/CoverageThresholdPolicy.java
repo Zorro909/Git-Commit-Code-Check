@@ -10,19 +10,19 @@ import java.util.List;
 public class CoverageThresholdPolicy {
 
     private final List<CoverageThreshold> thresholds;
+
     private final CoverageThreshold fallback;
 
-    public CoverageThresholdPolicy(List<CoverageThreshold> thresholds,
-                                   CoverageThreshold fallback) {
+    public CoverageThresholdPolicy(List<CoverageThreshold> thresholds, CoverageThreshold fallback) {
         this.thresholds = List.copyOf(thresholds);
         this.fallback = fallback;
     }
 
     public CoverageThreshold thresholdFor(Path sourceFile) {
         return thresholds.stream()
-                         .filter(threshold -> matches(threshold.match(), sourceFile))
-                         .max(Comparator.comparingInt(threshold -> specificity(threshold.match())))
-                         .orElse(fallback);
+            .filter(threshold -> matches(threshold.match(), sourceFile))
+            .max(Comparator.comparingInt(threshold -> specificity(threshold.match())))
+            .orElse(fallback);
     }
 
     private boolean matches(CoverageThresholdMatch match, Path sourceFile) {
@@ -66,14 +66,15 @@ public class CoverageThresholdPolicy {
             String source = Files.readString(sourceFile);
             String simpleName = annotation.substring(annotation.lastIndexOf('.') + 1);
             return source.contains("@" + annotation) || source.contains("@" + simpleName);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IllegalStateException("Unable to read " + sourceFile, e);
         }
     }
 
     private boolean globMatches(String glob, Path sourceFile) {
         return glob != null && !glob.isBlank()
-               && FileSystems.getDefault().getPathMatcher("glob:" + glob).matches(sourceFile);
+                && FileSystems.getDefault().getPathMatcher("glob:" + glob).matches(sourceFile);
     }
 
     private boolean classMatches(String className, Path sourceFile) {
@@ -105,14 +106,15 @@ public class CoverageThresholdPolicy {
         try {
             String source = Files.readString(sourceFile);
             String packageName = java.util.regex.Pattern.compile("package\\s+([\\w.]+)\\s*;")
-                                                        .matcher(source)
-                                                        .results()
-                                                        .map(match -> match.group(1))
-                                                        .findFirst()
-                                                        .orElse("");
+                .matcher(source)
+                .results()
+                .map(match -> match.group(1))
+                .findFirst()
+                .orElse("");
             String simpleName = sourceFile.getFileName().toString().replaceFirst("\\.java$", "");
             return packageName.isBlank() ? simpleName : packageName + "." + simpleName;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IllegalStateException("Unable to read " + sourceFile, e);
         }
     }
@@ -133,4 +135,5 @@ public class CoverageThresholdPolicy {
         }
         return score;
     }
+
 }

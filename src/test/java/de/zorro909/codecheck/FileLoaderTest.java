@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for FileLoader — the utility class that resolves and reads files
- * relative to a root directory.
+ * Tests for FileLoader — the utility class that resolves and reads files relative to a
+ * root directory.
  */
 class FileLoaderTest {
 
@@ -77,7 +77,7 @@ class FileLoaderTest {
     @Test
     void shouldReadBinaryFileContents() throws IOException {
         Path file = tempDir.resolve("data.bin");
-        byte[] expectedData = new byte[]{0x01, 0x02, 0x03, (byte) 0xFF};
+        byte[] expectedData = new byte[] { 0x01, 0x02, 0x03, (byte) 0xFF };
         Files.write(file, expectedData);
 
         byte[] contents = fileLoader.readFile("data.bin");
@@ -87,8 +87,7 @@ class FileLoaderTest {
 
     @Test
     void shouldThrowIOExceptionWhenReadingNonExistentFile() {
-        assertThatThrownBy(() -> fileLoader.readFile("nonexistent.txt"))
-                .isInstanceOf(IOException.class);
+        assertThatThrownBy(() -> fileLoader.readFile("nonexistent.txt")).isInstanceOf(IOException.class);
     }
 
     @Test
@@ -176,7 +175,8 @@ class FileLoaderTest {
         Path dir = tempDir.resolve("somedir");
         Files.createDirectories(dir);
 
-        // A directory is not a "file" in the usual sense, but File.exists() returns true for directories
+        // A directory is not a "file" in the usual sense, but File.exists() returns true
+        // for directories
         // This test documents current behavior
         assertThat(fileLoader.fileExists("somedir")).isTrue();
     }
@@ -190,4 +190,5 @@ class FileLoaderTest {
 
         assertThat(contents).isEmpty();
     }
+
 }

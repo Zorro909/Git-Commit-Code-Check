@@ -9,4 +9,5 @@ public interface ValidationEngine {
     ValidationResult validate(ChangeSet changeSet, ValidationMode mode);
 
     FileValidationResult validateFile(Path file, ValidationMode mode);
+
 }

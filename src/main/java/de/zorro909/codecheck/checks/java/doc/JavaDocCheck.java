@@ -35,24 +35,22 @@ import de.zorro909.codecheck.java.JavaParserService;
 import de.zorro909.codecheck.utils.MethodDeclarationExtensions;
 
 /**
- * This class is responsible for checking the correctness of Java code by enforcing JavaDoc comments for
- * public classes and methods that are not getter or setter methods or overridden methods. It extends the
- * {@link JavaChecker} abstract class.
+ * This class is responsible for checking the correctness of Java code by enforcing
+ * JavaDoc comments for public classes and methods that are not getter or setter methods
+ * or overridden methods. It extends the {@link JavaChecker} abstract class.
  */
 @Singleton
 public final class JavaDocCheck extends JavaChecker {
 
-    private static final String MAIN_FOLDER =
-        "src" + File.separatorChar + "main" + File.separatorChar + "java";
+    private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
 
-    private static final String TEST_FOLDER =
-        "src" + File.separatorChar + "test" + File.separatorChar + "java";
+    private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
-    public static final String ERROR_MESSAGE_CLASS =
-        "Public class doesn't implement an interface" + " and doesn't have a javadoc comment";
+    public static final String ERROR_MESSAGE_CLASS = "Public class doesn't implement an interface"
+            + " and doesn't have a javadoc comment";
 
     public static final String ERROR_MESSAGE_METHOD = "Public method doesn't have a @Override "
-        + "annotation, is not a simple getter or setter, and doesn't have a javadoc comment";
+            + "annotation, is not a simple getter or setter, and doesn't have a javadoc comment";
 
     public static final String ERROR_MESSAGE_TEST_METHOD = "Test method doesn't have a javadoc comment";
 
@@ -71,77 +69,74 @@ public final class JavaDocCheck extends JavaChecker {
 
     @Override
     public boolean isJavaResponsible(Path path) {
-        return path.toString().contains(MAIN_FOLDER) || (path.toString().contains(TEST_FOLDER)
-            && path.toString().endsWith("Test.java"));
+        return path.toString().contains(MAIN_FOLDER)
+                || (path.toString().contains(TEST_FOLDER) && path.toString().endsWith("Test.java"));
     }
 
     @Override
     public List<ValidationError> check(CompilationUnit javaUnit) {
         List<ValidationError> errors = new LinkedList<>();
 
-        javaUnit.findAll(TypeDeclaration.class,
-                decl -> decl.getAccessSpecifier() == AccessSpecifier.PUBLIC)
+        javaUnit.findAll(TypeDeclaration.class, decl -> decl.getAccessSpecifier() == AccessSpecifier.PUBLIC)
             .stream()
             .filter(this::hasNoJavaDoc)
             .filter(coi -> hasNoImplements(javaUnit, coi))
             .map(Node::getBegin)
             .map(pos -> new ValidationError(getPath(javaUnit), ERROR_MESSAGE_CLASS, pos,
-                ValidationError.Severity.MEDIUM))
+                    ValidationError.Severity.MEDIUM))
             .forEach(errors::add);
 
-        javaUnit.findAll(ClassOrInterfaceDeclaration.class,
-                decl -> decl.getAccessSpecifier() == AccessSpecifier.PUBLIC && decl.isInterface())
+        javaUnit
+            .findAll(ClassOrInterfaceDeclaration.class,
+                    decl -> decl.getAccessSpecifier() == AccessSpecifier.PUBLIC && decl.isInterface())
             .stream()
             .filter(decl -> !decl.getNameAsString().endsWith(EXCLUSIION_MAPPER_CLASS_SUFFIX))
             .flatMap(decl -> decl.findAll(MethodDeclaration.class).stream())
             .filter(method -> method.getAccessSpecifier() == AccessSpecifier.NONE)
             .filter(this::hasNoJavaDoc)
-            .filter(method -> method.getAnnotationByName(EXCLUSION_OVERRIDE_ANNOTAION)
-                .isEmpty())
+            .filter(method -> method.getAnnotationByName(EXCLUSION_OVERRIDE_ANNOTAION).isEmpty())
             .filter(MethodDeclarationExtensions::isSimpleGetterOrSetter)
             .map(Node::getBegin)
             .map(pos -> new ValidationError(getPath(javaUnit), ERROR_MESSAGE_METHOD, pos,
-                ValidationError.Severity.MEDIUM))
+                    ValidationError.Severity.MEDIUM))
             .forEach(errors::add);
 
-        javaUnit.findAll(MethodDeclaration.class,
-                method -> method.getAccessSpecifier() == AccessSpecifier.PUBLIC)
+        javaUnit.findAll(MethodDeclaration.class, method -> method.getAccessSpecifier() == AccessSpecifier.PUBLIC)
             .stream()
             .filter(this::hasNoJavaDoc)
-            .filter(method -> method.getAnnotationByName(EXCLUSION_OVERRIDE_ANNOTAION)
-                .isEmpty())
+            .filter(method -> method.getAnnotationByName(EXCLUSION_OVERRIDE_ANNOTAION).isEmpty())
             .filter(method -> !MethodDeclarationExtensions.isSimpleGetterOrSetter(method))
             .map(Node::getBegin)
             .map(pos -> new ValidationError(getPath(javaUnit), ERROR_MESSAGE_METHOD, pos,
-                ValidationError.Severity.MEDIUM))
+                    ValidationError.Severity.MEDIUM))
             .forEach(errors::add);
 
-        javaUnit.findAll(MethodDeclaration.class,
-                method -> method.getAnnotationByName("Test").isPresent())
+        javaUnit.findAll(MethodDeclaration.class, method -> method.getAnnotationByName("Test").isPresent())
             .stream()
             .filter(node -> hasNoJavaDoc(node, true))
             .map(Node::getBegin)
             .map(pos -> new ValidationError(getPath(javaUnit), ERROR_MESSAGE_TEST_METHOD, pos,
-                ValidationError.Severity.MEDIUM))
+                    ValidationError.Severity.MEDIUM))
             .forEach(errors::add);
 
         return errors;
     }
 
-    private boolean hasNoImplements(CompilationUnit unit,
-        TypeDeclaration typeDeclaration) {
+    private boolean hasNoImplements(CompilationUnit unit, TypeDeclaration typeDeclaration) {
         if (!(typeDeclaration instanceof ClassOrInterfaceDeclaration classOrInterfaceDeclaration)) {
             return true;
         }
 
-        NodeList<ClassOrInterfaceType> implementedTypes =
-            classOrInterfaceDeclaration.getImplementedTypes();
+        NodeList<ClassOrInterfaceType> implementedTypes = classOrInterfaceDeclaration.getImplementedTypes();
         if (implementedTypes.isEmpty()) {
             return true;
         }
 
-        String[] origPackages = unit.getPackageDeclaration().map(PackageDeclaration::getName).map(
-            Name::asString).orElse("").split("\\.");
+        String[] origPackages = unit.getPackageDeclaration()
+            .map(PackageDeclaration::getName)
+            .map(Name::asString)
+            .orElse("")
+            .split("\\.");
         if (origPackages.length < 5) {
             return false;
         }
@@ -156,13 +151,12 @@ public final class JavaDocCheck extends JavaChecker {
                     }
                 }
                 return true;
-            } catch (UnsolvedSymbolException use) {
+            }
+            catch (UnsolvedSymbolException use) {
                 return false;
             }
         });
     }
-
-
 
     boolean hasNoJavaDoc(NodeWithJavadoc<?> node) {
         return hasNoJavaDoc(node, false);
@@ -186,18 +180,16 @@ public final class JavaDocCheck extends JavaChecker {
 
         Javadoc javadoc = optionalComment.get();
         if (node instanceof MethodDeclaration method) {
-            List<String> parameters =
-                method.getParameters()
-                    .stream()
-                    .map(Parameter::getName)
-                    .map(SimpleName::asString)
-                    .toList();
+            List<String> parameters = method.getParameters()
+                .stream()
+                .map(Parameter::getName)
+                .map(SimpleName::asString)
+                .toList();
 
             if (!checkBlockTags(javadoc, parameters, JavadocBlockTag.Type.PARAM)) {
                 return true;
             }
-            List<String> exceptions =
-                method.getThrownExceptions().stream().map(ReferenceType::asString).toList();
+            List<String> exceptions = method.getThrownExceptions().stream().map(ReferenceType::asString).toList();
 
             if (!ignoreExceptions) {
                 if (!checkBlockTags(javadoc, exceptions, JavadocBlockTag.Type.THROWS)) {

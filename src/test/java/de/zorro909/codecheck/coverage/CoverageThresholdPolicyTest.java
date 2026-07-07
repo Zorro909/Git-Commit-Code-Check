@@ -24,11 +24,11 @@ class CoverageThresholdPolicyTest {
                 """);
         CoverageThreshold annotationThreshold = new CoverageThreshold(
                 new CoverageThresholdMatch("org.mapstruct.Mapper", null), 0.95, 0.90);
-        CoverageThreshold globThreshold = new CoverageThreshold(
-                new CoverageThresholdMatch(null, "**/mapper/*.java"), 0.70, 0.60);
+        CoverageThreshold globThreshold = new CoverageThreshold(new CoverageThresholdMatch(null, "**/mapper/*.java"),
+                0.70, 0.60);
         CoverageThreshold fallback = new CoverageThreshold(new CoverageThresholdMatch(null, null), 0.50, 0.40);
-        CoverageThresholdPolicy policy = new CoverageThresholdPolicy(
-                List.of(globThreshold, annotationThreshold), fallback);
+        CoverageThresholdPolicy policy = new CoverageThresholdPolicy(List.of(globThreshold, annotationThreshold),
+                fallback);
 
         assertThat(policy.thresholdFor(mapper)).isEqualTo(annotationThreshold);
     }
@@ -36,9 +36,9 @@ class CoverageThresholdPolicyTest {
     @Test
     void globThresholdMatchesSourcePath(@TempDir Path repo) throws Exception {
         Path service = write(repo.resolve("src/main/java/com/example/service/UserService.java"),
-                             "package com.example.service; class UserService {}");
-        CoverageThreshold globThreshold = new CoverageThreshold(
-                new CoverageThresholdMatch(null, "**/service/*.java"), 0.80, 0.75);
+                "package com.example.service; class UserService {}");
+        CoverageThreshold globThreshold = new CoverageThreshold(new CoverageThresholdMatch(null, "**/service/*.java"),
+                0.80, 0.75);
         CoverageThreshold fallback = new CoverageThreshold(new CoverageThresholdMatch(null, null), 0.50, 0.40);
         CoverageThresholdPolicy policy = new CoverageThresholdPolicy(List.of(globThreshold), fallback);
 
@@ -48,28 +48,25 @@ class CoverageThresholdPolicyTest {
     @Test
     void classThresholdWinsOverPackageThreshold(@TempDir Path repo) throws Exception {
         Path service = write(repo.resolve("src/main/java/com/example/service/UserService.java"),
-                             "package com.example.service; class UserService {}");
+                "package com.example.service; class UserService {}");
         CoverageThreshold packageThreshold = new CoverageThreshold(
                 new CoverageThresholdMatch(null, null, null, "com.example.service..*"), 0.80, 0.75);
         CoverageThreshold classThreshold = new CoverageThreshold(
                 new CoverageThresholdMatch(null, null, "com.example.service.UserService", null), 0.95, 0.90);
         CoverageThreshold fallback = new CoverageThreshold(new CoverageThresholdMatch(null, null), 0.50, 0.40);
-        CoverageThresholdPolicy policy = new CoverageThresholdPolicy(
-                List.of(packageThreshold, classThreshold), fallback);
+        CoverageThresholdPolicy policy = new CoverageThresholdPolicy(List.of(packageThreshold, classThreshold),
+                fallback);
 
         assertThat(policy.thresholdFor(service)).isEqualTo(classThreshold);
     }
 
     @Test
-    void thresholdWithMultipleCriteriaRequiresAllOfThemToMatch(@TempDir Path repo)
-            throws Exception {
+    void thresholdWithMultipleCriteriaRequiresAllOfThemToMatch(@TempDir Path repo) throws Exception {
         Path service = write(repo.resolve("src/main/java/com/example/service/UserService.java"),
-                             "package com.example.service; class UserService {}");
+                "package com.example.service; class UserService {}");
         CoverageThreshold combined = new CoverageThreshold(
-                new CoverageThresholdMatch("org.mapstruct.Mapper", null, null,
-                                           "com.example.service..*"), 0.95, 0.90);
-        CoverageThreshold fallback = new CoverageThreshold(new CoverageThresholdMatch(null, null),
-                                                           0.50, 0.40);
+                new CoverageThresholdMatch("org.mapstruct.Mapper", null, null, "com.example.service..*"), 0.95, 0.90);
+        CoverageThreshold fallback = new CoverageThreshold(new CoverageThresholdMatch(null, null), 0.50, 0.40);
         CoverageThresholdPolicy policy = new CoverageThresholdPolicy(List.of(combined), fallback);
 
         assertThat(policy.thresholdFor(service)).isEqualTo(fallback);
@@ -79,4 +76,5 @@ class CoverageThresholdPolicyTest {
         Files.createDirectories(path.getParent());
         return Files.writeString(path, content);
     }
+
 }

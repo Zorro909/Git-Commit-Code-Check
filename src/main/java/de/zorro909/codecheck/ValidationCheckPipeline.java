@@ -96,27 +96,27 @@ public class ValidationCheckPipeline {
         }
 
         return fixActions.stream()
-                         .filter(action -> action.canFixError(validationError))
-                         .anyMatch(action -> action.fixError(validationError));
+            .filter(action -> action.canFixError(validationError))
+            .anyMatch(action -> action.fixError(validationError));
     }
 
     public Map<Path, List<ValidationError>> checkForErrors(Stream<Path> changedFiles) {
-        ChangeSet changeSet = new ChangeSet(changedFiles.map(path -> new ChangeSetEntry(
-                                                     path, GitFileStatus.UNKNOWN, false, false,
-                                                     false, false, "validation pipeline"))
-                                             .toList());
+        ChangeSet changeSet = new ChangeSet(changedFiles
+            .map(path -> new ChangeSetEntry(path, GitFileStatus.UNKNOWN, false, false, false, false,
+                    "validation pipeline"))
+            .toList());
         return validationEngine().validate(changeSet, ValidationMode.INTERACTIVE)
-                                 .diagnostics()
-                                 .stream()
-                                 .map(Diagnostic::toValidationError)
-                                 .collect(Collectors.groupingBy(ValidationError::filePath));
+            .diagnostics()
+            .stream()
+            .map(Diagnostic::toValidationError)
+            .collect(Collectors.groupingBy(ValidationError::filePath));
     }
 
     public Stream<ValidationError> checkFile(Path file) {
         return validationEngine().validateFile(file, ValidationMode.INTERACTIVE)
-                                 .diagnostics()
-                                 .stream()
-                                 .map(Diagnostic::toValidationError);
+            .diagnostics()
+            .stream()
+            .map(Diagnostic::toValidationError);
     }
 
     private ValidationEngine validationEngine() {
@@ -124,8 +124,7 @@ public class ValidationCheckPipeline {
             return validationEngine;
         }
         RuleRegistry registry = new de.zorro909.codecheck.validation.DefaultRuleRegistry(
-                codeChecker == null ? List.of() : codeChecker,
-                fixActions == null ? List.of() : fixActions);
+                codeChecker == null ? List.of() : codeChecker, fixActions == null ? List.of() : fixActions);
         return new DefaultValidationEngine(registry);
     }
 

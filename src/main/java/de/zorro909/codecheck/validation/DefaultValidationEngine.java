@@ -17,9 +17,7 @@ public class DefaultValidationEngine implements ValidationEngine {
 
     @Override
     public ValidationResult validate(ChangeSet changeSet, ValidationMode mode) {
-        List<FileValidationResult> fileResults = changeSet.paths()
-                                                          .map(file -> validateFile(file, mode))
-                                                          .toList();
+        List<FileValidationResult> fileResults = changeSet.paths().map(file -> validateFile(file, mode)).toList();
         return new ValidationResult(mode, fileResults);
     }
 
@@ -27,10 +25,11 @@ public class DefaultValidationEngine implements ValidationEngine {
     public FileValidationResult validateFile(Path file, ValidationMode mode) {
         ValidationContext context = new ValidationContext(mode);
         List<Diagnostic> diagnostics = ruleRegistry.activeRules()
-                                                   .stream()
-                                                   .filter(rule -> rule.validatedFiles().matches(file))
-                                                   .flatMap(rule -> rule.check(context, file).stream())
-                                                   .toList();
+            .stream()
+            .filter(rule -> rule.validatedFiles().matches(file))
+            .flatMap(rule -> rule.check(context, file).stream())
+            .toList();
         return new FileValidationResult(file, mode, diagnostics);
     }
+
 }

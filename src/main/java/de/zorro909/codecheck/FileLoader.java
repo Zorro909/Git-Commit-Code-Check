@@ -13,6 +13,7 @@ import java.util.Optional;
 public class FileLoader {
 
     private final Optional<DaemonServer> daemonServer;
+
     private final Path rootDirectory;
 
     public FileLoader(Path rootDirectory, Optional<DaemonServer> daemonServer) {
@@ -46,4 +47,5 @@ public class FileLoader {
         daemonServer.ifPresent(daemonServer -> daemonServer.markFile(path));
         return Files.exists(path);
     }
+
 }

@@ -14,4 +14,5 @@ public interface Rule {
     FileInterest contextFiles();
 
     List<Diagnostic> check(ValidationContext context, Path file);
+
 }

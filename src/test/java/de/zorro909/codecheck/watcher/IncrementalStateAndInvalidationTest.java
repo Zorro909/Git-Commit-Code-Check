@@ -42,8 +42,8 @@ class IncrementalStateAndInvalidationTest {
     }
 
     private Diagnostic diagnostic(Path file, String message) {
-        return new Diagnostic(file, message, new SourcePosition(1, 1),
-                              ValidationError.Severity.LOW, DiagnosticKind.RULE_VIOLATION,
-                              new RuleId("test"));
+        return new Diagnostic(file, message, new SourcePosition(1, 1), ValidationError.Severity.LOW,
+                DiagnosticKind.RULE_VIOLATION, new RuleId("test"));
     }
+
 }

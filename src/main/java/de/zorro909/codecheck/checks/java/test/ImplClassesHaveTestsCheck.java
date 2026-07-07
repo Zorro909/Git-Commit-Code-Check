@@ -16,6 +16,7 @@ import java.util.List;
 public class ImplClassesHaveTestsCheck implements CodeCheck {
 
     private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
+
     private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
     private final FileLoader fileLoader;
@@ -32,16 +33,13 @@ public class ImplClassesHaveTestsCheck implements CodeCheck {
     @Override
     public List<ValidationError> check(Path file) {
         String filePath = file.toAbsolutePath().toString();
-        String testFilePath = filePath.replace(MAIN_FOLDER, TEST_FOLDER)
-                                      .replace("Impl.java", "ImplTest.java");
+        String testFilePath = filePath.replace(MAIN_FOLDER, TEST_FOLDER).replace("Impl.java", "ImplTest.java");
 
         Path testFile = Path.of(testFilePath);
         if (!fileLoader.fileExists(testFile)) {
             ValidationError noTestClassError = new ValidationError(file,
-                                                                   "The Implementation " + "Class '" + file.getFileName()
-                                                                                                           .toString() + "' has no Tests!",
-                                                                   new Position(1, 1),
-                                                                   ValidationError.Severity.MEDIUM);
+                    "The Implementation " + "Class '" + file.getFileName().toString() + "' has no Tests!",
+                    new Position(1, 1), ValidationError.Severity.MEDIUM);
             return List.of(noTestClassError);
         }
 
@@ -51,4 +49,5 @@ public class ImplClassesHaveTestsCheck implements CodeCheck {
     @Override
     public void resetCache(Path file) {
     }
+
 }

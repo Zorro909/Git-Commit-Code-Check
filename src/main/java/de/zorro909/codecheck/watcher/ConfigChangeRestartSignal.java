@@ -21,4 +21,5 @@ public class ConfigChangeRestartSignal {
     private Path normalize(Path path) {
         return path.toAbsolutePath().normalize();
     }
+
 }

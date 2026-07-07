@@ -10,20 +10,14 @@ import java.util.List;
 public class DefaultRuleRegistry implements RuleRegistry {
 
     private final List<Rule> rules;
+
     private final List<Fixer> fixers;
 
-    public DefaultRuleRegistry(List<CodeCheck> codeChecks,
-                               List<FixAction> fixActions) {
+    public DefaultRuleRegistry(List<CodeCheck> codeChecks, List<FixAction> fixActions) {
         this.rules = codeChecks == null ? List.of()
-                                        : codeChecks.stream()
-                                                    .map(CodeCheckRuleAdapter::new)
-                                                    .map(Rule.class::cast)
-                                                    .toList();
+                : codeChecks.stream().map(CodeCheckRuleAdapter::new).map(Rule.class::cast).toList();
         this.fixers = fixActions == null ? List.of()
-                                         : fixActions.stream()
-                                                     .map(FixActionFixerAdapter::new)
-                                                     .map(Fixer.class::cast)
-                                                     .toList();
+                : fixActions.stream().map(FixActionFixerAdapter::new).map(Fixer.class::cast).toList();
     }
 
     @Override
@@ -39,6 +33,7 @@ public class DefaultRuleRegistry implements RuleRegistry {
     @Override
     public WatchPlan watchPlan() {
         return new WatchPlan(rules.stream().map(Rule::validatedFiles).toList(),
-                             rules.stream().map(Rule::contextFiles).toList());
+                rules.stream().map(Rule::contextFiles).toList());
     }
+
 }

@@ -22,16 +22,19 @@ import java.util.Optional;
 public class DaemonProcessRegistry {
 
     static final String TRANSPORT_WEBSOCKET = "websocket";
+
     private static final String HOST = "127.0.0.1";
 
     private final Path repositoryDirectory;
+
     private final Path cacheRoot;
+
     private final DaemonMetadataStore metadataStore;
+
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Inject
-    public DaemonProcessRegistry(
-            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryDirectory) {
+    public DaemonProcessRegistry(@Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryDirectory) {
         this(repositoryDirectory, defaultCacheRoot());
     }
 
@@ -44,10 +47,10 @@ public class DaemonProcessRegistry {
     public String repoId() {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(repositoryDirectory.toString()
-                                                           .getBytes(StandardCharsets.UTF_8));
+            byte[] hash = digest.digest(repositoryDirectory.toString().getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 is unavailable", e);
         }
     }
@@ -69,9 +72,8 @@ public class DaemonProcessRegistry {
     }
 
     public DaemonMetadata createMetadata() {
-        return new DaemonMetadata(ProcessHandle.current().pid(), repositoryDirectory,
-                                  TRANSPORT_WEBSOCKET, HOST, randomPort(), randomToken(),
-                                  Instant.now());
+        return new DaemonMetadata(ProcessHandle.current().pid(), repositoryDirectory, TRANSPORT_WEBSOCKET, HOST,
+                randomPort(), randomToken(), Instant.now());
     }
 
     public void write(DaemonMetadata metadata) {
@@ -86,7 +88,8 @@ public class DaemonProcessRegistry {
         try (ServerSocket socket = new ServerSocket(0)) {
             socket.setReuseAddress(true);
             return socket.getLocalPort();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IllegalStateException("Unable to allocate daemon port", e);
         }
     }
@@ -100,4 +103,5 @@ public class DaemonProcessRegistry {
     private static Path defaultCacheRoot() {
         return Path.of(System.getProperty("user.home"), ".cache", "git-commit-code-check");
     }
+
 }

@@ -45,19 +45,16 @@ class DefaultJavaParserServiceTest {
         ParseOutcome outcome = parserService.parse(test);
 
         assertThat(outcome.compilationUnit()).isPresent();
-        assertThat(outcome.diagnostics()).noneMatch(diagnostic -> diagnostic.kind()
-                                                                 == DiagnosticKind.SYMBOL_WARNING);
+        assertThat(outcome.diagnostics()).noneMatch(diagnostic -> diagnostic.kind() == DiagnosticKind.SYMBOL_WARNING);
     }
 
     @Test
     void generatedImplementationCanBeParsedAsContext(@TempDir Path repo) throws Exception {
         writeRootPom(repo, "service");
-        Path generated = write(repo,
-                               "service/target/generated-sources/annotations/com/example/UserMapperImpl.java",
-                               """
-                                       package com.example;
-                                       public class UserMapperImpl {}
-                                       """);
+        Path generated = write(repo, "service/target/generated-sources/annotations/com/example/UserMapperImpl.java", """
+                package com.example;
+                public class UserMapperImpl {}
+                """);
         JavaParserService parserService = parserService(repo);
 
         ParseOutcome outcome = parserService.parse(generated);
@@ -80,8 +77,7 @@ class DefaultJavaParserServiceTest {
         assertThat(outcome.compilationUnit()).isEmpty();
         assertThat(outcome.diagnostics()).anySatisfy(diagnostic -> {
             assertThat(diagnostic.kind()).isEqualTo(DiagnosticKind.PARSE_ERROR);
-            assertThat(diagnostic.severity())
-                    .isEqualTo(de.zorro909.codecheck.checks.ValidationError.Severity.HIGH);
+            assertThat(diagnostic.severity()).isEqualTo(de.zorro909.codecheck.checks.ValidationError.Severity.HIGH);
         });
     }
 
@@ -101,8 +97,7 @@ class DefaultJavaParserServiceTest {
         assertThat(outcome.compilationUnit()).isPresent();
         assertThat(outcome.diagnostics()).anySatisfy(diagnostic -> {
             assertThat(diagnostic.kind()).isEqualTo(DiagnosticKind.SYMBOL_WARNING);
-            assertThat(diagnostic.severity())
-                    .isEqualTo(de.zorro909.codecheck.checks.ValidationError.Severity.MEDIUM);
+            assertThat(diagnostic.severity()).isEqualTo(de.zorro909.codecheck.checks.ValidationError.Severity.MEDIUM);
             assertThat(diagnostic.message()).contains("MissingType");
         });
     }
@@ -124,8 +119,7 @@ class DefaultJavaParserServiceTest {
     }
 
     private JavaParserService parserService(Path repo) {
-        return new DefaultJavaParserService(new MavenProjectModelService(
-                repo, CodeCheckConfigLoader.defaultsOnly()));
+        return new DefaultJavaParserService(new MavenProjectModelService(repo, CodeCheckConfigLoader.defaultsOnly()));
     }
 
     private void writeRootPom(Path repo, String module) throws Exception {
@@ -142,7 +136,7 @@ class DefaultJavaParserServiceTest {
                 """.formatted(module));
         Files.createDirectories(repo.resolve(module));
         Files.writeString(repo.resolve(module).resolve("pom.xml"),
-                          "<project><modelVersion>4.0.0</modelVersion></project>");
+                "<project><modelVersion>4.0.0</modelVersion></project>");
     }
 
     private Path write(Path repo, String relativePath, String content) throws Exception {
@@ -151,4 +145,5 @@ class DefaultJavaParserServiceTest {
         Files.writeString(file, content);
         return file;
     }
+
 }

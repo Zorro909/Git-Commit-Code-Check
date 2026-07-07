@@ -16,12 +16,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for JavaDocCheck which enforces JavaDoc comments on public classes,
- * public methods, interface methods, and test methods.
+ * Tests for JavaDocCheck which enforces JavaDoc comments on public classes, public
+ * methods, interface methods, and test methods.
  */
 class JavaDocCheckTest {
 
     private static final String MAIN_FOLDER = "src" + File.separatorChar + "main" + File.separatorChar + "java";
+
     private static final String TEST_FOLDER = "src" + File.separatorChar + "test" + File.separatorChar + "java";
 
     @TempDir
@@ -114,7 +115,8 @@ class JavaDocCheckTest {
 
         List<ValidationError> errors = parseAndCheckMain(source, "com/example", "MyClass.java");
 
-        // Class implementing an interface from the same package group should NOT require javadoc
+        // Class implementing an interface from the same package group should NOT require
+        // javadoc
         assertThat(errors).noneMatch(e -> e.errorMessage().contains(JavaDocCheck.ERROR_MESSAGE_CLASS));
     }
 
@@ -264,4 +266,5 @@ class JavaDocCheckTest {
 
         return check.check(filePath);
     }
+
 }

@@ -14,4 +14,5 @@ public interface JavaParserService {
     void invalidate(Path file);
 
     void invalidateModule(ModuleId moduleId);
+
 }

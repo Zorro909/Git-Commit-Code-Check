@@ -64,11 +64,11 @@ class FixerRegistryAndApplicationTest {
             return true;
         };
         RuleRegistry registry = new DefaultRuleRegistry(List.of(passingCheck()), List.of(fixAction));
-        FixApplicationService service = new FixApplicationService(
-                registry, new DefaultValidationEngine(registry), List.of(postAction));
+        FixApplicationService service = new FixApplicationService(registry, new DefaultValidationEngine(registry),
+                List.of(postAction));
 
         FixResult result = service.applyUserSelectedFix(diagnostic, ValidationMode.INTERACTIVE,
-                                                        new FixerId("two-file-fix"));
+                new FixerId("two-file-fix"));
 
         assertThat(result.applied()).isTrue();
         assertThat(result.restaged()).isTrue();
@@ -98,14 +98,14 @@ class FixerRegistryAndApplicationTest {
             }
         };
         RuleRegistry registry = new DefaultRuleRegistry(List.of(failingCheck()), List.of(fixAction));
-        FixApplicationService service = new FixApplicationService(
-                registry, new DefaultValidationEngine(registry), List.of(files -> {
+        FixApplicationService service = new FixApplicationService(registry, new DefaultValidationEngine(registry),
+                List.of(files -> {
                     restaged.set(files);
                     return true;
                 }));
 
         FixResult result = service.applyUserSelectedFix(diagnostic, ValidationMode.INTERACTIVE,
-                                                        new FixerId("failing-fix"));
+                new FixerId("failing-fix"));
 
         assertThat(result.applied()).isTrue();
         assertThat(result.restaged()).isFalse();
@@ -113,9 +113,8 @@ class FixerRegistryAndApplicationTest {
     }
 
     private Diagnostic diagnostic(Path file) {
-        return new Diagnostic(file, "message", new SourcePosition(1, 1),
-                              ValidationError.Severity.LOW, DiagnosticKind.RULE_VIOLATION,
-                              new RuleId("rule"));
+        return new Diagnostic(file, "message", new SourcePosition(1, 1), ValidationError.Severity.LOW,
+                DiagnosticKind.RULE_VIOLATION, new RuleId("rule"));
     }
 
     private CodeCheck passingCheck() {
@@ -123,9 +122,8 @@ class FixerRegistryAndApplicationTest {
     }
 
     private CodeCheck failingCheck() {
-        return check(List.of(new ValidationError(Path.of("src/main/java/Example.java"),
-                                                 "still failing", new Position(1, 1),
-                                                 ValidationError.Severity.HIGH)));
+        return check(List.of(new ValidationError(Path.of("src/main/java/Example.java"), "still failing",
+                new Position(1, 1), ValidationError.Severity.HIGH)));
     }
 
     private CodeCheck check(List<ValidationError> errors) {
@@ -147,6 +145,7 @@ class FixerRegistryAndApplicationTest {
     }
 
     private static final class NoopEditorExecutor implements EditorExecutor {
+
         @Override
         public boolean open(Path path, Position position) {
             return true;
@@ -156,5 +155,7 @@ class FixerRegistryAndApplicationTest {
         public boolean openAndWait(Path file, Position position) {
             return true;
         }
+
     }
+
 }

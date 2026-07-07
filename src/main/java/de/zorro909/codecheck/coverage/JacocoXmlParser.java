@@ -13,23 +13,21 @@ public class JacocoXmlParser {
     public CoverageSnapshot parse(Path report) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd",
-                               false);
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            Element root = factory.newDocumentBuilder()
-                                  .parse(report.toFile())
-                                  .getDocumentElement();
+            Element root = factory.newDocumentBuilder().parse(report.toFile()).getDocumentElement();
             NodeList classes = root.getElementsByTagName("class");
             Map<String, ClassCoverage> coverage = new HashMap<>();
             for (int i = 0; i < classes.getLength(); i++) {
                 Element classElement = (Element) classes.item(i);
                 String className = classElement.getAttribute("name");
-                coverage.put(className, new ClassCoverage(
-                        className, counter(classElement, "LINE"), counter(classElement, "BRANCH")));
+                coverage.put(className,
+                        new ClassCoverage(className, counter(classElement, "LINE"), counter(classElement, "BRANCH")));
             }
             return new CoverageSnapshot(coverage);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new IllegalStateException("Unable to parse JaCoCo report " + report, e);
         }
     }
@@ -40,9 +38,10 @@ public class JacocoXmlParser {
             Element counter = (Element) counters.item(i);
             if (type.equals(counter.getAttribute("type"))) {
                 return new CoverageMetric(Integer.parseInt(counter.getAttribute("missed")),
-                                          Integer.parseInt(counter.getAttribute("covered")));
+                        Integer.parseInt(counter.getAttribute("covered")));
             }
         }
         return new CoverageMetric(0, 0);
     }
+
 }

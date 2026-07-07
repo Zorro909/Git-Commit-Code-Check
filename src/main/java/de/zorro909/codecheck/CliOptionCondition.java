@@ -10,14 +10,13 @@ import java.util.Optional;
 @Singleton
 public class CliOptionCondition implements Condition {
 
-
     @Override
     public boolean matches(ConditionContext context) {
         String[] args = context.getBean(String[].class);
 
         Optional<String> optionNameOpt = context.getComponent()
-                                                .getAnnotationMetadata()
-                                                .stringValue(RequiresCliOption.class, "value");
+            .getAnnotationMetadata()
+            .stringValue(RequiresCliOption.class, "value");
 
         if (optionNameOpt.isEmpty()) {
             return false;
@@ -29,12 +28,13 @@ public class CliOptionCondition implements Condition {
         if (optionName.startsWith("!")) {
             expected = false;
             optionName = optionName.substring(1);
-        } else {
+        }
+        else {
             expected = true;
         }
 
         String finalOptionName = optionName;
-        return List.of(args).stream()
-                   .anyMatch(str -> str.equalsIgnoreCase(finalOptionName)) == expected;
+        return List.of(args).stream().anyMatch(str -> str.equalsIgnoreCase(finalOptionName)) == expected;
     }
+
 }

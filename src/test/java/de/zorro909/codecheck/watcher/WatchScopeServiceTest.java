@@ -21,37 +21,32 @@ class WatchScopeServiceTest {
 
     @Test
     void javaRuleInterestAddsModuleJavaRoots(@TempDir Path repo) {
-        WatchScopeService service = new WatchScopeService(repo, registry(
-                List.of(FileInterest.javaMainSources()), List.of()), projectModel(repo));
+        WatchScopeService service = new WatchScopeService(repo,
+                registry(List.of(FileInterest.javaMainSources()), List.of()), projectModel(repo));
 
         WatchScope scope = service.watchScope();
 
-        assertThat(scope.contains(repo.resolve("module-a/src/main/java"),
-                                  WatchPathKind.VALIDATED)).isTrue();
-        assertThat(scope.contains(repo.resolve("module-a/target/generated-sources/annotations"),
-                                  WatchPathKind.VALIDATED)).isFalse();
+        assertThat(scope.contains(repo.resolve("module-a/src/main/java"), WatchPathKind.VALIDATED)).isTrue();
+        assertThat(
+                scope.contains(repo.resolve("module-a/target/generated-sources/annotations"), WatchPathKind.VALIDATED))
+            .isFalse();
     }
 
     @Test
     void pomInterestAddsPomFilesToProjectModelWatchScope(@TempDir Path repo) {
         FileInterest pomInterest = new FileInterest("POM rule", List.of("pom.xml"),
-                                                    path -> path.getFileName()
-                                                                .toString()
-                                                                .equals("pom.xml"));
-        WatchScopeService service = new WatchScopeService(repo, registry(List.of(pomInterest),
-                                                                         List.of()),
-                                                          projectModel(repo));
+                path -> path.getFileName().toString().equals("pom.xml"));
+        WatchScopeService service = new WatchScopeService(repo, registry(List.of(pomInterest), List.of()),
+                projectModel(repo));
 
         WatchScope scope = service.watchScope();
 
-        assertThat(scope.contains(repo.resolve("module-a/pom.xml"), WatchPathKind.PROJECT_MODEL))
-                .isTrue();
+        assertThat(scope.contains(repo.resolve("module-a/pom.xml"), WatchPathKind.PROJECT_MODEL)).isTrue();
     }
 
     @Test
     void generatedRootsAreContextOnly(@TempDir Path repo) {
-        WatchScopeService service = new WatchScopeService(repo, registry(List.of(), List.of()),
-                                                          projectModel(repo));
+        WatchScopeService service = new WatchScopeService(repo, registry(List.of(), List.of()), projectModel(repo));
 
         WatchScope scope = service.watchScope();
 
@@ -62,8 +57,7 @@ class WatchScopeServiceTest {
 
     @Test
     void configFilesAreWatched(@TempDir Path repo) {
-        WatchScopeService service = new WatchScopeService(repo, registry(List.of(), List.of()),
-                                                          projectModel(repo));
+        WatchScopeService service = new WatchScopeService(repo, registry(List.of(), List.of()), projectModel(repo));
 
         WatchScope scope = service.watchScope();
 
@@ -91,12 +85,9 @@ class WatchScopeServiceTest {
 
     private ProjectModelService projectModel(Path repo) {
         MavenModule module = new MavenModule(new ModuleId("module-a"), repo.resolve("module-a"),
-                                             List.of(repo.resolve("module-a/src/main/java")),
-                                             List.of(repo.resolve("module-a/src/test/java")),
-                                             List.of(repo.resolve(
-                                                     "module-a/target/generated-sources/annotations")),
-                                             List.of(repo.resolve(
-                                                     "module-a/target/generated-test-sources/test-annotations")));
+                List.of(repo.resolve("module-a/src/main/java")), List.of(repo.resolve("module-a/src/test/java")),
+                List.of(repo.resolve("module-a/target/generated-sources/annotations")),
+                List.of(repo.resolve("module-a/target/generated-test-sources/test-annotations")));
         ProjectModel model = new ProjectModel(repo, repo, List.of(module), 25);
         return new ProjectModelService() {
             @Override
@@ -110,4 +101,5 @@ class WatchScopeServiceTest {
             }
         };
     }
+
 }

@@ -15,4 +15,5 @@ class MavenProjectModelServiceBeanTest {
             assertThat(service).isInstanceOf(MavenProjectModelService.class);
         }
     }
+
 }

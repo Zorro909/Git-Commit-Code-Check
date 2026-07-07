@@ -42,4 +42,5 @@ public class ManualEditorFixAction implements FixAction {
 
         return editorExecutor.openAndWait(filePath, position);
     }
+
 }

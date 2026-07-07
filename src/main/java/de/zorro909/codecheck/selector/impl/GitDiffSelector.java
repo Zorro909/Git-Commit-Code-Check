@@ -1,6 +1,5 @@
 package de.zorro909.codecheck.selector.impl;
 
-
 import de.zorro909.codecheck.selector.FileSelector;
 import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Singleton;
@@ -16,8 +15,11 @@ import java.util.stream.Stream;
 public class GitDiffSelector implements FileSelector {
 
     private static final String GIT_COMMAND = "git";
-    private static final String[] GIT_PARAMS = {GIT_COMMAND, "diff", "--cached", "--name-status", "--relative"};
+
+    private static final String[] GIT_PARAMS = { GIT_COMMAND, "diff", "--cached", "--name-status", "--relative" };
+
     private static final String FILE_ADDED = "A";
+
     private static final String FILE_MODIFIED = "M";
 
     private final Path repositoryDirectory;
@@ -31,7 +33,8 @@ public class GitDiffSelector implements FileSelector {
         try {
             Stream<String> lines = executeGitDiffCommand();
             return processGitDiffOutput(lines);
-        } catch (InterruptedException | IOException e) {
+        }
+        catch (InterruptedException | IOException e) {
             throw new IOException("Failed to execute git command", e);
         }
     }
@@ -45,17 +48,17 @@ public class GitDiffSelector implements FileSelector {
 
     private Stream<Path> processGitDiffOutput(Stream<String> output) {
         return output.map(line -> line.split("\t"))
-                     .filter(this::isFileAddedOrModified)
-                     .map(splitLine -> Path.of(splitLine[1]));
+            .filter(this::isFileAddedOrModified)
+            .map(splitLine -> Path.of(splitLine[1]));
     }
 
     private boolean isFileAddedOrModified(String[] splitLine) {
-        if(splitLine.length == 3){
+        if (splitLine.length == 3) {
             splitLine[1] = splitLine[2];
             return true;
         }
 
-        return splitLine.length > 1 && (splitLine[0].equals(FILE_ADDED) || splitLine[0].equals(
-                FILE_MODIFIED));
+        return splitLine.length > 1 && (splitLine[0].equals(FILE_ADDED) || splitLine[0].equals(FILE_MODIFIED));
     }
+
 }

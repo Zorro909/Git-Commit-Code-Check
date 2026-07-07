@@ -12,8 +12,7 @@ class DebouncedFileUpdateSchedulerTest {
 
     @Test
     void saveIsReleasedOnlyAfterConfiguredDebounce() {
-        DebouncedFileUpdateScheduler scheduler = new DebouncedFileUpdateScheduler(
-                Duration.ofSeconds(5));
+        DebouncedFileUpdateScheduler scheduler = new DebouncedFileUpdateScheduler(Duration.ofSeconds(5));
         Instant savedAt = Instant.parse("2026-07-07T00:00:00Z");
         Path file = Path.of("src/main/java/Example.java");
 
@@ -21,8 +20,8 @@ class DebouncedFileUpdateSchedulerTest {
 
         assertThat(scheduler.duePaths(savedAt.plusSeconds(4))).isEmpty();
         assertThat(scheduler.pendingPaths()).hasSize(1);
-        assertThat(scheduler.duePaths(savedAt.plusSeconds(5))).containsExactly(
-                file.toAbsolutePath().normalize());
+        assertThat(scheduler.duePaths(savedAt.plusSeconds(5))).containsExactly(file.toAbsolutePath().normalize());
         assertThat(scheduler.pendingPaths()).isEmpty();
     }
+
 }

@@ -15,4 +15,5 @@ class DockerMvndTestRunnerBeanTest {
             assertThat(runner).isInstanceOf(DockerMvndTestRunner.class);
         }
     }
+
 }

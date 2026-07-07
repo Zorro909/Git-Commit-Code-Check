@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class IncrementalValidationState {
 
     private final Map<Path, FileValidationStatus> statuses = new ConcurrentHashMap<>();
+
     private final Map<Path, List<Diagnostic>> diagnostics = new ConcurrentHashMap<>();
 
     public void markChecking(Path path) {
@@ -37,4 +38,5 @@ public class IncrementalValidationState {
     private Path normalize(Path path) {
         return path.toAbsolutePath().normalize();
     }
+
 }

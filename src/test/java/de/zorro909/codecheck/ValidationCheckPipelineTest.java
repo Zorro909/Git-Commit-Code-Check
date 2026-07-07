@@ -19,15 +19,17 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for the core ValidationCheckPipeline.
- * Uses manual construction to avoid Micronaut DI complexity
- * while thoroughly testing pipeline behavior.
+ * Tests for the core ValidationCheckPipeline. Uses manual construction to avoid Micronaut
+ * DI complexity while thoroughly testing pipeline behavior.
  */
 class ValidationCheckPipelineTest {
 
     private ValidationCheckPipeline pipeline;
+
     private List<CodeCheck> mockChecks;
+
     private List<FixAction> mockFixActions;
+
     private List<PostAction> mockPostActions;
 
     @BeforeEach
@@ -79,9 +81,8 @@ class ValidationCheckPipelineTest {
             @Override
             public List<ValidationError> check(Path file) {
                 checkCount.incrementAndGet();
-                return List.of(new ValidationError(
-                        file, "Test error", new Position(1, 1),
-                        ValidationError.Severity.LOW));
+                return List
+                    .of(new ValidationError(file, "Test error", new Position(1, 1), ValidationError.Severity.LOW));
             }
 
             @Override
@@ -113,11 +114,8 @@ class ValidationCheckPipelineTest {
 
             @Override
             public List<ValidationError> check(Path file) {
-                return List.of(
-                        new ValidationError(file, "Error A", new Position(1, 1),
-                                ValidationError.Severity.LOW),
-                        new ValidationError(file, "Error B", new Position(2, 1),
-                                ValidationError.Severity.MEDIUM));
+                return List.of(new ValidationError(file, "Error A", new Position(1, 1), ValidationError.Severity.LOW),
+                        new ValidationError(file, "Error B", new Position(2, 1), ValidationError.Severity.MEDIUM));
             }
 
             @Override
@@ -151,9 +149,8 @@ class ValidationCheckPipelineTest {
             @Override
             public List<ValidationError> check(Path file) {
                 javaCheckCount.incrementAndGet();
-                return List.of(new ValidationError(
-                        file, "Java error", new Position(1, 1),
-                        ValidationError.Severity.LOW));
+                return List
+                    .of(new ValidationError(file, "Java error", new Position(1, 1), ValidationError.Severity.LOW));
             }
 
             @Override
@@ -162,8 +159,7 @@ class ValidationCheckPipelineTest {
         };
         mockChecks.add(javaOnlyCheck);
 
-        Map<Path, List<ValidationError>> errors =
-                pipeline.checkForErrors(Stream.of(javaFile, xmlFile));
+        Map<Path, List<ValidationError>> errors = pipeline.checkForErrors(Stream.of(javaFile, xmlFile));
 
         assertThat(javaCheckCount.get()).isEqualTo(1);
         assertThat(errors).hasSize(1);
@@ -185,7 +181,7 @@ class ValidationCheckPipelineTest {
         assertThat(errors).hasSize(1);
         assertThat(errors.get(file)).hasSize(2);
         assertThat(errors.get(file)).extracting(ValidationError::errorMessage)
-                .containsExactlyInAnyOrder("Error from check 1", "Error from check 2");
+            .containsExactlyInAnyOrder("Error from check 1", "Error from check 2");
     }
 
     // --- checkFile tests ---
@@ -221,8 +217,7 @@ class ValidationCheckPipelineTest {
     }
 
     @Test
-    void shouldReturnEmptyStreamWhenNoCheckersAreResponsible(@TempDir Path tempDir)
-            throws Exception {
+    void shouldReturnEmptyStreamWhenNoCheckersAreResponsible(@TempDir Path tempDir) throws Exception {
         Path file = tempDir.resolve("config.xml");
         Files.writeString(file, "<config/>");
 
@@ -322,9 +317,12 @@ class ValidationCheckPipelineTest {
         };
         mockFixActions.add(firstAction);
 
-        // The pipeline calls checkFile internally after a successful fix to see if errors remain.
-        // The initial error was pre-constructed in the errorsMap, so the first actual call
-        // to check() happens after the fix action runs. It should return empty (no more errors).
+        // The pipeline calls checkFile internally after a successful fix to see if errors
+        // remain.
+        // The initial error was pre-constructed in the errorsMap, so the first actual
+        // call
+        // to check() happens after the fix action runs. It should return empty (no more
+        // errors).
         CodeCheck check = new CodeCheck() {
             @Override
             public boolean isResponsible(Path f) {
@@ -343,8 +341,7 @@ class ValidationCheckPipelineTest {
         };
         mockChecks.add(check);
 
-        ValidationError error = new ValidationError(
-                file, "Fixable error", new Position(1, 1),
+        ValidationError error = new ValidationError(file, "Fixable error", new Position(1, 1),
                 ValidationError.Severity.LOW);
 
         Map<Path, List<ValidationError>> errorsMap = new HashMap<>();
@@ -383,9 +380,8 @@ class ValidationCheckPipelineTest {
 
             @Override
             public List<ValidationError> check(Path f) {
-                return List.of(new ValidationError(
-                        f, "Unfixable error", new Position(1, 1),
-                        ValidationError.Severity.HIGH));
+                return List
+                    .of(new ValidationError(f, "Unfixable error", new Position(1, 1), ValidationError.Severity.HIGH));
             }
 
             @Override
@@ -394,8 +390,7 @@ class ValidationCheckPipelineTest {
         };
         mockChecks.add(check);
 
-        ValidationError error = new ValidationError(
-                file, "Unfixable error", new Position(1, 1),
+        ValidationError error = new ValidationError(file, "Unfixable error", new Position(1, 1),
                 ValidationError.Severity.HIGH);
 
         Map<Path, List<ValidationError>> errorsMap = new HashMap<>();
@@ -417,9 +412,7 @@ class ValidationCheckPipelineTest {
         CodeCheck check = createSimpleCheck("Error", ValidationError.Severity.LOW);
         mockChecks.add(check);
 
-        ValidationError error = new ValidationError(
-                file, "Error", new Position(1, 1),
-                ValidationError.Severity.LOW);
+        ValidationError error = new ValidationError(file, "Error", new Position(1, 1), ValidationError.Severity.LOW);
 
         Map<Path, List<ValidationError>> errorsMap = new HashMap<>();
         errorsMap.put(file, new ArrayList<>(List.of(error)));
@@ -440,8 +433,7 @@ class ValidationCheckPipelineTest {
 
             @Override
             public List<ValidationError> check(Path file) {
-                return List.of(new ValidationError(
-                        file, errorMessage, new Position(1, 1), severity));
+                return List.of(new ValidationError(file, errorMessage, new Position(1, 1), severity));
             }
 
             @Override
@@ -455,8 +447,10 @@ class ValidationCheckPipelineTest {
             java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(target, value);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException("Failed to set field: " + fieldName, e);
         }
     }
+
 }

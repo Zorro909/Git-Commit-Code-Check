@@ -34,7 +34,9 @@ public class DefaultJavaParserService implements JavaParserService {
     private static final RuleId JAVA_PARSER_RULE = new RuleId("java.parser");
 
     private final ProjectModelService projectModelService;
+
     private final ConcurrentMap<Path, ParseOutcome> parseCache = new ConcurrentHashMap<>();
+
     private final ConcurrentMap<ModuleId, JavaParser> parserCache = new ConcurrentHashMap<>();
 
     public DefaultJavaParserService(ProjectModelService projectModelService) {
@@ -62,10 +64,10 @@ public class DefaultJavaParserService implements JavaParserService {
         parserCache.remove(moduleId);
         ProjectModel model = projectModelService.currentModel();
         model.modules()
-             .stream()
-             .filter(module -> module.id().equals(moduleId))
-             .findFirst()
-             .ifPresent(module -> parseCache.keySet().removeIf(module::owns));
+            .stream()
+            .filter(module -> module.id().equals(moduleId))
+            .findFirst()
+            .ifPresent(module -> parseCache.keySet().removeIf(module::owns));
     }
 
     private ParseOutcome parseUncached(Path file) {
@@ -81,12 +83,12 @@ public class DefaultJavaParserService implements JavaParserService {
             diagnostics.addAll(parseDiagnostics(file, result));
             diagnostics.addAll(symbolDiagnostics(file, compilationUnit));
             return new ParseOutcome(file, Optional.of(compilationUnit), diagnostics);
-        } catch (Exception e) {
-            return new ParseOutcome(file, Optional.empty(), List.of(new Diagnostic(
-                    file, "Failure parsing java file: " + e.getMessage(),
-                    new SourcePosition(Position.FIRST_LINE, Position.FIRST_COLUMN),
-                    ValidationError.Severity.HIGH, DiagnosticKind.PARSE_ERROR,
-                    JAVA_PARSER_RULE)));
+        }
+        catch (Exception e) {
+            return new ParseOutcome(file, Optional.empty(),
+                    List.of(new Diagnostic(file, "Failure parsing java file: " + e.getMessage(),
+                            new SourcePosition(Position.FIRST_LINE, Position.FIRST_COLUMN),
+                            ValidationError.Severity.HIGH, DiagnosticKind.PARSE_ERROR, JAVA_PARSER_RULE)));
         }
     }
 
@@ -94,14 +96,15 @@ public class DefaultJavaParserService implements JavaParserService {
         return parserCache.computeIfAbsent(module.id(), _ -> {
             CombinedTypeSolver typeSolver = new CombinedTypeSolver();
             typeSolver.add(new ReflectionTypeSolver());
-            Stream.of(module.sourceRoots(), module.testRoots(), module.generatedSourceRoots(),
-                      module.generatedTestSourceRoots())
-                  .flatMap(List::stream)
-                  .filter(Files::exists)
-                  .forEach(root -> typeSolver.add(new JavaParserTypeSolver(root)));
+            Stream
+                .of(module.sourceRoots(), module.testRoots(), module.generatedSourceRoots(),
+                        module.generatedTestSourceRoots())
+                .flatMap(List::stream)
+                .filter(Files::exists)
+                .forEach(root -> typeSolver.add(new JavaParserTypeSolver(root)));
             ParserConfiguration configuration = new ParserConfiguration()
-                    .setLanguageLevel(languageLevel(model.languageLevel()))
-                    .setSymbolResolver(new JavaSymbolSolver(typeSolver));
+                .setLanguageLevel(languageLevel(model.languageLevel()))
+                .setSymbolResolver(new JavaSymbolSolver(typeSolver));
             return new JavaParser(configuration);
         });
     }
@@ -127,22 +130,18 @@ public class DefaultJavaParserService implements JavaParserService {
     }
 
     private List<Diagnostic> parseDiagnostics(Path file, ParseResult<CompilationUnit> result) {
-        return result.getProblems()
-                     .stream()
-                     .map(problem -> parseDiagnostic(file, problem))
-                     .toList();
+        return result.getProblems().stream().map(problem -> parseDiagnostic(file, problem)).toList();
     }
 
     private Diagnostic parseDiagnostic(Path file, Problem problem) {
         SourcePosition position = problem.getLocation()
-                                         .map(location -> location.getBegin())
-                                         .flatMap(token -> token.getRange())
-                                         .map(range -> range.begin)
-                                         .map(SourcePosition::from)
-                                         .orElse(new SourcePosition(1, 1));
-        return new Diagnostic(file, "Failure parsing java file: " + problem.getMessage(),
-                              position, ValidationError.Severity.HIGH,
-                              DiagnosticKind.PARSE_ERROR, JAVA_PARSER_RULE);
+            .map(location -> location.getBegin())
+            .flatMap(token -> token.getRange())
+            .map(range -> range.begin)
+            .map(SourcePosition::from)
+            .orElse(new SourcePosition(1, 1));
+        return new Diagnostic(file, "Failure parsing java file: " + problem.getMessage(), position,
+                ValidationError.Severity.HIGH, DiagnosticKind.PARSE_ERROR, JAVA_PARSER_RULE);
     }
 
     private List<Diagnostic> symbolDiagnostics(Path file, CompilationUnit compilationUnit) {
@@ -150,20 +149,19 @@ public class DefaultJavaParserService implements JavaParserService {
         for (ClassOrInterfaceType type : compilationUnit.findAll(ClassOrInterfaceType.class)) {
             try {
                 type.resolve();
-            } catch (UnsolvedSymbolException | UnsupportedOperationException e) {
-                diagnostics.add(new Diagnostic(file,
-                                               "Unresolved symbol '" + type.getNameAsString()
-                                               + "': " + e.getMessage(),
-                                               type.getBegin().map(SourcePosition::from)
-                                                   .orElse(new SourcePosition(1, 1)),
-                                               ValidationError.Severity.MEDIUM,
-                                               DiagnosticKind.SYMBOL_WARNING,
-                                               JAVA_PARSER_RULE));
-            } catch (RuntimeException ignored) {
+            }
+            catch (UnsolvedSymbolException | UnsupportedOperationException e) {
+                diagnostics
+                    .add(new Diagnostic(file, "Unresolved symbol '" + type.getNameAsString() + "': " + e.getMessage(),
+                            type.getBegin().map(SourcePosition::from).orElse(new SourcePosition(1, 1)),
+                            ValidationError.Severity.MEDIUM, DiagnosticKind.SYMBOL_WARNING, JAVA_PARSER_RULE));
+            }
+            catch (RuntimeException ignored) {
                 // JavaParser can throw for constructs it cannot model yet. Those are not
                 // unresolved-symbol diagnostics.
             }
         }
         return diagnostics;
     }
+
 }

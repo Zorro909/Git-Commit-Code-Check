@@ -3,10 +3,7 @@ package de.zorro909.codecheck.validation;
 import java.nio.file.Path;
 import java.util.Set;
 
-public record FixResult(boolean applied,
-                        Set<Path> affectedFiles,
-                        boolean restaged,
-                        String message) {
+public record FixResult(boolean applied, Set<Path> affectedFiles, boolean restaged, String message) {
 
     public FixResult {
         affectedFiles = Set.copyOf(affectedFiles);

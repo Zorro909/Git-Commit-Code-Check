@@ -3,11 +3,8 @@ package de.zorro909.codecheck.coverage;
 import java.nio.file.Path;
 import java.util.List;
 
-public record CoverageRequest(List<Path> sourceFiles,
-                              List<Path> testFiles,
-                              List<Path> contextFiles,
-                              List<Path> buildFiles,
-                              List<Path> reportPaths) {
+public record CoverageRequest(List<Path> sourceFiles, List<Path> testFiles, List<Path> contextFiles,
+        List<Path> buildFiles, List<Path> reportPaths) {
 
     public CoverageRequest {
         sourceFiles = normalize(sourceFiles);

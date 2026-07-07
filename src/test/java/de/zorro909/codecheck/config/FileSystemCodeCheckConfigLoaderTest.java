@@ -96,8 +96,8 @@ class FileSystemCodeCheckConfigLoaderTest {
                   saveDebounce: "10s"
                 """);
 
-        CodeCheckConfig config = loader(repo).load(new ConfigOverrides(
-                List.of("release-main"), null, Duration.ofMillis(250)));
+        CodeCheckConfig config = loader(repo)
+            .load(new ConfigOverrides(List.of("release-main"), null, Duration.ofMillis(250)));
 
         assertThat(config.git().mainBranches()).containsExactly("release-main");
         assertThat(config.daemon().saveDebounce()).isEqualTo(Duration.ofMillis(250));
@@ -112,11 +112,10 @@ class FileSystemCodeCheckConfigLoaderTest {
                   saveDebounce: "soon"
                 """);
 
-        assertThatThrownBy(() -> loader(repo).load())
-                .isInstanceOf(ConfigException.class)
-                .hasMessageContaining(".codecheck.yaml")
-                .hasMessageContaining("daemon.saveDebounce")
-                .hasMessageContaining("invalid duration");
+        assertThatThrownBy(() -> loader(repo).load()).isInstanceOf(ConfigException.class)
+            .hasMessageContaining(".codecheck.yaml")
+            .hasMessageContaining("daemon.saveDebounce")
+            .hasMessageContaining("invalid duration");
     }
 
     @Test
@@ -128,10 +127,9 @@ class FileSystemCodeCheckConfigLoaderTest {
                   releaseBranchPattern: "release/["
                 """);
 
-        assertThatThrownBy(() -> loader(repo).load())
-                .isInstanceOf(ConfigException.class)
-                .hasMessageContaining("git.releaseBranchPattern")
-                .hasMessageContaining("invalid regular expression");
+        assertThatThrownBy(() -> loader(repo).load()).isInstanceOf(ConfigException.class)
+            .hasMessageContaining("git.releaseBranchPattern")
+            .hasMessageContaining("invalid regular expression");
     }
 
     @Test
@@ -143,10 +141,9 @@ class FileSystemCodeCheckConfigLoaderTest {
                   runner: host-maven
                 """);
 
-        assertThatThrownBy(() -> loader(repo).load())
-                .isInstanceOf(ConfigException.class)
-                .hasMessageContaining("maven.runner")
-                .hasMessageContaining("unknown value");
+        assertThatThrownBy(() -> loader(repo).load()).isInstanceOf(ConfigException.class)
+            .hasMessageContaining("maven.runner")
+            .hasMessageContaining("unknown value");
     }
 
     @Test
@@ -160,18 +157,16 @@ class FileSystemCodeCheckConfigLoaderTest {
                   foo: bar
                 """);
         List<String> warnings = new ArrayList<>();
-        FileSystemCodeCheckConfigLoader loader = new FileSystemCodeCheckConfigLoader(
-                repo, repo.resolve("missing-user.yaml"), warnings::add);
+        FileSystemCodeCheckConfigLoader loader = new FileSystemCodeCheckConfigLoader(repo,
+                repo.resolve("missing-user.yaml"), warnings::add);
 
         CodeCheckConfig config = loader.load();
 
         assertThat(config.git().mainBranches()).containsExactly("develop", "main", "master");
-        assertThat(warnings).anySatisfy(warning -> assertThat(warning)
-                .contains(".codecheck.yaml")
-                .contains("git")
-                .contains("unknown key 'mainbranches'"));
-        assertThat(warnings).anySatisfy(warning -> assertThat(warning)
-                .contains("unknown key 'unknownSection'"));
+        assertThat(warnings).anySatisfy(warning -> assertThat(warning).contains(".codecheck.yaml")
+            .contains("git")
+            .contains("unknown key 'mainbranches'"));
+        assertThat(warnings).anySatisfy(warning -> assertThat(warning).contains("unknown key 'unknownSection'"));
     }
 
     @Test
@@ -186,8 +181,8 @@ class FileSystemCodeCheckConfigLoaderTest {
                     image: "example/mvnd:jdk25"
                 """);
         List<String> warnings = new ArrayList<>();
-        FileSystemCodeCheckConfigLoader loader = new FileSystemCodeCheckConfigLoader(
-                repo, repo.resolve("missing-user.yaml"), warnings::add);
+        FileSystemCodeCheckConfigLoader loader = new FileSystemCodeCheckConfigLoader(repo,
+                repo.resolve("missing-user.yaml"), warnings::add);
 
         loader.load();
 
@@ -201,4 +196,5 @@ class FileSystemCodeCheckConfigLoaderTest {
     private FileSystemCodeCheckConfigLoader loader(Path repo, Path userConfig) {
         return new FileSystemCodeCheckConfigLoader(repo, userConfig);
     }
+
 }

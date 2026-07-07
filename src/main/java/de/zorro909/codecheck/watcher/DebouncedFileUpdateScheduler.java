@@ -10,6 +10,7 @@ import java.util.Map;
 public class DebouncedFileUpdateScheduler {
 
     private final Duration debounce;
+
     private final Map<Path, Instant> pending = new LinkedHashMap<>();
 
     public DebouncedFileUpdateScheduler(Duration debounce) {
@@ -22,10 +23,10 @@ public class DebouncedFileUpdateScheduler {
 
     public synchronized List<Path> duePaths(Instant now) {
         List<Path> due = pending.entrySet()
-                                .stream()
-                                .filter(entry -> !entry.getValue().plus(debounce).isAfter(now))
-                                .map(Map.Entry::getKey)
-                                .toList();
+            .stream()
+            .filter(entry -> !entry.getValue().plus(debounce).isAfter(now))
+            .map(Map.Entry::getKey)
+            .toList();
         due.forEach(pending::remove);
         return due;
     }
@@ -33,4 +34,5 @@ public class DebouncedFileUpdateScheduler {
     public synchronized List<Path> pendingPaths() {
         return List.copyOf(pending.keySet());
     }
+
 }

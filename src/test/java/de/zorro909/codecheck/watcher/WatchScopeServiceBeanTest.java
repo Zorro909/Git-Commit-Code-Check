@@ -9,12 +9,11 @@ class WatchScopeServiceBeanTest {
 
     @Test
     void watchScopeServiceBeanResolvesWithRepositoryDirectory() {
-        try (ApplicationContext context = ApplicationContext.builder()
-                                                            .singletons((Object) new String[0])
-                                                            .start()) {
+        try (ApplicationContext context = ApplicationContext.builder().singletons((Object) new String[0]).start()) {
             WatchScopeService service = context.getBean(WatchScopeService.class);
 
             assertThat(service.watchScope().paths()).isNotEmpty();
         }
     }
+
 }

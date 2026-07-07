@@ -12,7 +12,6 @@ public record WatchScope(Set<WatchedPath> paths) {
     public boolean contains(Path path, WatchPathKind kind) {
         Path normalized = path.toAbsolutePath().normalize();
         return paths.stream()
-                    .anyMatch(watchedPath -> watchedPath.path().equals(normalized)
-                                             && watchedPath.kind() == kind);
+            .anyMatch(watchedPath -> watchedPath.path().equals(normalized) && watchedPath.kind() == kind);
     }
 }

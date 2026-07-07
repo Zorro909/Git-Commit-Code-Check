@@ -21,10 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The NoMagicValuesCheck class is responsible for checking Java code files for the presence of magic values.
- * Magic values are strings or integers that are hardcoded in the code and are not represented by constants.
- * It extends the JavaChecker class and implements the CodeCheck interface.
- * Only Java files located in the "src/main/java" folder are considered for validation.
+ * The NoMagicValuesCheck class is responsible for checking Java code files for the
+ * presence of magic values. Magic values are strings or integers that are hardcoded in
+ * the code and are not represented by constants. It extends the JavaChecker class and
+ * implements the CodeCheck interface. Only Java files located in the "src/main/java"
+ * folder are considered for validation.
  */
 @Singleton
 public class NoMagicValuesCheck extends JavaChecker {
@@ -48,7 +49,7 @@ public class NoMagicValuesCheck extends JavaChecker {
     @Override
     public RuleMetadata ruleMetadata() {
         return new RuleMetadata("No magic values",
-                                "Rejects literal method and constructor arguments in main Java sources.");
+                "Rejects literal method and constructor arguments in main Java sources.");
     }
 
     @Override
@@ -66,22 +67,20 @@ public class NoMagicValuesCheck extends JavaChecker {
         List<ValidationError> errors = new ArrayList<>();
 
         filterGeneratedClasses(javaUnit).flatMap(Node::stream)
-                                        .filter(node -> node instanceof MethodCallExpr || node instanceof ExplicitConstructorInvocationStmt || node instanceof ObjectCreationExpr)
-                                        .map(obj -> (NodeWithArguments<?>) obj)
-                                        .filter(this::filterOutExceptions)
-                                        .flatMap(call -> call.getArguments().stream())
-                                        .filter(expr -> expr instanceof LiteralExpr
-                                                && !(expr instanceof NullLiteralExpr)
-                                                && !(expr instanceof BooleanLiteralExpr))
-                                        .map(expr -> new ValidationError(getPath(javaUnit),
-                                                                         "Magic Values like '" + expr + "' are not allowed! Extract to Constant!",
-                                                                         expr.getBegin(),
-                                                                         ValidationError.Severity.LOW))
-                                        .forEach(errors::add);
+            .filter(node -> node instanceof MethodCallExpr || node instanceof ExplicitConstructorInvocationStmt
+                    || node instanceof ObjectCreationExpr)
+            .map(obj -> (NodeWithArguments<?>) obj)
+            .filter(this::filterOutExceptions)
+            .flatMap(call -> call.getArguments().stream())
+            .filter(expr -> expr instanceof LiteralExpr && !(expr instanceof NullLiteralExpr)
+                    && !(expr instanceof BooleanLiteralExpr))
+            .map(expr -> new ValidationError(getPath(javaUnit),
+                    "Magic Values like '" + expr + "' are not allowed! Extract to Constant!", expr.getBegin(),
+                    ValidationError.Severity.LOW))
+            .forEach(errors::add);
 
         return errors;
     }
-
 
     private boolean filterOutExceptions(NodeWithArguments<?> nodeWithArguments) {
         if (nodeWithArguments instanceof MethodCallExpr methodCallExpr) {
@@ -99,6 +98,7 @@ public class NoMagicValuesCheck extends JavaChecker {
         COLLECTORS_JOINING("Collectors", "joining");
 
         private final String scope;
+
         private final String method;
 
         MethodExclusion(String scope, String method) {
@@ -116,4 +116,5 @@ public class NoMagicValuesCheck extends JavaChecker {
         }
 
     }
+
 }
