@@ -34,6 +34,7 @@ All packages are relative to `de.zorro909.codecheck`.
 | core | (root) | RepositoryPathProvider (shared by config, daemon, changeset, runner, project model, watcher) |
 | core.config | config | all 6 classes, unchanged |
 | core.diagnostic | validation | Diagnostic, DiagnosticKind, SourcePosition |
+| core.diagnostic | checks | ValidationError (its nested Severity enum is the severity type used by Diagnostic, reporting, coverage, and the parser service; keeping it in legacy would force core to import legacy) |
 | core.changeset | changeset | ChangeSet, ChangeSetEntry, ChangeSetService, GitFileStatus |
 | core.validation | validation | ValidationEngine, DefaultValidationEngine, ValidationContext, ValidationMode, ValidationResult, FileValidationResult |
 | core.validation.rule | validation | Rule, RuleId, RuleMetadata, RuleRegistry, DefaultRuleRegistry, FileInterest, WatchPlan |
@@ -57,7 +58,7 @@ All packages are relative to `de.zorro909.codecheck`.
 | To | From | Classes |
 | --- | --- | --- |
 | legacy | (root) | ValidationCheckPipeline, FileLoader |
-| legacy.checks.** | checks.** | subtree moves intact (CodeCheck, ValidationError, java checks) |
+| legacy.checks.** | checks.** | subtree moves intact (CodeCheck, java checks) — except ValidationError, which moves to core.diagnostic |
 | legacy.actions.** | actions.** | subtree moves intact |
 | legacy.selector.** | selector.** | subtree moves intact |
 | legacy.editor.** | editor.** | subtree moves intact (used only by legacy fix flow) |
@@ -65,8 +66,13 @@ All packages are relative to `de.zorro909.codecheck`.
 | legacy.adapter | validation | CodeCheckRuleAdapter, FixActionFixerAdapter |
 
 Design invariant: after the move, no class under `core`, `cli`, `daemon`, or `infra` imports
-anything from `legacy` except the composition points that already bridge the two generations
-(command service and rule registry wiring via the adapters).
+anything from `legacy` except the four composition points that already bridge the two
+generations (verified against current imports):
+
+- `cli.CodeCheckCommandService` (legacy pipeline, FileSelector)
+- `daemon.DaemonServer` (legacy pipeline, FileSelector)
+- `core.validation.rule.DefaultRuleRegistry` (registers legacy checks/fix actions via the adapters)
+- `core.validation.fix.FixApplicationService` (runs legacy PostAction after fixes)
 
 ## Rationale
 
@@ -88,7 +94,10 @@ anything from `legacy` except the composition points that already bridge the two
 3. Rewrite `de.zorro909.codecheck.*` FQCNs in `src/main/resources/native-image/reflect-config.json`
    with the same mapping. `updateTrace.sh` remains the canonical regeneration path; the textual
    rewrite is exact for a pure rename.
-4. `-Amicronaut.processing.group=de.zorro909.codecheck` in `pom.xml` is prefix-based and unaffected.
+4. `-Amicronaut.processing.group=de.zorro909.codecheck` in `pom.xml` is prefix-based and unaffected,
+   but `exec.mainClass` names the command class and must become
+   `de.zorro909.codecheck.cli.GitCommitCodeCheckCommand`; a jar `--help` smoke test proves the
+   manifest main class survives the move.
 
 ## Verification
 
