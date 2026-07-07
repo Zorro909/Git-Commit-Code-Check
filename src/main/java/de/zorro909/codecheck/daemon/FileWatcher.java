@@ -8,6 +8,7 @@ import jakarta.inject.Singleton;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ public class FileWatcher implements Runnable {
     private Thread watchThread;
     private Future<?> watchUpdateTask;
     private WatchService watchService;
+    private volatile Duration saveDebounce = Duration.ofSeconds(5);
 
     private final Executor taskExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
@@ -63,6 +65,8 @@ public class FileWatcher implements Runnable {
             watchThread.interrupt();
             watchService.close();
         }
+
+        saveDebounce = configLoader.load().daemon().saveDebounce();
 
         Path path = repositoryPathProvider.repositoryDirectory().toAbsolutePath();
         watchService = path.getFileSystem().newWatchService();
@@ -158,7 +162,7 @@ public class FileWatcher implements Runnable {
     private void initFileUpdate() {
         watchUpdateTask = CompletableFuture.runAsync(() -> {
             try {
-                Thread.sleep(configLoader.load().daemon().saveDebounce().toMillis());
+                Thread.sleep(saveDebounce.toMillis());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

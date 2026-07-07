@@ -1,10 +1,13 @@
 package de.zorro909.codecheck.watcher;
 
+import de.zorro909.codecheck.RepositoryPathProvider;
 import de.zorro909.codecheck.java.MavenModule;
 import de.zorro909.codecheck.java.ProjectModel;
 import de.zorro909.codecheck.java.ProjectModelService;
 import de.zorro909.codecheck.validation.FileInterest;
 import de.zorro909.codecheck.validation.RuleRegistry;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
@@ -18,9 +21,11 @@ public class WatchScopeService {
     private final RuleRegistry ruleRegistry;
     private final ProjectModelService projectModelService;
 
-    public WatchScopeService(Path repositoryRoot,
-                             RuleRegistry ruleRegistry,
-                             ProjectModelService projectModelService) {
+    @Inject
+    public WatchScopeService(
+            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryRoot,
+            RuleRegistry ruleRegistry,
+            ProjectModelService projectModelService) {
         this.repositoryRoot = repositoryRoot.toAbsolutePath().normalize();
         this.ruleRegistry = ruleRegistry;
         this.projectModelService = projectModelService;
