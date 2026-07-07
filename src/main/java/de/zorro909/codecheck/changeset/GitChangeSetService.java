@@ -108,7 +108,7 @@ public class GitChangeSetService implements ChangeSetService {
     }
 
     private boolean isMainLikeBranch(String currentBranch, CodeCheckConfig.Git gitConfig) {
-        Pattern releasePattern = gitConfig.releaseBranchPattern();
+        Pattern releasePattern = Pattern.compile(gitConfig.releaseBranchPattern());
         return gitConfig.mainBranches().contains(currentBranch)
                || releasePattern.matcher(currentBranch).matches();
     }
