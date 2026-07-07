@@ -1,4 +1,7 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.infra.jacoco;
+
+import de.zorro909.codecheck.core.coverage.ClassCoverage;
+import de.zorro909.codecheck.core.coverage.CoverageSnapshot;
 
 import java.io.IOException;
 import java.nio.file.Files;

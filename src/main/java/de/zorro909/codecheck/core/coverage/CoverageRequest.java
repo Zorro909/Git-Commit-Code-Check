@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.core.coverage;
 
 import java.nio.file.Path;
 import java.util.List;

@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.core.coverage;
 
 public record CoverageMetric(int missed, int covered) {
 

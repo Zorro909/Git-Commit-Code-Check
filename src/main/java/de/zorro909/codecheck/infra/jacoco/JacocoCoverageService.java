@@ -1,5 +1,9 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.infra.jacoco;
 
+import de.zorro909.codecheck.core.coverage.CoverageFreshness;
+import de.zorro909.codecheck.core.coverage.CoverageRequest;
+import de.zorro909.codecheck.core.coverage.CoverageService;
+import de.zorro909.codecheck.core.coverage.CoverageSnapshot;
 import de.zorro909.codecheck.runner.TestRunRequest;
 import de.zorro909.codecheck.runner.TestRunner;
 import jakarta.inject.Singleton;

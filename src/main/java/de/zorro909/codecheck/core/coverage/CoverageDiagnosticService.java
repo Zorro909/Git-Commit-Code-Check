@@ -1,10 +1,11 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.core.coverage;
 
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.core.diagnostic.Diagnostic;
 import de.zorro909.codecheck.core.diagnostic.DiagnosticKind;
 import de.zorro909.codecheck.core.validation.rule.RuleId;
 import de.zorro909.codecheck.core.diagnostic.SourcePosition;
+import de.zorro909.codecheck.infra.jacoco.MapStructCoverageAttributor;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

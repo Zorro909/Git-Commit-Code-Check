@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.core.coverage;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

@@ -1,5 +1,8 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.infra.jacoco;
 
+import de.zorro909.codecheck.core.coverage.ClassCoverage;
+import de.zorro909.codecheck.core.coverage.CoverageMetric;
+import de.zorro909.codecheck.core.coverage.CoverageSnapshot;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 

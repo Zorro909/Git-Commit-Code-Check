@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.coverage;
+package de.zorro909.codecheck.core.coverage;
 
 public record ClassCoverage(String className, CoverageMetric line, CoverageMetric branch) {
 }
