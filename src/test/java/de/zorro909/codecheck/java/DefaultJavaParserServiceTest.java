@@ -77,7 +77,8 @@ class DefaultJavaParserServiceTest {
         assertThat(outcome.compilationUnit()).isEmpty();
         assertThat(outcome.diagnostics()).anySatisfy(diagnostic -> {
             assertThat(diagnostic.kind()).isEqualTo(DiagnosticKind.PARSE_ERROR);
-            assertThat(diagnostic.severity()).isEqualTo(de.zorro909.codecheck.checks.ValidationError.Severity.HIGH);
+            assertThat(diagnostic.severity())
+                .isEqualTo(de.zorro909.codecheck.core.diagnostic.ValidationError.Severity.HIGH);
         });
     }
 
@@ -97,7 +98,8 @@ class DefaultJavaParserServiceTest {
         assertThat(outcome.compilationUnit()).isPresent();
         assertThat(outcome.diagnostics()).anySatisfy(diagnostic -> {
             assertThat(diagnostic.kind()).isEqualTo(DiagnosticKind.SYMBOL_WARNING);
-            assertThat(diagnostic.severity()).isEqualTo(de.zorro909.codecheck.checks.ValidationError.Severity.MEDIUM);
+            assertThat(diagnostic.severity())
+                .isEqualTo(de.zorro909.codecheck.core.diagnostic.ValidationError.Severity.MEDIUM);
             assertThat(diagnostic.message()).contains("MissingType");
         });
     }

@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.validation;
 
-import de.zorro909.codecheck.FileLoader;
-import de.zorro909.codecheck.checks.java.code.NoMagicValuesCheck;
+import de.zorro909.codecheck.legacy.FileLoader;
+import de.zorro909.codecheck.legacy.checks.java.code.NoMagicValuesCheck;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

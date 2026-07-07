@@ -1,20 +1,20 @@
 package de.zorro909.codecheck.command;
 
 import com.github.javaparser.Position;
-import de.zorro909.codecheck.ValidationCheckPipeline;
-import de.zorro909.codecheck.actions.FixAction;
-import de.zorro909.codecheck.actions.PostAction;
+import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
+import de.zorro909.codecheck.legacy.actions.FixAction;
+import de.zorro909.codecheck.legacy.actions.PostAction;
 import de.zorro909.codecheck.changeset.ChangeSet;
 import de.zorro909.codecheck.changeset.ChangeSetEntry;
 import de.zorro909.codecheck.changeset.ChangeSetService;
 import de.zorro909.codecheck.changeset.GitFileStatus;
-import de.zorro909.codecheck.checks.CodeCheck;
-import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.legacy.checks.CodeCheck;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.config.CodeCheckConfig;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigException;
 import de.zorro909.codecheck.config.ConfigOverrides;
-import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.legacy.selector.FileSelector;
 import de.zorro909.codecheck.validation.Diagnostic;
 import de.zorro909.codecheck.validation.DiagnosticKind;
 import de.zorro909.codecheck.validation.FileValidationResult;

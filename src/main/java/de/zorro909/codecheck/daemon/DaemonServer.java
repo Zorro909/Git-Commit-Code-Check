@@ -2,9 +2,9 @@ package de.zorro909.codecheck.daemon;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import de.zorro909.codecheck.ValidationCheckPipeline;
-import de.zorro909.codecheck.checks.ValidationError;
-import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
+import de.zorro909.codecheck.legacy.selector.FileSelector;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 

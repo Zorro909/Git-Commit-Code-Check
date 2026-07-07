@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.validation;
 
-import de.zorro909.codecheck.actions.PostAction;
+import de.zorro909.codecheck.legacy.actions.PostAction;
 import jakarta.inject.Singleton;
 
 import java.nio.file.Path;

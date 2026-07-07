@@ -12,7 +12,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.validation.Diagnostic;
 import de.zorro909.codecheck.validation.DiagnosticKind;
 import de.zorro909.codecheck.validation.RuleId;

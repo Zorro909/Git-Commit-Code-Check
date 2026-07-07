@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.reporting;
 
-import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.validation.ValidationMode;
 import jakarta.inject.Singleton;
 

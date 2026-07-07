@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.validation;
 
-import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;

@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.daemon;
 
-import de.zorro909.codecheck.ValidationCheckPipeline;
-import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
+import de.zorro909.codecheck.legacy.selector.FileSelector;
 import jakarta.inject.Provider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

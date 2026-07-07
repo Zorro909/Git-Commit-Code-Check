@@ -1,16 +1,16 @@
 package de.zorro909.codecheck.command;
 
-import de.zorro909.codecheck.ValidationCheckPipeline;
+import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
 import de.zorro909.codecheck.changeset.ChangeSet;
 import de.zorro909.codecheck.changeset.ChangeSetService;
 import de.zorro909.codecheck.changeset.GitCommandException;
-import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigException;
 import de.zorro909.codecheck.config.ConfigOverrides;
 import de.zorro909.codecheck.reporting.ModeSeverityPolicy;
 import de.zorro909.codecheck.reporting.TerminalDiagnosticRenderer;
-import de.zorro909.codecheck.selector.FileSelector;
+import de.zorro909.codecheck.legacy.selector.FileSelector;
 import de.zorro909.codecheck.validation.Diagnostic;
 import de.zorro909.codecheck.validation.ValidationEngine;
 import de.zorro909.codecheck.validation.ValidationMode;

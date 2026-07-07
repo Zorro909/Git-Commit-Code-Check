@@ -4,8 +4,8 @@ import com.github.javaparser.Position;
 import de.zorro909.codecheck.changeset.ChangeSet;
 import de.zorro909.codecheck.changeset.ChangeSetEntry;
 import de.zorro909.codecheck.changeset.GitFileStatus;
-import de.zorro909.codecheck.checks.CodeCheck;
-import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.legacy.checks.CodeCheck;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -80,7 +80,8 @@ class DefaultValidationEngineTest {
             .satisfies(interest -> assertThat(interest.includeGlobs()).containsExactly("src/main/java/**/*.java"));
     }
 
-    private RuleRegistry registry(List<CodeCheck> checks, List<de.zorro909.codecheck.actions.FixAction> fixActions) {
+    private RuleRegistry registry(List<CodeCheck> checks,
+            List<de.zorro909.codecheck.legacy.actions.FixAction> fixActions) {
         return new DefaultRuleRegistry(checks, fixActions);
     }
 

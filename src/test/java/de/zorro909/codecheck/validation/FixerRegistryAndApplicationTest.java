@@ -1,12 +1,12 @@
 package de.zorro909.codecheck.validation;
 
 import com.github.javaparser.Position;
-import de.zorro909.codecheck.actions.FixAction;
-import de.zorro909.codecheck.actions.PostAction;
-import de.zorro909.codecheck.actions.fix.ManualEditorFixAction;
-import de.zorro909.codecheck.checks.CodeCheck;
-import de.zorro909.codecheck.checks.ValidationError;
-import de.zorro909.codecheck.editor.EditorExecutor;
+import de.zorro909.codecheck.legacy.actions.FixAction;
+import de.zorro909.codecheck.legacy.actions.PostAction;
+import de.zorro909.codecheck.legacy.actions.fix.ManualEditorFixAction;
+import de.zorro909.codecheck.legacy.checks.CodeCheck;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
+import de.zorro909.codecheck.legacy.editor.EditorExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;

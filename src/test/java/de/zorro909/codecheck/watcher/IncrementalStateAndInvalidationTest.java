@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.watcher;
 
-import de.zorro909.codecheck.checks.ValidationError;
+import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.validation.Diagnostic;
 import de.zorro909.codecheck.validation.DiagnosticKind;
 import de.zorro909.codecheck.validation.RuleId;

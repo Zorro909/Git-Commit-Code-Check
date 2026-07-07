@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.daemon;
 
 import de.zorro909.codecheck.RepositoryPathProvider;
-import de.zorro909.codecheck.ValidationCheckPipeline;
+import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
 import de.zorro909.codecheck.config.CodeCheckConfig;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigOverrides;

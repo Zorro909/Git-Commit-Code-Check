@@ -1,7 +1,9 @@
 package de.zorro909.codecheck.validation;
 
-import de.zorro909.codecheck.actions.FixAction;
-import de.zorro909.codecheck.checks.CodeCheck;
+import de.zorro909.codecheck.legacy.actions.FixAction;
+import de.zorro909.codecheck.legacy.adapter.CodeCheckRuleAdapter;
+import de.zorro909.codecheck.legacy.adapter.FixActionFixerAdapter;
+import de.zorro909.codecheck.legacy.checks.CodeCheck;
 import jakarta.inject.Singleton;
 
 import java.util.List;
