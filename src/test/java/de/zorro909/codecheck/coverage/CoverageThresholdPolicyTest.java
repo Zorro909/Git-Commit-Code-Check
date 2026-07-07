@@ -60,6 +60,21 @@ class CoverageThresholdPolicyTest {
         assertThat(policy.thresholdFor(service)).isEqualTo(classThreshold);
     }
 
+    @Test
+    void thresholdWithMultipleCriteriaRequiresAllOfThemToMatch(@TempDir Path repo)
+            throws Exception {
+        Path service = write(repo.resolve("src/main/java/com/example/service/UserService.java"),
+                             "package com.example.service; class UserService {}");
+        CoverageThreshold combined = new CoverageThreshold(
+                new CoverageThresholdMatch("org.mapstruct.Mapper", null, null,
+                                           "com.example.service..*"), 0.95, 0.90);
+        CoverageThreshold fallback = new CoverageThreshold(new CoverageThresholdMatch(null, null),
+                                                           0.50, 0.40);
+        CoverageThresholdPolicy policy = new CoverageThresholdPolicy(List.of(combined), fallback);
+
+        assertThat(policy.thresholdFor(service)).isEqualTo(fallback);
+    }
+
     private static Path write(Path path, String content) throws IOException {
         Files.createDirectories(path.getParent());
         return Files.writeString(path, content);

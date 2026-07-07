@@ -26,10 +26,36 @@ public class CoverageThresholdPolicy {
     }
 
     private boolean matches(CoverageThresholdMatch match, Path sourceFile) {
-        return annotationMatches(match.annotation(), sourceFile)
-               || globMatches(match.glob(), sourceFile)
-               || classMatches(match.className(), sourceFile)
-               || packageMatches(match.packageName(), sourceFile);
+        boolean anyCriterionSet = false;
+        if (isSet(match.annotation())) {
+            anyCriterionSet = true;
+            if (!annotationMatches(match.annotation(), sourceFile)) {
+                return false;
+            }
+        }
+        if (isSet(match.glob())) {
+            anyCriterionSet = true;
+            if (!globMatches(match.glob(), sourceFile)) {
+                return false;
+            }
+        }
+        if (isSet(match.className())) {
+            anyCriterionSet = true;
+            if (!classMatches(match.className(), sourceFile)) {
+                return false;
+            }
+        }
+        if (isSet(match.packageName())) {
+            anyCriterionSet = true;
+            if (!packageMatches(match.packageName(), sourceFile)) {
+                return false;
+            }
+        }
+        return anyCriterionSet;
+    }
+
+    private boolean isSet(String criterion) {
+        return criterion != null && !criterion.isBlank();
     }
 
     private boolean annotationMatches(String annotation, Path sourceFile) {
