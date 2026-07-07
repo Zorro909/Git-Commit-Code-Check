@@ -45,3 +45,5 @@ or module.
 - Generated implementation files can be parsed as context.
 - Parse errors become HIGH diagnostics.
 - Unresolved symbols become MEDIUM diagnostics.
+- All Java checks share the singleton parser service and its caches.
+- The project model bean resolves through the qualified repository directory path.

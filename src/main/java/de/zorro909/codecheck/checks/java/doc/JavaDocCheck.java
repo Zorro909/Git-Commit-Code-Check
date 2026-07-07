@@ -1,5 +1,6 @@
 package de.zorro909.codecheck.checks.java.doc;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import com.github.javaparser.resolution.UnsolvedSymbolException;
 import de.zorro909.codecheck.FileLoader;
 import de.zorro909.codecheck.checks.ValidationError;
 import de.zorro909.codecheck.checks.java.JavaChecker;
+import de.zorro909.codecheck.java.JavaParserService;
 import de.zorro909.codecheck.utils.MethodDeclarationExtensions;
 
 /**
@@ -60,6 +62,11 @@ public final class JavaDocCheck extends JavaChecker {
 
     public JavaDocCheck(FileLoader fileLoader) {
         super(fileLoader);
+    }
+
+    @Inject
+    public JavaDocCheck(FileLoader fileLoader, JavaParserService javaParserService) {
+        super(fileLoader, javaParserService);
     }
 
     @Override
