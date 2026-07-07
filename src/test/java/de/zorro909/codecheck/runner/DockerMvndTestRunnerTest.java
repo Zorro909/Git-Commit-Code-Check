@@ -84,6 +84,18 @@ class DockerMvndTestRunnerTest {
     }
 
     @Test
+    void staleContainersAreRemovedBeforeStartingNewContainer(@TempDir Path repo) {
+        FakeDockerExecutor docker = new FakeDockerExecutor();
+        DockerMvndTestRunner runner = runner(repo, docker, new MutableClock());
+
+        runner.runTests(TestRunRequest.full());
+
+        assertThat(docker.removedRepositories)
+                .containsExactly(repo.toAbsolutePath().normalize());
+        assertThat(docker.startedImages).hasSize(1);
+    }
+
+    @Test
     void exitedContainerIsRestartedOnNextRun(@TempDir Path repo) {
         FakeDockerExecutor docker = new FakeDockerExecutor();
         DockerMvndTestRunner runner = runner(repo, docker, new MutableClock());
@@ -119,6 +131,7 @@ class DockerMvndTestRunnerTest {
         private final List<String> startedImages = new ArrayList<>();
         private final List<List<String>> executedCommands = new ArrayList<>();
         private final List<String> stoppedContainers = new ArrayList<>();
+        private final List<Path> removedRepositories = new ArrayList<>();
         private boolean running = true;
 
         @Override
@@ -143,6 +156,11 @@ class DockerMvndTestRunnerTest {
         public void stopContainer(String containerId) {
             stoppedContainers.add(containerId);
             running = false;
+        }
+
+        @Override
+        public void removeContainersForRepository(Path repositoryRoot) {
+            removedRepositories.add(repositoryRoot);
         }
     }
 

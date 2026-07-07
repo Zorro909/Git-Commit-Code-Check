@@ -1,7 +1,10 @@
 package de.zorro909.codecheck.runner;
 
+import de.zorro909.codecheck.RepositoryPathProvider;
 import de.zorro909.codecheck.config.CodeCheckConfig;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
@@ -20,9 +23,11 @@ public class DockerMvndTestRunner implements TestRunner {
     private String containerId;
     private Instant lastUsed;
 
-    public DockerMvndTestRunner(Path repositoryRoot,
-                                CodeCheckConfigLoader configLoader,
-                                DockerCommandExecutor docker) {
+    @Inject
+    public DockerMvndTestRunner(
+            @Named(RepositoryPathProvider.REPOSITORY_DIRECTORY) Path repositoryRoot,
+            CodeCheckConfigLoader configLoader,
+            DockerCommandExecutor docker) {
         this(repositoryRoot, configLoader, docker, Clock.systemUTC());
     }
 
@@ -70,6 +75,7 @@ public class DockerMvndTestRunner implements TestRunner {
 
     private String ensureContainer(CodeCheckConfig.Maven config) {
         if (containerId == null || !docker.isRunning(containerId)) {
+            docker.removeContainersForRepository(repositoryRoot);
             containerId = docker.startContainer(config.docker().image(), repositoryRoot,
                                                 config.docker().mountM2());
         }
