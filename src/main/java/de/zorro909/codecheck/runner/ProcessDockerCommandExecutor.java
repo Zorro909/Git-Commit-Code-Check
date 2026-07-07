@@ -7,13 +7,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Singleton
 public class ProcessDockerCommandExecutor implements DockerCommandExecutor {
 
+    static final String REPOSITORY_LABEL = "de.zorro909.git-commit-code-check.repo";
+
     @Override
     public String startContainer(String image, Path repositoryRoot, boolean mountM2) {
         List<String> command = new ArrayList<>(List.of("docker", "run", "-d", "-w", "/workspace",
+                                                       "--label", repositoryLabel(repositoryRoot),
                                                        "-v", repositoryRoot.toAbsolutePath()
                                                                             + ":/workspace"));
         if (mountM2) {
@@ -53,13 +57,36 @@ public class ProcessDockerCommandExecutor implements DockerCommandExecutor {
         run(List.of("docker", "rm", "-f", containerId));
     }
 
-    private CommandResult run(List<String> command) {
+    @Override
+    public void removeContainersForRepository(Path repositoryRoot) {
+        CommandResult listing = run(List.of("docker", "ps", "-aq", "--filter",
+                                            "label=" + repositoryLabel(repositoryRoot)));
+        listing.stdout()
+               .lines()
+               .map(String::strip)
+               .filter(line -> !line.isEmpty())
+               .forEach(this::stopContainer);
+    }
+
+    private String repositoryLabel(Path repositoryRoot) {
+        return REPOSITORY_LABEL + "=" + repositoryRoot.toAbsolutePath().normalize();
+    }
+
+    CommandResult run(List<String> command) {
         try {
             Process process = new ProcessBuilder(command).start();
+            AtomicReference<byte[]> stderrBytes = new AtomicReference<>(new byte[0]);
+            Thread stderrReader = Thread.ofVirtual().start(() -> {
+                try {
+                    stderrBytes.set(process.getErrorStream().readAllBytes());
+                } catch (IOException ignored) {
+                    // The process ended without a readable stderr stream.
+                }
+            });
             String stdout = new String(process.getInputStream().readAllBytes(),
                                        StandardCharsets.UTF_8);
-            String stderr = new String(process.getErrorStream().readAllBytes(),
-                                       StandardCharsets.UTF_8);
+            stderrReader.join();
+            String stderr = new String(stderrBytes.get(), StandardCharsets.UTF_8);
             return new CommandResult(process.waitFor(), stdout, stderr);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to execute " + String.join(" ", command), e);

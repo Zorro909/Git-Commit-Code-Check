@@ -12,4 +12,6 @@ public interface DockerCommandExecutor {
     CommandResult exec(String containerId, Path workingDirectory, List<String> command);
 
     void stopContainer(String containerId);
+
+    void removeContainersForRepository(Path repositoryRoot);
 }
