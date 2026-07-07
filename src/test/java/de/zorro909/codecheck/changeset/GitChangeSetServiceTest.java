@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -117,7 +116,7 @@ class GitChangeSetServiceTest {
         CodeCheckConfig config = CodeCheckConfig.defaults()
                                                .withGit(new CodeCheckConfig.Git(
                                                        mainBranches,
-                                                       Pattern.compile("release/.*"),
+                                                       "release/.*",
                                                        true));
         return new CodeCheckConfigLoader() {
             @Override
