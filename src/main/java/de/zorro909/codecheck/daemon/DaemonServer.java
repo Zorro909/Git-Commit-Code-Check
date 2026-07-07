@@ -46,17 +46,14 @@ public class DaemonServer {
     }
 
     /**
-     * Runs the application by selecting files, updating files, starting an HTTP server, and running the server indefinitely.
+     * Starts the daemon control server described by the metadata and blocks until it is shut
+     * down via the control endpoint or the inactivity timeout elapses.
      *
-     * @throws IOException            if an I/O error occurs during the file selection process.
-     * @throws InterruptedException   if the current thread is interrupted while sleeping.
+     * @param metadata          host, port, and auth token the server binds and authorizes with.
+     * @param inactivityTimeout idle time after which the server stops itself.
+     * @throws IOException          if the server cannot bind to the configured address.
+     * @throws InterruptedException if the current thread is interrupted while waiting.
      */
-    public void run() throws IOException, InterruptedException {
-        run(new DaemonMetadata(ProcessHandle.current().pid(), Path.of(""),
-                               DaemonProcessRegistry.TRANSPORT_WEBSOCKET, "127.0.0.1", 23464,
-                               "", Instant.now()), Duration.ofMinutes(30));
-    }
-
     public void run(DaemonMetadata metadata, Duration inactivityTimeout)
             throws IOException, InterruptedException {
         CountDownLatch shutdownLatch = new CountDownLatch(1);
@@ -108,8 +105,8 @@ public class DaemonServer {
 
     private void handleAuthorized(DaemonMetadata metadata, HttpExchange httpExchange,
                                   ThrowingRunnable handler) throws IOException {
-        if (!metadata.token().isEmpty()
-            && !metadata.token().equals(httpExchange.getRequestHeaders()
+        if (metadata.token().isEmpty()
+            || !metadata.token().equals(httpExchange.getRequestHeaders()
                                                     .getFirst("X-CodeCheck-Token"))) {
             sendResponse(httpExchange, 401, "Unauthorized");
             return;

@@ -3,11 +3,14 @@ package de.zorro909.codecheck.daemon;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class DaemonProcessRegistryTest {
 
@@ -42,6 +45,29 @@ class DaemonProcessRegistryTest {
         assertThat(loaded.get().token()).isNotBlank();
         assertThat(registry.metadataDirectory().resolve("daemon.json")).exists();
         assertThat(registry.metadataDirectory().resolve("daemon.pid")).exists();
+    }
+
+    @Test
+    void metadataFilesAreReadableOnlyByOwner(@TempDir Path tempDir) throws Exception {
+        assumeTrue(FileSystems.getDefault().supportedFileAttributeViews().contains("posix"));
+        Path repo = tempDir.resolve("repo");
+        Files.createDirectories(repo);
+        DaemonProcessRegistry registry = new DaemonProcessRegistry(repo, tempDir.resolve("cache"));
+
+        registry.write(registry.createMetadata());
+
+        assertThat(Files.getPosixFilePermissions(registry.metadataDirectory()))
+                .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ,
+                                           PosixFilePermission.OWNER_WRITE,
+                                           PosixFilePermission.OWNER_EXECUTE);
+        assertThat(Files.getPosixFilePermissions(
+                registry.metadataDirectory().resolve("daemon.json")))
+                .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ,
+                                           PosixFilePermission.OWNER_WRITE);
+        assertThat(Files.getPosixFilePermissions(
+                registry.metadataDirectory().resolve("daemon.pid")))
+                .containsExactlyInAnyOrder(PosixFilePermission.OWNER_READ,
+                                           PosixFilePermission.OWNER_WRITE);
     }
 
     @Test

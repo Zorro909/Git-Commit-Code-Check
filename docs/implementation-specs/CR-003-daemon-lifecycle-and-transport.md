@@ -42,7 +42,11 @@ The server binds to `127.0.0.1` and a random available port. Control endpoints r
 - `GET /check`
 - `POST /shutdown`
 
-Unauthorized requests return `401`.
+Unauthorized requests return `401`. An empty token never authorizes; a daemon cannot run without
+authentication.
+
+On POSIX file systems the metadata directory and files are readable and writable only by the
+owning user, so the auth token is not exposed to other local users.
 
 ## Inactivity
 
@@ -56,3 +60,6 @@ refresh activity. When idle time exceeds the timeout, the server stops.
 - New metadata uses localhost, a random port, a non-empty token, and writes `daemon.json` plus
   `daemon.pid`.
 - Control endpoints reject missing tokens and accept the correct token.
+- Empty-token metadata rejects every request.
+- Metadata files are owner-only on POSIX file systems.
+- The registry bean resolves through the qualified repository directory path.
