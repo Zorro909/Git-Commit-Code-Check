@@ -66,6 +66,8 @@ class JacocoCoverageServiceTest {
     private static String report(String className, int lineMissed, int lineCovered,
                                  int branchMissed, int branchCovered) {
         return """
+                <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
                 <report name="unit">
                   <package name="com/example">
                     <class name="%s" sourcefilename="Foo.java">

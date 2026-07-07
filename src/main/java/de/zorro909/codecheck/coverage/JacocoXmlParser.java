@@ -12,10 +12,14 @@ public class JacocoXmlParser {
 
     public CoverageSnapshot parse(Path report) {
         try {
-            Element root = DocumentBuilderFactory.newInstance()
-                                                 .newDocumentBuilder()
-                                                 .parse(report.toFile())
-                                                 .getDocumentElement();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd",
+                               false);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            Element root = factory.newDocumentBuilder()
+                                  .parse(report.toFile())
+                                  .getDocumentElement();
             NodeList classes = root.getElementsByTagName("class");
             Map<String, ClassCoverage> coverage = new HashMap<>();
             for (int i = 0; i < classes.getLength(); i++) {
