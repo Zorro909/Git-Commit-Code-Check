@@ -146,6 +146,19 @@ The migration intentionally leaves the following items for future CRs:
 - host mvnd fallback if Docker is unavailable
 - broader integration between coverage diagnostics and rule registry execution
 
+Review follow-ups recorded while merging the stack:
+
+- wire `WatchScopeService`, `DebouncedFileUpdateScheduler`, `IncrementalValidationState`, and
+  `ConfigChangeRestartSignal` into `FileWatcher` and the daemon lifecycle (CR-007 scaffolding)
+- wire `TestRunner`, `CoverageService`, and `CoverageDiagnosticService` into validation execution
+  (CR-008/CR-009 scaffolding)
+- consolidate the legacy `CodeCheckCommandService` constructors and inject the renderer beans
+  instead of constructing them inline
+- expose CLI flags that populate `ConfigOverrides` so command-scoped overrides are reachable
+  end to end
+- resolve the repository root from Git instead of the current working directory in
+  `RepositoryPathProvider`
+
 ## Operational Guidance
 
 Future changes should keep the same migration rules:
