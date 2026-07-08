@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.legacy.actions.fix;
 
 import com.github.javaparser.Position;
-import de.zorro909.codecheck.RequiresCliOption;
+import de.zorro909.codecheck.cli.RequiresCliOption;
 import de.zorro909.codecheck.legacy.actions.FixAction;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.editor.EditorExecutor;

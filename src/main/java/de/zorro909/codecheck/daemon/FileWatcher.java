@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.daemon;
 
 import de.zorro909.codecheck.core.RepositoryPathProvider;
-import de.zorro909.codecheck.RequiresCliOption;
+import de.zorro909.codecheck.cli.RequiresCliOption;
 import de.zorro909.codecheck.core.config.CodeCheckConfigLoader;
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Singleton;

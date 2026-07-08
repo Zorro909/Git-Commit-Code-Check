@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.legacy.selector.impl;
 
-import de.zorro909.codecheck.RequiresCliOption;
+import de.zorro909.codecheck.cli.RequiresCliOption;
 import de.zorro909.codecheck.legacy.selector.FileSelector;
 import jakarta.inject.Singleton;
 

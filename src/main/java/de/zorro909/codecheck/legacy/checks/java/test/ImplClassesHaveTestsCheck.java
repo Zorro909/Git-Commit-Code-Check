@@ -2,7 +2,7 @@ package de.zorro909.codecheck.legacy.checks.java.test;
 
 import com.github.javaparser.Position;
 import de.zorro909.codecheck.legacy.FileLoader;
-import de.zorro909.codecheck.RequiresCliOption;
+import de.zorro909.codecheck.cli.RequiresCliOption;
 import de.zorro909.codecheck.legacy.checks.CodeCheck;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import jakarta.inject.Singleton;

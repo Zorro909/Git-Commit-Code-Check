@@ -18,7 +18,7 @@
         <release.version>25</release.version>
         <maven.compiler.release>${release.version}</maven.compiler.release>
         <micronaut.version>5.0.3</micronaut.version>
-        <exec.mainClass>de.zorro909.codecheck.GitCommitCodeCheckCommand</exec.mainClass>
+        <exec.mainClass>de.zorro909.codecheck.cli.GitCommitCodeCheckCommand</exec.mainClass>
     </properties>
 
     <repositories>

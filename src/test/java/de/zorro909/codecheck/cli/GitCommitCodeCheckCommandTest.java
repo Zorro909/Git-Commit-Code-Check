@@ -1,7 +1,7 @@
-package de.zorro909.codecheck;
+package de.zorro909.codecheck.cli;
 
-import de.zorro909.codecheck.command.CodeCheckCommandService;
-import de.zorro909.codecheck.command.CommandOutcome;
+import de.zorro909.codecheck.cli.CodeCheckCommandService;
+import de.zorro909.codecheck.cli.CommandOutcome;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 

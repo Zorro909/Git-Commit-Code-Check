@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.command;
+package de.zorro909.codecheck.cli;
 
 public record CommandOutcome(int exitCode) {
 

@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.command;
+package de.zorro909.codecheck.cli;
 
 import com.github.javaparser.Position;
 import de.zorro909.codecheck.legacy.ValidationCheckPipeline;

@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.command;
+package de.zorro909.codecheck.cli;
 
 import de.zorro909.codecheck.core.config.CodeCheckConfig;
 import de.zorro909.codecheck.core.config.CodeCheckConfigLoader;

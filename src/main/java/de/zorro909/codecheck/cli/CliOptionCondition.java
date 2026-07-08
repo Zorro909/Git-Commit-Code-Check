@@ -1,4 +1,4 @@
-package de.zorro909.codecheck;
+package de.zorro909.codecheck.cli;
 
 import io.micronaut.context.condition.Condition;
 import io.micronaut.context.condition.ConditionContext;

@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.command;
+package de.zorro909.codecheck.cli;
 
 import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
 import de.zorro909.codecheck.core.changeset.ChangeSet;

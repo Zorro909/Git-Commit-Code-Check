@@ -101,7 +101,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"de.zorro909.codecheck.$GitCommitCodeCheckCommand$Definition",
+  "name":"de.zorro909.codecheck.cli.$GitCommitCodeCheckCommand$Definition",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -109,7 +109,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"de.zorro909.codecheck.GitCommitCodeCheckCommand",
+  "name":"de.zorro909.codecheck.cli.GitCommitCodeCheckCommand",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true
 },

@@ -1,6 +1,6 @@
-package de.zorro909.codecheck;
+package de.zorro909.codecheck.cli;
 
-import de.zorro909.codecheck.command.CodeCheckCommandService;
+import de.zorro909.codecheck.cli.CodeCheckCommandService;
 import io.micronaut.configuration.picocli.MicronautFactory;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.env.Environment;
