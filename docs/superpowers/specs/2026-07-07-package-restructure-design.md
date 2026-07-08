@@ -107,7 +107,11 @@ generations (verified against current imports):
   resources): `checks`, `actions`, `selector`, `editor`, `utils`, `command`, `config`,
   `changeset`, `coverage`, `java`, `reporting`, `runner`, `validation`, `watcher` directly under
   `de.zorro909.codecheck`. `daemon` is the one package that keeps its coordinate and is excluded
-  from this check.
+  from this check. Accepted exception: two pre-existing stale entries in
+  `native-image/reflect-config.json` (`java.doc.$JavaDocCheck$Definition`,
+  `java.test.$TestClassCheck$Definition`) reference classes that did not exist at those
+  coordinates even before this restructure; they are left untouched per Mechanics item 3 and
+  disappear on the next `updateTrace.sh` regeneration.
 
 ## Out Of Scope
 

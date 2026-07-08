@@ -159,6 +159,17 @@ Review follow-ups recorded while merging the stack:
 - resolve the repository root from Git instead of the current working directory in
   `RepositoryPathProvider`
 
+Review follow-ups recorded during the 2026-07 package restructure:
+
+- invert the `core.coverage -> infra.jacoco` dependency: `CoverageDiagnosticService` injects
+  `MapStructCoverageAttributor` directly, creating the only core-to-infra edge; extract an
+  attributor port in `core.coverage` and implement it in `infra.jacoco`
+- consider relocating `RequiresCliOption` and `CliOptionCondition` from `cli` to `core` — they
+  are consumed by `daemon` and `legacy`, so they behave like shared kernel, and moving them
+  would remove the `daemon -> cli` edge
+- batch cleanup of sed artifacts: redundant same-package self-imports in
+  `cli/GitCommitCodeCheckCommand.java`, its test, and `core/diagnostic/Diagnostic.java`
+
 ## Operational Guidance
 
 Future changes should keep the same migration rules:
