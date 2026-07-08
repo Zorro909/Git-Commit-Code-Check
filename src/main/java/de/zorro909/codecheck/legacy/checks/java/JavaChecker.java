@@ -12,10 +12,10 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import de.zorro909.codecheck.legacy.FileLoader;
 import de.zorro909.codecheck.legacy.checks.CodeCheck;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
-import de.zorro909.codecheck.java.DefaultJavaParserService;
-import de.zorro909.codecheck.java.JavaParserService;
-import de.zorro909.codecheck.java.MavenProjectModelService;
-import de.zorro909.codecheck.java.ParseOutcome;
+import de.zorro909.codecheck.core.project.DefaultJavaParserService;
+import de.zorro909.codecheck.core.project.JavaParserService;
+import de.zorro909.codecheck.core.project.MavenProjectModelService;
+import de.zorro909.codecheck.core.project.ParseOutcome;
 import de.zorro909.codecheck.core.diagnostic.Diagnostic;
 
 public abstract class JavaChecker implements CodeCheck {

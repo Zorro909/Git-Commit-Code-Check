@@ -8,7 +8,7 @@ import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
 import de.zorro909.codecheck.legacy.FileLoader;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.checks.java.JavaChecker;
-import de.zorro909.codecheck.java.JavaParserService;
+import de.zorro909.codecheck.core.project.JavaParserService;
 import de.zorro909.codecheck.core.validation.rule.FileInterest;
 import de.zorro909.codecheck.core.validation.rule.RuleId;
 import de.zorro909.codecheck.core.validation.rule.RuleMetadata;

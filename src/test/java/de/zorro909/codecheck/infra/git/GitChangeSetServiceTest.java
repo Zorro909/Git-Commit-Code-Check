@@ -1,8 +1,8 @@
 package de.zorro909.codecheck.infra.git;
 
-import de.zorro909.codecheck.config.CodeCheckConfig;
-import de.zorro909.codecheck.config.CodeCheckConfigLoader;
-import de.zorro909.codecheck.config.ConfigOverrides;
+import de.zorro909.codecheck.core.config.CodeCheckConfig;
+import de.zorro909.codecheck.core.config.CodeCheckConfigLoader;
+import de.zorro909.codecheck.core.config.ConfigOverrides;
 import de.zorro909.codecheck.core.changeset.ChangeSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

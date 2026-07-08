@@ -1,6 +1,6 @@
 package de.zorro909.codecheck.daemon;
 
-import de.zorro909.codecheck.RepositoryPathProvider;
+import de.zorro909.codecheck.core.RepositoryPathProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;

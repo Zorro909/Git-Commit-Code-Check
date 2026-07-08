@@ -4,7 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import de.zorro909.codecheck.legacy.FileLoader;
 import de.zorro909.codecheck.core.diagnostic.ValidationError;
 import de.zorro909.codecheck.legacy.checks.java.JavaChecker;
-import de.zorro909.codecheck.java.JavaParserService;
+import de.zorro909.codecheck.core.project.JavaParserService;
 import de.zorro909.codecheck.legacy.utils.CompilationUnitExtensions;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

@@ -1,8 +1,8 @@
 package de.zorro909.codecheck.infra.docker;
 
-import de.zorro909.codecheck.RepositoryPathProvider;
-import de.zorro909.codecheck.config.CodeCheckConfig;
-import de.zorro909.codecheck.config.CodeCheckConfigLoader;
+import de.zorro909.codecheck.core.RepositoryPathProvider;
+import de.zorro909.codecheck.core.config.CodeCheckConfig;
+import de.zorro909.codecheck.core.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.core.testrun.TestRunRequest;
 import de.zorro909.codecheck.core.testrun.TestRunResult;
 import de.zorro909.codecheck.core.testrun.TestRunner;

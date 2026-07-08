@@ -1,8 +1,8 @@
 package de.zorro909.codecheck.infra.git;
 
-import de.zorro909.codecheck.RepositoryPathProvider;
-import de.zorro909.codecheck.config.CodeCheckConfig;
-import de.zorro909.codecheck.config.CodeCheckConfigLoader;
+import de.zorro909.codecheck.core.RepositoryPathProvider;
+import de.zorro909.codecheck.core.config.CodeCheckConfig;
+import de.zorro909.codecheck.core.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.core.changeset.ChangeSet;
 import de.zorro909.codecheck.core.changeset.ChangeSetEntry;
 import de.zorro909.codecheck.core.changeset.ChangeSetService;

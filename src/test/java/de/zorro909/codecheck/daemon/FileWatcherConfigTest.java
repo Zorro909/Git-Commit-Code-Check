@@ -1,10 +1,10 @@
 package de.zorro909.codecheck.daemon;
 
-import de.zorro909.codecheck.RepositoryPathProvider;
+import de.zorro909.codecheck.core.RepositoryPathProvider;
 import de.zorro909.codecheck.legacy.ValidationCheckPipeline;
-import de.zorro909.codecheck.config.CodeCheckConfig;
-import de.zorro909.codecheck.config.CodeCheckConfigLoader;
-import de.zorro909.codecheck.config.ConfigOverrides;
+import de.zorro909.codecheck.core.config.CodeCheckConfig;
+import de.zorro909.codecheck.core.config.CodeCheckConfigLoader;
+import de.zorro909.codecheck.core.config.ConfigOverrides;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

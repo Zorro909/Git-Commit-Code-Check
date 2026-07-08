@@ -1,7 +1,7 @@
 package de.zorro909.codecheck.command;
 
-import de.zorro909.codecheck.config.CodeCheckConfig;
-import de.zorro909.codecheck.config.CodeCheckConfigLoader;
+import de.zorro909.codecheck.core.config.CodeCheckConfig;
+import de.zorro909.codecheck.core.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.daemon.DaemonServer;
 import de.zorro909.codecheck.daemon.DaemonMetadata;
 import de.zorro909.codecheck.daemon.DaemonProcessRegistry;

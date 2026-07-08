@@ -2,8 +2,8 @@ package de.zorro909.codecheck.legacy.checks.java;
 
 import de.zorro909.codecheck.legacy.FileLoader;
 import de.zorro909.codecheck.legacy.checks.CodeCheck;
-import de.zorro909.codecheck.java.JavaParserService;
-import de.zorro909.codecheck.java.ParseOutcome;
+import de.zorro909.codecheck.core.project.JavaParserService;
+import de.zorro909.codecheck.core.project.ParseOutcome;
 import io.micronaut.context.ApplicationContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
