@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.runner;
+package de.zorro909.codecheck.infra.docker;
 
 import java.nio.file.Path;
 import java.util.List;

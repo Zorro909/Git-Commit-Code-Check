@@ -4,8 +4,8 @@ import de.zorro909.codecheck.core.coverage.CoverageFreshness;
 import de.zorro909.codecheck.core.coverage.CoverageRequest;
 import de.zorro909.codecheck.core.coverage.CoverageService;
 import de.zorro909.codecheck.core.coverage.CoverageSnapshot;
-import de.zorro909.codecheck.runner.TestRunRequest;
-import de.zorro909.codecheck.runner.TestRunner;
+import de.zorro909.codecheck.core.testrun.TestRunRequest;
+import de.zorro909.codecheck.core.testrun.TestRunner;
 import jakarta.inject.Singleton;
 
 import java.io.IOException;

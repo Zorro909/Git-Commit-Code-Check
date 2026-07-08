@@ -1,4 +1,4 @@
-package de.zorro909.codecheck.runner;
+package de.zorro909.codecheck.infra.docker;
 
 import org.junit.jupiter.api.Test;
 

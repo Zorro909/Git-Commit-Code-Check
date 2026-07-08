@@ -1,8 +1,10 @@
-package de.zorro909.codecheck.runner;
+package de.zorro909.codecheck.infra.docker;
 
 import de.zorro909.codecheck.config.CodeCheckConfig;
 import de.zorro909.codecheck.config.CodeCheckConfigLoader;
 import de.zorro909.codecheck.config.ConfigOverrides;
+import de.zorro909.codecheck.core.testrun.TestRunRequest;
+import de.zorro909.codecheck.core.testrun.TestRunResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

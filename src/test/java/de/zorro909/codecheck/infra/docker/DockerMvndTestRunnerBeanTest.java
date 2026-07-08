@@ -1,5 +1,6 @@
-package de.zorro909.codecheck.runner;
+package de.zorro909.codecheck.infra.docker;
 
+import de.zorro909.codecheck.core.testrun.TestRunner;
 import io.micronaut.context.ApplicationContext;
 import org.junit.jupiter.api.Test;
 
